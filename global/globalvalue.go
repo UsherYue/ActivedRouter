@@ -5,7 +5,7 @@ package global
 var (
 	ServerConfig = "config/server.ini"
 	HookConfig   = "config/hook.json"
-	ClientConfig = "config/client.ini"
+	ClientConfig = "config/client.json"
 	ProxyConfig  = "config/proxy.json"
 )
 
@@ -16,4 +16,11 @@ var (
 	ProxyMode      = "proxy"      //反向代理模式
 	MixMode        = "mix"        //server+proxy模式
 	HttpRouterMode = "httprouter" //http路由模式
+)
+
+//负载方法
+
+var (
+	Alived = "alived"
+	Random = "random"
 )

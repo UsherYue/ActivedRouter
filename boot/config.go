@@ -24,8 +24,7 @@ func parseConfigfile() {
 	case global.ClientMode:
 		{
 			//client mode
-			//loadClientModeConfig(global.ClientConfig)
-			loadJsonConfig("config/client.json")
+			loadJsonConfig(global.ClientConfig)
 		}
 	case global.ProxyMode:
 		{

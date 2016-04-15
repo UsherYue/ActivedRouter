@@ -5,6 +5,7 @@ package netservice
 
 import (
 	"ActivedRouter/cache"
+	"ActivedRouter/global"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -53,7 +54,7 @@ func (this *ReseveProxyHandler) GetAlivedHost(domain string) *HostInfo {
 
 //根据负载方法进行主机筛选
 //proxy_method  random 和alived
-func (this *ReseveProxyHandler) GetHostInfo(domain string) *HostInfo {
+func (this *ReseveProxyHandler) GetHostInfo(domain, proxyMethod string) *HostInfo {
 	requestDomain := domain
 	//处理非80端口
 	if strings.IndexAny(domain, ":") != -1 {
@@ -62,7 +63,7 @@ func (this *ReseveProxyHandler) GetHostInfo(domain string) *HostInfo {
 	}
 	//random proxy模式即可
 	//alived 需要开启mix模式
-	switch this.ProxyMethod {
+	switch proxyMethod {
 	case "random":
 		{
 			return this.GetRandomHost(requestDomain)
@@ -79,7 +80,14 @@ func (this *ReseveProxyHandler) GetHostInfo(domain string) *HostInfo {
 //serve http
 func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//获取服务器
-	hostinfo := this.GetHostInfo(r.Host)
+	hostinfo := this.GetHostInfo(r.Host, this.ProxyMethod)
+	//如果获取不到挂载主机那么使用random
+	if hostinfo == nil && this.ProxyMethod == global.Alived {
+		hostinfo = this.GetHostInfo(r.Host, global.Random)
+		if hostinfo == nil {
+			log.Fatalln("miss proxy host ....")
+		}
+	}
 	redirect := fmt.Sprintf("http://%s:%s", hostinfo.Host, hostinfo.Port)
 	remote, err := url.Parse(redirect)
 	if err != nil {
@@ -116,11 +124,14 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 			this.ProxyMethod, _ = v.(string)
 		}
 		if v, ok := proxyConfig["reserve_proxy"]; !ok {
-			log.Fatalln("反向代理配置加载失败!!")
+			log.Fatalln("Reserve Proxy Config file load error !!")
 		} else {
 			//获取到不同域名
 			this.DomainHostList = cache.Newcache("memory")
 			clients := v.([]interface{})
+			if len(clients) == 0 {
+				log.Fatalln("Config file miss proxy host......")
+			}
 			for _, client := range clients {
 				mapClient, _ := client.(map[string]interface{})
 				subDomain := mapClient["domain"].(string)

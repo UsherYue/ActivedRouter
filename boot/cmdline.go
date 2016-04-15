@@ -17,11 +17,11 @@ Author:usher.yue
 Email:ushe.yue@gmail.com
 
 ActiveRouter Desceiption:
-	mode运行模式可以是 server或者client,分别代表路由服务器和客户端 proxy代表反向代理服务器。
+	mode运行模式可以是 server或者client,分别代表路由服务器和客户端 proxy代表反向代理服务器 mix同时开启陆游服务器和反向代理服务器。
 	服务器模式下加载server.ini。
 	客户端模式下记加载client.ini读取相关配置信息。	
 The commands are:
-	ActiveRouter --runmode=server或client	
+	ActiveRouter --runmode=server/client/mix
 The Help:
     ActiveRouter --help or  -h or -help
 `
@@ -40,7 +40,7 @@ func parseCmdline() {
 		log.Println(usageTemplate)
 		goto EXIT
 	} else {
-		if strings.ToLower(*runmode) != "server" && strings.ToLower(*runmode) != "client" && strings.ToLower(*runmode) != "proxy" {
+		if strings.ToLower(*runmode) != "server" && strings.ToLower(*runmode) != "client" && strings.ToLower(*runmode) != "proxy" && strings.ToLower(*runmode) != "mix" {
 			t, _ := template.New("info").Parse(usageRunmodeTemplate)
 			buffer := &bytes.Buffer{}
 			t.Execute(buffer, struct{ Msg string }{Msg: "runmode参数错误,参考 ActiveRouter --runmode=server或client proxy"})
@@ -56,6 +56,8 @@ func parseCmdline() {
 		log.Println("ActivedRouter正在启动server模式")
 	} else if strings.ToLower(*runmode) == "proxy" {
 		log.Println("ActivedRouter正在启动reserve proxy模式")
+	} else if strings.ToLower(*runmode) == "mix" {
+		log.Println("ActivedRouter正在启动mix模式")
 	}
 	return
 EXIT:
