@@ -27,7 +27,7 @@ func StartNetworkService() {
 	case "proxy":
 		{
 			log.Println("正在启动reserve proxy.......")
-			StartProxyServer()
+			ProxyHandler.StartProxyServer()
 		}
 	}
 
@@ -36,8 +36,4 @@ func StartNetworkService() {
 //stop service
 func StopNetworkService() {
 	<-NetworkChan
-}
-
-func init() {
-
 }

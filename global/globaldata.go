@@ -20,9 +20,6 @@ var GActiveRouterList = system.NewRouterList()
 //dns配置脚本
 var DnsScript []map[string]interface{}
 
-//加载配置文件
-var ConfigFile = ""
-
 //配置选项
 var ConfigMap map[string]string = map[string]string{}
 

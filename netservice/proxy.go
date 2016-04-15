@@ -5,7 +5,6 @@ package netservice
 
 import (
 	"ActivedRouter/cache"
-	"ActivedRouter/global"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -19,6 +18,7 @@ import (
 )
 
 var HTTPADDR string
+
 var DefaultHttpAddr = "127.0.0.1:8888"
 
 type HostInfo struct {
@@ -89,8 +89,8 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 }
 
 //load proxy
-func (this *ReseveProxyHandler) loadProxyConfig() {
-	file, err := os.Open(global.ConfigFile)
+func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
+	file, err := os.Open(proxyConfigFile)
 	defer func() {
 		file.Close()
 	}()
@@ -140,9 +140,7 @@ func (this *ReseveProxyHandler) loadProxyConfig() {
 }
 
 //启动proxy
-func StartProxyServer() {
-	//加载配置文件
-	ProxyHandler.loadProxyConfig()
+func (this *ReseveProxyHandler) StartProxyServer() {
 	//被代理的服务器host和port
 	err := http.ListenAndServe(HTTPADDR, ProxyHandler)
 	if err != nil {

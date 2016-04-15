@@ -3,6 +3,7 @@ package boot
 import (
 	"ActivedRouter/global"
 	"ActivedRouter/hook"
+	"ActivedRouter/netservice"
 	"bufio"
 	"encoding/json"
 	"io/ioutil"
@@ -13,28 +14,64 @@ import (
 
 func parseConfigfile() {
 	switch global.RunMode {
-	case "server":
+	case global.ServerMode:
 		{
 			//server config
-			global.ConfigFile = "config/server.ini"
+			loadServerModeConfig(global.ServerConfig)
 			//hook script
-			hook.ParseHookScript("config/hook.json")
-
+			hook.ParseHookScript(global.HookConfig)
 		}
-	case "client":
+	case global.ClientMode:
 		{
-			global.ConfigFile = "config/client.ini"
+			//client mode
+			loadClientModeConfig(global.ClientConfig)
 		}
-	case "proxy":
+	case global.ProxyMode:
 		{
-			global.ConfigFile = "config/proxy.json"
+			//proxy config
+			netservice.ProxyHandler.LoadProxyConfig(global.ProxyConfig)
 			return
 		}
+	case global.MixMode:
+		{
+			//server config
+			loadServerModeConfig(global.ServerConfig)
+			//proxy config
+			netservice.ProxyHandler.LoadProxyConfig(global.ProxyConfig)
+		}
 	}
-	log.Printf("正在加载配置文件 %s .......\n", global.ConfigFile)
-	loadIni(global.ConfigFile)
+
+}
+
+//加载客户端模式下的配置
+func loadClientModeConfig(config string) {
+	loadIni(global.ClientConfig)
 	log.Println(global.ConfigMap)
-	//必备的通用配置选项配置本机或者远程的ip或者端口号
+	if val, ok := global.ConfigMap["host"]; !ok || val == "" {
+		log.Fatalln("-------配置文件缺少host键值-------")
+	}
+	if val, ok := global.ConfigMap["port"]; !ok || val == "" {
+		log.Fatalln("-------配置文件缺少port键值-------")
+	}
+	//客户端模式下的配置
+	if global.RunMode == "client" {
+		//获取集群分组
+		if val, ok := global.ConfigMap["cluster"]; ok {
+			global.Cluster = val
+		}
+		log.Println("集群分组:", global.Cluster)
+		//获取域名配置
+		if val, ok := global.ConfigMap["domain"]; ok {
+			global.Domain = val
+		}
+		log.Println("域名:", global.Cluster)
+	}
+}
+
+//加载服务器模式配置
+func loadServerModeConfig(config string) {
+	loadIni(global.ServerConfig)
+	log.Println(global.ConfigMap)
 	if val, ok := global.ConfigMap["host"]; !ok || val == "" {
 		log.Fatalln("-------配置文件缺少host键值-------")
 	}
@@ -52,19 +89,6 @@ func parseConfigfile() {
 		if val, ok := global.ConfigMap["srvmode"]; !ok || val == "" {
 			log.Fatalln("-------配置文件缺少srvmode键值-------")
 		}
-	}
-	//客户端模式下的配置
-	if global.RunMode == "client" {
-		//获取集群分组
-		if val, ok := global.ConfigMap["cluster"]; ok {
-			global.Cluster = val
-		}
-		log.Println("集群分组:", global.Cluster)
-		//获取域名配置
-		if val, ok := global.ConfigMap["domain"]; ok {
-			global.Domain = val
-		}
-		log.Println("域名:", global.Cluster)
 	}
 }
 
@@ -95,7 +119,7 @@ func loadDnsRouterConfig(routerFile string) {
 //load ini config
 func loadIni(config string) {
 	//打开文件
-	file, err := os.Open(global.ConfigFile)
+	file, err := os.Open(config)
 	defer func() {
 		file.Close()
 	}()
