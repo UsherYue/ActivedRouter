@@ -6,12 +6,10 @@ import (
 	"runtime"
 	"strings"
 
-	//"ActivedRouter/gopsutil/cpu"
 	"ActivedRouter/gopsutil/disk"
 	"ActivedRouter/gopsutil/host"
 	"ActivedRouter/gopsutil/load"
 	"ActivedRouter/gopsutil/mem"
-	//	"ActivedRouter/gopsutil/net"
 )
 
 //系统信息定义
@@ -31,7 +29,6 @@ type SystemInfo struct {
 
 //获取系统信息 返回json
 func SysInfo(cluster, domain string) string {
-	//获取服务器信息并且序列化发送给每一个路由服务器
 	//内存
 	virtualMem, _ := mem.VirtualMemory()
 	//交换内存

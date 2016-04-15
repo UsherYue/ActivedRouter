@@ -7,6 +7,7 @@ import (
 	"ActivedRouter/cache"
 	"ActivedRouter/global"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -35,7 +36,23 @@ type ReseveProxyHandler struct {
 	ProxyMethod    string
 }
 
-//获取代理服务器
+//random method
+func (this *ReseveProxyHandler) GetRandomHost(domain string) *HostInfo {
+	v, _ := this.DomainHostList.Get(domain)
+	vArr, _ := v.([]*HostInfo)
+	proxyCount := len(vArr)
+	index := rand.Uint32() % uint32(proxyCount)
+	return vArr[index]
+}
+
+//alived method
+func (this *ReseveProxyHandler) GetAlivedHost(domain string) *HostInfo {
+	return nil
+
+}
+
+//根据负载方法进行主机筛选
+//proxy_method  random 和alived
 func (this *ReseveProxyHandler) GetHostInfo(domain string) *HostInfo {
 	requestDomain := domain
 	//处理非80端口
@@ -43,16 +60,14 @@ func (this *ReseveProxyHandler) GetHostInfo(domain string) *HostInfo {
 		strs := strings.Split(domain, ":")
 		requestDomain = strs[0]
 	}
-	v, _ := this.DomainHostList.Get(requestDomain)
-	vArr, _ := v.([]*HostInfo)
-
-	proxyCount := len(vArr)
 	switch this.ProxyMethod {
 	case "random":
 		{
-			index := rand.Uint32() % uint32(proxyCount)
-			log.Println(vArr[index])
-			return vArr[index]
+			return this.GetRandomHost(requestDomain)
+		}
+	case "alived":
+		{
+			return this.GetAlivedHost(requestDomain)
 		}
 	}
 
@@ -61,9 +76,10 @@ func (this *ReseveProxyHandler) GetHostInfo(domain string) *HostInfo {
 
 //serve http
 func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	//获取服务器
 	hostinfo := this.GetHostInfo(r.Host)
-	//log.Println(*hostinfo)
-	remote, err := url.Parse("http://" + hostinfo.Host + ":" + hostinfo.Port)
+	redirect := fmt.Sprintf("http://%s:%s", hostinfo.Host, hostinfo.Port)
+	remote, err := url.Parse(redirect)
 	if err != nil {
 		panic(err)
 	}

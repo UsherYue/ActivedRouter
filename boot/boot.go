@@ -1,7 +1,6 @@
 package boot
 
 import (
-	"ActivedRouter/hook"
 	"ActivedRouter/netservice"
 )
 
@@ -13,8 +12,6 @@ func init() {
 	parseCmdline()
 	//parse config file
 	parseConfigfile()
-	//hook script
-	hook.ParseHookScript("config/hook.json")
 	//start network
 	netservice.StartNetworkService()
 

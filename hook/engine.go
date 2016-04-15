@@ -53,7 +53,6 @@ func checkScriptItem(scriptItem map[string]interface{}) {
 
 //解析钩子脚本
 func ParseHookScript(configfile string) {
-	log.Println("开始加载hook脚本!")
 	loadHookScript(configfile)
 	scriptList := _hookScript["script"]
 	eventList := scriptList.([]interface{})
@@ -109,7 +108,6 @@ func ParseHookScript(configfile string) {
 
 //处理disk event
 func processDiskEvent(hostip string, event *Event) {
-	log.Println("disk event")
 	//	//获取服务器
 	info := global.GHostInfoTable.GetHostInfo(hostip)
 	//获取失败返回
@@ -132,7 +130,6 @@ func processDiskEvent(hostip string, event *Event) {
 
 //处理mem event
 func processMemEvent(hostip string, event *Event) {
-	log.Println("mem event")
 	//获取服务器
 	info := global.GHostInfoTable.GetHostInfo(hostip)
 	//获取失败返回
@@ -155,7 +152,6 @@ func processMemEvent(hostip string, event *Event) {
 
 //处理load event
 func processLoadEvent(hostip string, event *Event) {
-	log.Println("load event")
 	//获取服务器
 	info := global.GHostInfoTable.GetHostInfo(hostip)
 	//获取失败返回

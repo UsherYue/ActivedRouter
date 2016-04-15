@@ -2,6 +2,7 @@ package boot
 
 import (
 	"ActivedRouter/global"
+	"ActivedRouter/hook"
 	"bufio"
 	"encoding/json"
 	"io/ioutil"
@@ -14,8 +15,10 @@ func parseConfigfile() {
 	switch global.RunMode {
 	case "server":
 		{
+			//server config
 			global.ConfigFile = "config/server.ini"
-			log.Println("开始加载dns路由服务配置!")
+			//hook script
+			hook.ParseHookScript("config/hook.json")
 
 		}
 	case "client":
