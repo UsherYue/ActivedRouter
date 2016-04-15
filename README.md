@@ -2,28 +2,27 @@
 当前版本: Beta 0.1	by usher.yue	
 
 Email:   usher.yue@gmail.com		
-
-工作之余,能写个娱乐性代码乐趣无穷			
+			
 <br>
 ##  <b>简单介绍</b>
-        1、ActiveRouter分为Sever 模式、Client模式以Reserve Proxy 模式 。通过ActiveRouter可以实现内网环境下的api负载均衡、服务器监控等功能。
+	1、ActiveRouter分为Sever 模式、Client模式以Reserve Proxy 模式 。通过ActiveRouter可以实现内网环境下的api负载均衡、服务器监控等功能。
         
-        2、提供服务器运行状态监控功能,可时刻返回服务器状态,对服务器运行状态了如指掌。
+	2、提供服务器运行状态监控功能,可时刻返回服务器状态,对服务器运行状态了如指掌。
         
-        3、后期提供第三方SDK php、golang、java、nodejs、ruby等等,实现http请求的真机负载。
+	3、后期提供第三方SDK php、golang、java、nodejs、ruby等等,实现http请求的真机负载。
         
-        4、Server & Client 模式组合下,可以用作服务器监控使用,并且可以设置监控报警,Server端可以选择性开启监控Dashboard,用于直观的监控。
+	4、Server & Client 模式组合下,可以用作服务器监控使用,并且可以设置监控报警,Server端可以选择性开启监控Dashboard,用于直观的监控。
         
-        5、Proxy模式下可以提供简单的反向代理服务。 
+	5、Proxy模式下可以提供简单的反向代理服务。 
         
-        6、=_=!!!  所有以上功能都在完善中～～～～
+	6、=_=!!!  所有以上功能都在完善中～～～～
 ##  快速入门		
 ###  编译安装
-在系统下运行如下脚本,会在当前目录生成  ActiveRouter二进制文件
+在系统下运行如下脚本,会在当前目录
 
-		linux64下    boot_linux64.sh
-		darwin64下   boot_darwin64.sh
-		linux64下    boot_linux64.sh
+	linux64下    boot_linux64.sh
+	darwin64下   boot_darwin64.sh
+	linux64下    boot_linux64.sh
                
 ##  工作模式 
 ### 1、反向代理模式 Reserve Proxy ,类似nginx的反向代理功能
