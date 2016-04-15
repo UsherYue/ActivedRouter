@@ -1,0 +1,8 @@
+{
+	"domain":"wwww.xxx.com",
+	"cluster":"UIA集群",
+	"router_list":[
+		"127.0.0.1:8888",
+		"127.0.0.1:9999"
+	]
+}
