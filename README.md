@@ -2,7 +2,8 @@
 当前版本: Beta 0.1	by usher.yue	
 
 Email:   usher.yue@gmail.com		
-			
+
+工作之余,能写个娱乐性代码乐趣无穷			
 <br>
 ##  <b>简单介绍</b>
         1、ActiveRouter分为Sever 模式、Client模式以Reserve Proxy 模式 。通过ActiveRouter可以实现内网环境下的api负载均衡、服务器监控等功能。
