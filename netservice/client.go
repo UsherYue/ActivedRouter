@@ -10,10 +10,12 @@ import (
 )
 
 type Client struct {
-	Host       string
-	Port       string
-	TaskFlag   chan bool //syn channel
-	ConnSocket net.Conn
+	Host        string
+	Port        string
+	TaskFlag    chan bool //syn channel
+	ConnectFlag chan bool //connect syn channel
+	Closed      bool
+	ConnSocket  net.Conn
 }
 
 const (
@@ -22,7 +24,7 @@ const (
 
 //创建http服务
 func NewClient(host, port string) *Client {
-	return &Client{Host: host, Port: port, TaskFlag: make(chan bool, 0)}
+	return &Client{Host: host, Port: port, TaskFlag: make(chan bool, 0), ConnectFlag: make(chan bool, 0), Closed: false}
 }
 
 //connect to server
@@ -30,9 +32,9 @@ func (self *Client) ConnectToServer(addr string) {
 	//connect  time out 5s
 	defer func() {
 		if res := recover(); res != nil {
-			log.Println("connect to router server error!")
-			//panic不退出系统
-			//os.Exit(0)
+			log.Println("connect to router" + self.Host + ":" + self.Port + " server error!")
+			//链接失败尝试重复
+			self.ConnectFlag <- true
 		}
 	}()
 	conn, _ := net.DialTimeout("tcp", addr, time.Second*5)
@@ -55,7 +57,7 @@ func (self *Client) ConnectToServer(addr string) {
 				info := system.SysInfo(global.Cluster, global.Domain)
 				_, err := self.ConnSocket.Write([]byte(tools.Base64Encode([]byte(info))))
 				//如果断开连接重复连接 直到连接到路由服务器为止
-				if err != nil {
+				if err != nil && !self.Closed {
 					conn, err := net.DialTimeout("tcp", addr, time.Second*5)
 					if err == nil {
 						self.ConnSocket = conn
@@ -77,12 +79,27 @@ func (self *Client) Run() {
 	}
 	//此处应该是连接到多个路由服务器
 	go self.ConnectToServer(addr)
-	//syn
+	//多次尝试
+	go func() {
+		for {
+			//2s尝试一次重新链接
+			time.Sleep(time.Second * 2)
+			<-self.ConnectFlag
+			if !self.Closed {
+				log.Println("尝试链接" + addr)
+				go self.ConnectToServer(addr)
+			} else {
+				break
+			}
+		}
+	}()
+	//stop task
 	self.TaskFlag <- true
 }
 
 //停止服务器
 func (self *Client) Disconnect() {
+	self.Closed = true
 	//停止服务器之前先关闭所有连接
 	self.ConnSocket.Close()
 	//发送关闭消息退出关闭任务
