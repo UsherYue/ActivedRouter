@@ -1,0 +1,27 @@
+{   
+	"script":[
+		{
+			"host":"127.0.0.1",
+			"hookscript":[
+				{
+					"eventtarget":"disk",
+					"attr":"used",
+					"gt":"15",
+					"callback":"ls"
+				},
+				{
+					"eventtarget":"load",
+					"attr":"load",
+					"gt":"1.5",
+					"callback":"ls"
+				},
+				{
+					"eventtarget":"mem",
+					"attr":"used",
+					"gt":"75",
+					"callback":"netstat -ant"
+				}
+			]
+		}
+	]
+}

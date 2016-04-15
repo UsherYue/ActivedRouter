@@ -1,0 +1,28 @@
+{
+	"proxy_addr":"127.0.0.1:80",
+	"proxy_method":"random",
+	"reserve_proxy":[
+		{
+			"domain":"api.golang.com",
+			"clients":[
+			    {
+				   "host":"uia.com",
+				   "port":"80"	
+		        },
+				{
+				   "host":"uiatest.com",
+				   "port":"80"	
+		        }
+			]
+		},
+		{
+			"domain":"api1.golang.com",
+			"clients":[
+			    {
+				   "host":"goapi.com",
+				   "port":"80"	
+		        }
+			]
+		}
+	]
+}
