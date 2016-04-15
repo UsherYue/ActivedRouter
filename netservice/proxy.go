@@ -60,6 +60,8 @@ func (this *ReseveProxyHandler) GetHostInfo(domain string) *HostInfo {
 		strs := strings.Split(domain, ":")
 		requestDomain = strs[0]
 	}
+	//random proxy模式即可
+	//alived 需要开启mix模式
 	switch this.ProxyMethod {
 	case "random":
 		{

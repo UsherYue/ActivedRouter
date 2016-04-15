@@ -6,7 +6,6 @@ import (
 	"ActivedRouter/tools"
 	"log"
 	"net"
-	"os"
 	"time"
 )
 
@@ -32,7 +31,8 @@ func (self *Client) ConnectToServer(addr string) {
 	defer func() {
 		if res := recover(); res != nil {
 			log.Println("connect to router server error!")
-			os.Exit(0)
+			//panic不退出系统
+			//os.Exit(0)
 		}
 	}()
 	conn, _ := net.DialTimeout("tcp", addr, time.Second*5)

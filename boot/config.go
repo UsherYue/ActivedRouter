@@ -24,7 +24,8 @@ func parseConfigfile() {
 	case global.ClientMode:
 		{
 			//client mode
-			loadClientModeConfig(global.ClientConfig)
+			//loadClientModeConfig(global.ClientConfig)
+			loadJsonConfig("config/client.json")
 		}
 	case global.ProxyMode:
 		{
@@ -40,7 +41,36 @@ func parseConfigfile() {
 			netservice.ProxyHandler.LoadProxyConfig(global.ProxyConfig)
 		}
 	}
+}
 
+//加载json文件
+func loadJsonConfig(config string) {
+	file, err := os.Open(config)
+	defer file.Close()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	if bts, err := ioutil.ReadAll(file); err != nil {
+		log.Fatalln(err.Error())
+	} else {
+		var ClientMap map[string]interface{}
+		err := json.Unmarshal(bts, &ClientMap)
+		if err != nil {
+			log.Fatalln("加载client.json失败")
+		}
+		domain, _ := ClientMap["domain"].(string)
+		cluster, _ := ClientMap["cluster"].(string)
+		serverList := ClientMap["router_list"].([]interface{})
+		global.ConfigMap["domain"] = domain
+		global.ConfigMap["cluster"] = cluster
+		//服务器列表
+		var serverArr []string
+		for _, v := range serverList {
+			serverArr = append(serverArr, v.(string))
+		}
+		global.ConfigMap["serverlist"] = strings.Join(serverArr, "|")
+		log.Println(global.ConfigMap)
+	}
 }
 
 //加载客户端模式下的配置

@@ -3,6 +3,7 @@ package netservice
 import (
 	"ActivedRouter/global"
 	"log"
+	"strings"
 )
 
 //控制服务启停
@@ -21,7 +22,12 @@ func StartNetworkService() {
 	case "client":
 		{
 			log.Printf("正在启动客户端模式下的网络服务.......")
-			go NewClient(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
+			serverList := global.ConfigMap["serverlist"]
+			serverListArr := strings.Split(serverList, "|")
+			for _, server := range serverListArr {
+				hostinfo := strings.Split(server, ":")
+				go NewClient(hostinfo[0], hostinfo[1]).Run()
+			}
 			NetworkChan <- true
 		}
 	case "proxy":
