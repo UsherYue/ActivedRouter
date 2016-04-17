@@ -32,6 +32,14 @@ func ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, string(bts))
 }
 
+//Active ClientInfos
+func ActiveClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	data := global.GHostInfoTable.ActiveHostList.ActiveHostInfo.GetMemory().GetData()
+	bts, _ := json.MarshalIndent(data, "", " ")
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(bts))
+}
+
 //index redirect to static
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	http.Redirect(w, r, "/static", 302)
@@ -55,6 +63,7 @@ func (seft *Http) Run() {
 	router := httprouter.New()
 	router.GET("/domain", TestDomain)
 	router.GET("/clientinfos", ClientInfos)
+	router.GET("/activeclients", ActiveClientInfos)
 	router.GET("/", Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	log.Fatal(http.ListenAndServe(seft.Host+":"+seft.Port, router))

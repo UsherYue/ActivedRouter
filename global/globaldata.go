@@ -14,9 +14,6 @@ var GlobalCache cache.Cache = cache.Newcache("memory")
 //存储服务器相关状态
 var GHostInfoTable = system.NewHostInfoTable()
 
-//active router list
-var GActiveRouterList = system.NewRouterList()
-
 //dns配置脚本
 var DnsScript []map[string]interface{}
 

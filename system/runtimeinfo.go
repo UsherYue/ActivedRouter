@@ -20,6 +20,7 @@ type SystemInfo struct {
 	HOST    *host.HostInfoStat     `json:"HOST"`    //host
 	Cluster string                 `json:"Cluster"` //集群分组
 	Domain  string                 `json:"Domain"`  //domain
+	IP      string                 `json:"IP"`
 	CpuNums int                    `json:"CpuNums"` //cpu number
 	//CPUS    []cpu.CPUInfoStat      `json:"CPUS"`    //cpu
 	//CPUTIMES []cpu.CPUTimesStat     `json:"CPUTIMES"` //cpu times

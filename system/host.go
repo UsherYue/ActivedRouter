@@ -9,7 +9,7 @@ import (
 )
 
 //host sync
-var hosttableMutex = sync.Mutex{}
+var hosttableMutex = sync.RWMutex{}
 
 const (
 	UNACTIVE_TIMEOUT = 5 //unactive seconds
@@ -34,58 +34,60 @@ type HostRouteInfo struct {
 	Weight int
 }
 
-//active ROUTER LIST
-type RouterList struct {
-	ActiveHostInfo cache.Cache
-}
-
 //host info list
 type HostInfoTable struct {
 	HostsInfo cache.Cache
-}
-
-//新创建主机信息存储
-func NewRouterList() *RouterList {
-	table := &RouterList{}
-	table.ActiveHostInfo = cache.Newcache("memory")
-	return table
+	//active router
+	ActiveHostList *HostList
 }
 
 //新创建主机信息存储
 func NewHostInfoTable() *HostInfoTable {
 	table := &HostInfoTable{}
+	//挂载主机列表
 	table.HostsInfo = cache.Newcache("memory")
+	//活跃主机列表
+	table.ActiveHostList = NewHostList()
 	return table
 }
 
 //update host table status
 func (self *HostInfoTable) UpdateHostStatus() {
+	hosttableMutex.Lock()
+	defer hosttableMutex.Unlock()
 	cacheMap := *self.HostsInfo.GetMemory().GetData()
 	for _, v := range cacheMap {
 		hostInfo := v.(*HostInfo)
 		//超过最大非活跃时间间隔
 		if time.Now().Unix()-hostInfo.LastActive > UNACTIVE_TIMEOUT {
 			hostInfo.Status = UNACTIVE
+			//从活跃主机列表移除
 		}
+		//更新活跃主机列表 或者添加主机列表,主机不活跃的时候从列表删除
+		//unactive下线
+		//active 存活
+		self.ActiveHostList.UpdateHostList(hostInfo)
 	}
+	//self.ActiveHostList.DumpInfo()
 }
 
 //calc host weight
 func (self *HostInfoTable) calcHostWeight() {
 	hosttableMutex.Lock()
+	defer hosttableMutex.Unlock()
 	cacheMap := *self.HostsInfo.GetMemory().GetData()
 	for _, v := range cacheMap {
 		hostInfo := v.(*HostInfo)
 		//计算服务器权重 分为活跃列表和非活跃列表
 		hostInfo.LastActive = 1
 	}
-	hosttableMutex.Unlock()
+
 }
 
 //更新服务器状态  不存在插入 存在更新
 func (self *HostInfoTable) UpdateHostTable(ip string, info *SystemInfo) {
 	hosttableMutex.Lock()
-	//更新服务器列表 此处需要有专门的一个服务定时的计算服务器权重
+	defer hosttableMutex.Unlock()
 	//更新状态
 	hostInfo := &HostInfo{}
 	hostInfo.Info = info
@@ -93,12 +95,11 @@ func (self *HostInfoTable) UpdateHostTable(ip string, info *SystemInfo) {
 	hostInfo.LastActive = time.Now().Unix() //unix timestamp
 	self.HostsInfo.Set(ip, hostInfo)
 	//self.DumpInfo()
-	hosttableMutex.Unlock()
+
 }
 
 //dump
 func (self *HostInfoTable) DumpInfo() {
-
 	mapChan := *self.HostsInfo.GetMemory().GetData()
 	for k, v := range mapChan {
 		fmt.Println(k)
@@ -112,7 +113,8 @@ func (self *HostInfoTable) DumpInfo() {
 //如果服务器存在的话 初始化服务器信息是null
 //初始化服务器是status 是 noactive  活跃是 active
 func (self *HostInfoTable) GetHostInfo(ip string) *HostInfo {
-	hosttableMutex.Lock()
+	hosttableMutex.RLock()
+	defer hosttableMutex.RUnlock()
 	value, ok := self.HostsInfo.Get(ip)
 	if !ok {
 		return nil
@@ -123,6 +125,5 @@ func (self *HostInfoTable) GetHostInfo(ip string) *HostInfo {
 	}
 	//保证返回副本
 	safeRet := *systemInfo
-	hosttableMutex.Unlock()
 	return &safeRet
 }

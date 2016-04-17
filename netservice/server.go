@@ -15,9 +15,9 @@ import (
 //后期可以配置脚本化
 const (
 	CHECK_INTERCAL          = 1
-	CHECK_ACTIVE_INTERVAL   = 2
-	DISPATCH_EVENT_INTERVAL = 10
-	BUFFER_SIZE             = 100 * 1024 * 1024
+	CHECK_ACTIVE_INTERVAL   = 2                 //活跃检测周期
+	DISPATCH_EVENT_INTERVAL = 5                 //事件分发检测
+	BUFFER_SIZE             = 100 * 1024 * 1024 //‘缓存buffer大小
 )
 
 //路由服务器相关封装
@@ -55,16 +55,17 @@ func (self *Server) OnDataRecv(c net.Conn) {
 			//更新服务器状态
 			//要做到 thread safe
 			//更新服务器列表 如果不存在那么添加到服务器列表
+			data.IP = addrs[0]
 			global.GHostInfoTable.UpdateHostTable(addrs[0], data)
-			srvmode, _ := global.ConfigMap["srvmode"]
-			switch srvmode {
-			case "moniter":
-				{
-					log.Println("-------event begin------------")
-					hook.DispatchEvent()
-					log.Println("-------event end------------")
-				}
-			}
+			//			srvmode, _ := global.ConfigMap["srvmode"]
+			//			switch srvmode {
+			//			case "moniter":
+			//				{
+			//					log.Println("-------event begin------------")
+			//					hook.DispatchEvent()
+			//					log.Println("-------event end------------")
+			//				}
+			//			}
 		}
 	}
 }
@@ -118,29 +119,31 @@ func (self *Server) Run() {
 			}
 		}
 	}()
-	//dispatch event
-	//	dispather := func() {
-	//		t1 := time.NewTimer(time.Second * DISPATCH_EVENT_INTERVAL)
-	//		for {
-	//			select {
-	//			case <-t1.C:
-	//				{
-	//					log.Println("-------event begin------------")
-	//					hook.DispatchEvent()
-	//					log.Println("-------event end------------")
-	//					t1.Reset(time.Second * DISPATCH_EVENT_INTERVAL)
-	//				}
-	//			}
-	//		}
-	//	}
+	//hook event dispatch
+	dispather := func() {
+		t1 := time.NewTimer(time.Second * DISPATCH_EVENT_INTERVAL)
+		for {
+			select {
+			case <-t1.C:
+				{
+					log.Println("-------event begin------------")
+					hook.DispatchEvent()
+					log.Println("空事件测试...............")
+					log.Println("-------event end------------")
+					t1.Reset(time.Second * DISPATCH_EVENT_INTERVAL)
+				}
+			}
+		}
+	}
 	//moniter 模式下分发事件
-	//	srvmode, _ := global.ConfigMap["srvmode"]
-	//	switch srvmode {
-	//	case "moniter":
-	//		{
-	//			go dispather()
-	//		}
-	//	}
+	srvmode, _ := global.ConfigMap["srvmode"]
+	switch srvmode {
+	case "moniter":
+		{
+
+			go dispather()
+		}
+	}
 	//等待任务结束
 	self.TaskFlag <- false
 }

@@ -37,7 +37,6 @@ func loadHookScript(routerFile string) {
 			log.Fatalln(err.Error())
 		} else {
 			_hookScript = hookScript
-			log.Println(string(bts))
 		}
 	}
 }
