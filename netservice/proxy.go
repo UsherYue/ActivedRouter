@@ -6,6 +6,7 @@ package netservice
 import (
 	"ActivedRouter/cache"
 	"ActivedRouter/global"
+	"ActivedRouter/system"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -47,33 +48,51 @@ func (this *ReseveProxyHandler) GetRandomHost(domain string) *HostInfo {
 }
 
 //alived method
+//根据域名 或者ip获取集群最活跃的主机
 func (this *ReseveProxyHandler) GetAlivedHost(domain string) *HostInfo {
-	return nil
+	v, _ := this.DomainHostList.Get(domain)
+	vArr, _ := v.([]*HostInfo)
+	hostinfo := this.BestHostInfo(vArr)
+	return hostinfo
 
+}
+
+//获取最优服务器根据服务器权限
+//根据域名对指定集群进行路由
+func (this *ReseveProxyHandler) BestHostInfo(hosts []*HostInfo) *HostInfo {
+	hostSortedList := global.GHostInfoTable.ActiveHostWeightList
+	for el := hostSortedList.Front(); el != nil; el = el.Next() {
+		bestHost := el.Value.(system.HostInfo)
+		for _, host := range hosts {
+			if bestHost.Info.IP == host.Host || bestHost.Info.Domain == host.Host {
+				return host
+			}
+		}
+	}
+	return nil
 }
 
 //根据负载方法进行主机筛选
 //proxy_method  random 和alived
-func (this *ReseveProxyHandler) GetHostInfo(domain, proxyMethod string) *HostInfo {
-	requestDomain := domain
+func (this *ReseveProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo {
+	requestHost := host
 	//处理非80端口
-	if strings.IndexAny(domain, ":") != -1 {
-		strs := strings.Split(domain, ":")
-		requestDomain = strs[0]
+	if strings.IndexAny(host, ":") != -1 {
+		strs := strings.Split(host, ":")
+		requestHost = strs[0]
 	}
 	//random proxy模式即可
 	//alived 需要开启mix模式
 	switch proxyMethod {
-	case "random":
+	case global.Random:
 		{
-			return this.GetRandomHost(requestDomain)
+			return this.GetRandomHost(requestHost)
 		}
-	case "alived":
+	case global.Alived:
 		{
-			return this.GetAlivedHost(requestDomain)
+			return this.GetAlivedHost(requestHost)
 		}
 	}
-
 	return nil
 }
 
@@ -82,10 +101,11 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	//获取服务器
 	hostinfo := this.GetHostInfo(r.Host, this.ProxyMethod)
 	//如果获取不到挂载主机那么使用random
-	if hostinfo == nil && this.ProxyMethod == global.Alived {
-		hostinfo = this.GetHostInfo(r.Host, global.Random)
+	if hostinfo == nil {
+		//hostinfo = this.GetHostInfo(r.Host, global.Random)
 		if hostinfo == nil {
-			log.Fatalln("miss proxy host ....")
+			w.Write([]byte(r.Host + "没有发现相关集群活跃服务器........."))
+			return
 		}
 	}
 	redirect := fmt.Sprintf("http://%s:%s", hostinfo.Host, hostinfo.Port)

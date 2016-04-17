@@ -17,7 +17,6 @@ func StartNetworkService() {
 			log.Printf("Running Server Mode Service.......")
 			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
 			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
-			NetworkChan <- true
 		}
 	case "client":
 		{
@@ -28,7 +27,6 @@ func StartNetworkService() {
 				hostinfo := strings.Split(server, ":")
 				go NewClient(hostinfo[0], hostinfo[1]).Run()
 			}
-			NetworkChan <- true
 		}
 	case "proxy":
 		{
@@ -36,15 +34,17 @@ func StartNetworkService() {
 			if ProxyHandler.ProxyMethod == global.Alived {
 				log.Fatalln("Reserve Proxy Actived method need mix runmode")
 			}
-			ProxyHandler.StartProxyServer()
+			go ProxyHandler.StartProxyServer()
 		}
 	case "mix":
 		{
 			log.Printf("Running Mix Mode Service .......")
 			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
-			ProxyHandler.StartProxyServer()
+			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
+			go ProxyHandler.StartProxyServer()
 		}
 	}
+	NetworkChan <- true
 }
 
 //stop service

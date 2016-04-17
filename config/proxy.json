@@ -6,12 +6,8 @@
 			"domain":"api.golang.com",
 			"clients":[
 			    {
-				   "host":"uia.com",
-				   "port":"80"	
-		        },
-				{
-				   "host":"uiatest.com",
-				   "port":"80"	
+				   "host":"127.0.0.1",
+				   "port":"8080"	
 		        }
 			]
 		},
@@ -19,8 +15,8 @@
 			"domain":"api1.golang.com",
 			"clients":[
 			    {
-				   "host":"goapi.com",
-				   "port":"80"	
+				   "host":"127.0.0.1",
+				   "port":"8080"	
 		        }
 			]
 		}

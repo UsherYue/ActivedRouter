@@ -13,6 +13,9 @@ import (
 //host sync
 var hosttableMutex = sync.RWMutex{}
 
+//权重
+var hostWeightMutex = sync.RWMutex{}
+
 const (
 	UNACTIVE_TIMEOUT = 5 //unactive seconds
 )
@@ -90,11 +93,11 @@ func (self *HostInfoTable) HostInfoSortList(hostinfo HostInfo) (*list.Element, b
 //根据权重对主机进行排序  只有权重改变的主机才进行排序
 func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 	fmt.Println("对服务器进行权重排序...........")
+	fmt.Println("SortListLen1:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
 	//列表空
 	if self.ActiveHostWeightList.Len() == 0 && hostinfo.Status == ACTIVE {
 		self.ActiveHostWeightList.PushFront(hostinfo)
-		fmt.Println("SortListLen1:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
-	} else if self.ActiveHostWeightList.Len() > 0 && hostinfo.Status == ACTIVE {
+	} else if self.ActiveHostWeightList.Len() > 0 {
 		//如果在主机列表 先摘除
 		//可添加标志位在权重不变的情况下 不排序
 		if e, ok := self.HostInfoSortList(hostinfo); ok {
@@ -107,9 +110,8 @@ func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 			//同一台服务器 列表中只有一台
 			if 0 == self.ActiveHostWeightList.Len() {
 				self.ActiveHostWeightList.PushFront(hostinfo)
+				return
 			}
-			fmt.Println("SortListLen2:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
-			return
 		}
 		//遍历列表
 		for e := self.ActiveHostWeightList.Front(); e != nil; e = e.Next() {
@@ -124,8 +126,6 @@ func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 		}
 		//最后权重最低插入到最后
 		self.ActiveHostWeightList.PushBack(hostinfo)
-		//dump
-		fmt.Println("SortListLen3:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
 	}
 }
 
