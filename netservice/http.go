@@ -25,6 +25,7 @@ var templates = `
 `
 
 //ClientInfos
+//所有服务器 活跃和非活跃
 func ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.HostsInfo.GetMemory().GetData()
 	bts, _ := json.MarshalIndent(data, "", " ")
@@ -33,8 +34,18 @@ func ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 //Active ClientInfos
+//活跃列表
 func ActiveClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.ActiveHostList.ActiveHostInfo.GetMemory().GetData()
+	bts, _ := json.MarshalIndent(data, "", " ")
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(bts))
+}
+
+//BEST  ClientInfos
+//权重最高的服务器
+func BestClients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	data := global.GHostInfoTable.ActiveHostWeightList.Front().Value
 	bts, _ := json.MarshalIndent(data, "", " ")
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, string(bts))
@@ -64,6 +75,7 @@ func (seft *Http) Run() {
 	router.GET("/domain", TestDomain)
 	router.GET("/clientinfos", ClientInfos)
 	router.GET("/activeclients", ActiveClientInfos)
+	router.GET("/bestclients", ActiveClientInfos)
 	router.GET("/", Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	log.Fatal(http.ListenAndServe(seft.Host+":"+seft.Port, router))

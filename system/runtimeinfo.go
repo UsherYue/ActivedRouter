@@ -22,6 +22,7 @@ type SystemInfo struct {
 	Domain  string                 `json:"Domain"`  //domain
 	IP      string                 `json:"IP"`
 	CpuNums int                    `json:"CpuNums"` //cpu number
+	Weight  int                    ///host weight
 	//CPUS    []cpu.CPUInfoStat      `json:"CPUS"`    //cpu
 	//CPUTIMES []cpu.CPUTimesStat     `json:"CPUTIMES"` //cpu times
 	//SM *mem.SwapMemoryStat    `json:"SM"` //交换内存

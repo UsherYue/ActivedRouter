@@ -24,3 +24,16 @@ var (
 	Alived = "alived"
 	Random = "random"
 )
+
+// 服务器权重 1-9  权重越高 那么服务器处理能力越高 在服务的时候优先被使用
+var (
+	HOSTWEIGHT_1 = 1
+	HOSTWEIGHT_2 = 2
+	HOSTWEIGHT_3 = 3
+	HOSTWEIGHT_4 = 4
+	HOSTWEIGHT_5 = 5
+	HOSTWEIGHT_6 = 6
+	HOSTWEIGHT_7 = 7
+	HOSTWEIGHT_8 = 8
+	HOSTWEIGHT_9 = 9
+)

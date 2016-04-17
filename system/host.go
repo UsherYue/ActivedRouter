@@ -2,8 +2,10 @@ package system
 
 import (
 	"ActivedRouter/cache"
+	"container/list"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -27,18 +29,13 @@ type HostInfo struct {
 	LastActive int64
 }
 
-//active router
-type HostRouteInfo struct {
-	DNS    string
-	IP     string
-	Weight int
-}
-
 //host info list
 type HostInfoTable struct {
 	HostsInfo cache.Cache
 	//active router
 	ActiveHostList *HostList
+	//active host weight list,sorted by weight
+	ActiveHostWeightList *list.List
 }
 
 //新创建主机信息存储
@@ -48,6 +45,8 @@ func NewHostInfoTable() *HostInfoTable {
 	table.HostsInfo = cache.Newcache("memory")
 	//活跃主机列表
 	table.ActiveHostList = NewHostList()
+	//权重列表 倒序
+	table.ActiveHostWeightList = list.New()
 	return table
 }
 
@@ -62,25 +61,87 @@ func (self *HostInfoTable) UpdateHostStatus() {
 		if time.Now().Unix()-hostInfo.LastActive > UNACTIVE_TIMEOUT {
 			hostInfo.Status = UNACTIVE
 			//从活跃主机列表移除
+		} else {
+			//如果活跃重新计算权重
+			self.CalcHostWeight(hostInfo)
 		}
 		//更新活跃主机列表 或者添加主机列表,主机不活跃的时候从列表删除
-		//unactive下线
-		//active 存活
 		self.ActiveHostList.UpdateHostList(hostInfo)
+		//对计算过后的活跃主机进行按照权重插入排序 unactive主机删除
+		self.InsertSortHostWeight(*hostInfo)
+		//self.DumpSortedByWeightInfo()
 	}
-	//self.ActiveHostList.DumpInfo()
+}
+
+//主机是否在排序列表中
+//根据ip对比
+func (self *HostInfoTable) HostInfoSortList(hostinfo HostInfo) (*list.Element, bool) {
+	//遍历列表
+	for e := self.ActiveHostWeightList.Front(); e != nil; e = e.Next() {
+		//获取hostinfo
+		hostItem := e.Value.(HostInfo)
+		if hostItem.Info.IP == hostinfo.Info.IP {
+			return e, true
+		}
+	}
+	return nil, false
+}
+
+//根据权重对主机进行排序  只有权重改变的主机才进行排序
+func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
+	fmt.Println("对服务器进行权重排序...........")
+	//列表空
+	if self.ActiveHostWeightList.Len() == 0 && hostinfo.Status == ACTIVE {
+		self.ActiveHostWeightList.PushFront(hostinfo)
+		fmt.Println("SortListLen1:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
+	} else if self.ActiveHostWeightList.Len() > 0 && hostinfo.Status == ACTIVE {
+		//如果在主机列表 先摘除
+		//可添加标志位在权重不变的情况下 不排序
+		if e, ok := self.HostInfoSortList(hostinfo); ok {
+			// 先移除服务器
+			self.ActiveHostWeightList.Remove(e)
+			//不活跃直接退出
+			if hostinfo.Status == UNACTIVE {
+				return
+			}
+			//同一台服务器 列表中只有一台
+			if 0 == self.ActiveHostWeightList.Len() {
+				self.ActiveHostWeightList.PushFront(hostinfo)
+			}
+			fmt.Println("SortListLen2:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
+			return
+		}
+		//遍历列表
+		for e := self.ActiveHostWeightList.Front(); e != nil; e = e.Next() {
+			//获取hostinfo
+			hostItem := e.Value.(*HostInfo)
+			//降序排序 插入并返回
+			if hostItem.Info.Weight <= hostinfo.Info.Weight {
+				self.ActiveHostWeightList.InsertBefore(hostinfo, e)
+				fmt.Println("SortListLen4:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
+				return
+			}
+		}
+		//最后权重最低插入到最后
+		self.ActiveHostWeightList.PushBack(hostinfo)
+		//dump
+		fmt.Println("SortListLen3:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
+	}
 }
 
 //calc host weight
-func (self *HostInfoTable) calcHostWeight() {
-	hosttableMutex.Lock()
-	defer hosttableMutex.Unlock()
-	cacheMap := *self.HostsInfo.GetMemory().GetData()
-	for _, v := range cacheMap {
-		hostInfo := v.(*HostInfo)
-		//计算服务器权重 分为活跃列表和非活跃列表
-		hostInfo.LastActive = 1
-	}
+//根据服务器负载状态  计算 权重
+func (self *HostInfoTable) CalcHostWeight(hostInfo *HostInfo) {
+	fmt.Println("计算服务器权重...........")
+	//load average
+
+	//mem
+
+	//net connections
+
+	//disk
+	//设置权重
+	hostInfo.Info.Weight = 10
 
 }
 
@@ -98,7 +159,7 @@ func (self *HostInfoTable) UpdateHostTable(ip string, info *SystemInfo) {
 
 }
 
-//dump
+//dump挂载的服务器列表
 func (self *HostInfoTable) DumpInfo() {
 	mapChan := *self.HostsInfo.GetMemory().GetData()
 	for k, v := range mapChan {
@@ -106,7 +167,14 @@ func (self *HostInfoTable) DumpInfo() {
 		bts, _ := json.MarshalIndent(v, "", " ")
 		fmt.Println(string(bts))
 	}
+}
 
+//打印根据权重排序后的服务器信息
+func (self *HostInfoTable) DumpSortedByWeightInfo() {
+	for e := self.ActiveHostWeightList.Front(); e != nil; e = e.Next() {
+		bts, _ := json.MarshalIndent(e.Value, "", " ")
+		fmt.Println(string(bts))
+	}
 }
 
 //获取服务器信息
