@@ -4,7 +4,7 @@ package system
 import (
 	"encoding/json"
 	"fmt"
-	"runtime"
+	//	"runtime"
 	"strings"
 
 	"ActivedRouter/gopsutil/disk"
@@ -15,8 +15,8 @@ import (
 )
 
 //网络信息
-//各种网络状态
-type NetInfo struct {
+//各种tcp网络状态
+type TCPNetInfo struct {
 	ClosedWaitCount  int
 	ClosedCount      int
 	ListenCount      int
@@ -45,7 +45,8 @@ type SystemInfo struct {
 	//CPUS    []cpu.CPUInfoStat      `json:"CPUS"`    //cpu
 	//CPUTIMES []cpu.CPUTimesStat     `json:"CPUTIMES"` //cpu times
 	//SM *mem.SwapMemoryStat    `json:"SM"` //交换内存
-	NC []net.NetConnectionStat `json:"NC"` //网络
+	NC *[]net.NetConnectionStat `json:"NC"` //网络
+
 }
 
 //获取系统信息 返回json
@@ -71,10 +72,11 @@ func SysInfo(cluster, domain string) string {
 	info.Domain = domain
 	//info.CPUS, _ = cpu.CPUInfo()
 	//cpu counts
-	info.CpuNums = runtime.NumCPU()
+	//info.CpuNums = runtime.NumCPU()
 	//testNc()
 
-	info.NC, _ = net.NetConnections("tcp4")
+	nc, _ := net.NetConnections("tcp4")
+	info.NC = &nc
 	bts, _ := json.Marshal(info)
 	return strings.TrimSpace(strings.Trim(strings.Trim(string(bts), "\n"), "\t"))
 }
