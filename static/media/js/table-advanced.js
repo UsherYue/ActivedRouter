@@ -37,6 +37,14 @@ var TableAdvanced = function () {
             sOut += '<tr><td>服务器IP:</td><td>'+ aData[2]+'</td></tr>';
 			sOut += '<tr><td>服务器内核:</td><td>'+ item.Info.HOST.platform+'</td></tr>';
 			sOut += '<tr><td>CPU核数:</td><td>'+ item.Info.CpuNums+'</td></tr>';
+			var cpus="";
+			var allPercent=0;
+			for(var i=0;i<item.Info.CPUPERCENTS.length;i++){
+				cpus+='<span "color:red;">'+item.Info.CPUPERCENTS[i].toFixed(1).toString()+"</sapn>   ";
+				allPercent+=item.Info.CPUPERCENTS[i];
+			}
+			sOut += '<tr><td>CPU使用百分比/核心:</td><td>'+ cpus+'</td></tr>';
+			sOut += '<tr><td>CPU百分比:</td><td>'+ (allPercent/item.Info.CPUPERCENTS.length).toFixed(2).toString()+'</td></tr>';
 			sOut += '<tr><td>内核版本:</td><td>'+  item.Info.HOST.platform_version+'</td></tr>';
             sOut += '<tr><td>服务器集群:</td><td>'+item.Info.Cluster+'</td></tr>';
             sOut += '<tr><td>服务器域名:</td><td>'+item.Info.Domain+'</td></tr>';

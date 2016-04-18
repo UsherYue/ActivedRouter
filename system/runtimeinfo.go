@@ -4,9 +4,12 @@ package system
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
+	"time"
 	//	"runtime"
 	"strings"
 
+	"ActivedRouter/gopsutil/cpu"
 	"ActivedRouter/gopsutil/disk"
 	"ActivedRouter/gopsutil/host"
 	"ActivedRouter/gopsutil/load"
@@ -42,11 +45,11 @@ type SystemInfo struct {
 	IP      string                 `json:"IP"`
 	CpuNums int                    `json:"CpuNums"` //cpu number
 	Weight  int                    ///host weight
-	//CPUS    []cpu.CPUInfoStat      `json:"CPUS"`    //cpu
+	//CPUS     []cpu.CPUInfoStat      `json:"CPUS"`     //cpu
 	//CPUTIMES []cpu.CPUTimesStat     `json:"CPUTIMES"` //cpu times
 	//SM *mem.SwapMemoryStat    `json:"SM"` //交换内存
-	NC *TCPNetInfo `json:"NC"` //网络
-
+	NC         *TCPNetInfo `json:"NC"`          //网络
+	CpuPercent []float64   `json:"CPUPERCENTS"` //cpu percent
 }
 
 //获取系统信息 返回json
@@ -58,6 +61,7 @@ func SysInfo(cluster, domain string) string {
 	//load
 	loadAvg, _ := load.LoadAvg()
 	info := &SystemInfo{}
+	info.CpuNums = runtime.NumCPU()
 	//vm
 	info.VM = virtualMem
 	//load
@@ -70,7 +74,9 @@ func SysInfo(cluster, domain string) string {
 	info.Cluster = cluster
 	//domain
 	info.Domain = domain
-	//nc
+	//最近5s的状态
+	cpuPercent, _ := cpu.CPUPercent(1*time.Second, true)
+	info.CpuPercent = cpuPercent
 	nc, _ := net.NetConnections("tcp4")
 	tcpNc := TCPNetInfo{}
 	//所有网络链接

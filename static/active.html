@@ -649,14 +649,21 @@
 			</div>
 		</div>
 		<div class="portlet-body">
-			<table class="table table-striped table-bordered table-hover table-full-width" id="sample_1">
+			<table class="table table-striped table-bordered table-hover table-full-width" style="font-size:11px;" id="sample_1">
 				<thead id="activeHead">
 					<tr>
 						<th>操作系统类型</th>
 						<th>服务器IP</th>
 						<th class="hidden-480">内网DNS解析</th>
 						<th class="hidden-480">集群分类</th>
+						<th class="hidden-480">所有网络连接</th>
+						<th class="hidden-480">NET:&nbsp;TIME_WAIT</th>
+						<th class="hidden-480">NET:&nbsp;ESTABLISH</th>
+						<th class="hidden-480">Mem Used Percent(%)</th>
+						<th class="hidden-480">Disk Used Percent(%)</th>
+						<th class="hidden-480">CPU Used Percent(%)</th>
 						<th class="hidden-480">Load Average</th>
+					
 						<th>主机状态</th>
 					</tr>
 				</thead>
@@ -667,7 +674,20 @@
 						<td><%= data[key].Info.HOST.os %></td>
 						<td><%= key %></td>
 						<td class="hidden-480"><%= data[key].Info.Domain %></td>
-						<td class="hidden-480"><%= data[key].Info.Cluster %></td>
+						<td class="hidden-680"><%= data[key].Info.Cluster %></td>
+						<td class="hidden-320"><%= data[key].Info.NC.ALLCOUNT %></td>
+						<td class="hidden-320"><%= data[key].Info.NC.TIME_WAIT %></td>
+						<td class="hidden-320"><%= data[key].Info.NC.ESTABLISH %></td>
+						<td class="hidden-480"><%= data[key].Info.VM.used_percent.toFixed(2).toString()+'%' %></td>
+						<td class="hidden-480"><%= data[key].Info.DISK.used_percent.toFixed(2).toString()+'%' %></td>
+						<%
+						   var cpuPercent=0;
+							for(var i=0;i<data[key].Info.CPUPERCENTS.length;i++){
+								cpuPercent+=data[key].Info.CPUPERCENTS[i];
+							}
+							cpuPercent=(cpuPercent/data[key].Info.CPUPERCENTS.length).toFixed(2).toString();
+						%>
+						<td class="hidden-480"><%= cpuPercent+'%' %></td>
 						<td class="hidden-480">	
 						<%  
 							//定于负载上限为百分之70

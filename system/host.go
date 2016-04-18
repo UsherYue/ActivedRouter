@@ -74,7 +74,7 @@ func (self *HostInfoTable) UpdateHostStatus() {
 		self.InsertSortHostWeight(*hostInfo)
 		//self.DumpSortedByWeightInfo()
 	}
-	self.DumpInfo()
+	//self.DumpInfo()
 }
 
 //主机是否在排序列表中
