@@ -117,7 +117,7 @@ func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 		//遍历列表
 		for e := self.ActiveHostWeightList.Front(); e != nil; e = e.Next() {
 			//获取hostinfo
-			hostItem := e.Value.(*HostInfo)
+			hostItem := e.Value.(HostInfo)
 			//降序排序 插入并返回
 			if hostItem.Info.Weight <= hostinfo.Info.Weight {
 				self.ActiveHostWeightList.InsertBefore(hostinfo, e)

@@ -18,7 +18,7 @@
 				{
 					"eventtarget":"mem",
 					"attr":"used",
-					"gt":"15",
+					"gt":"99",
 					"callback":"netstat -ant"
 				}
 			]

@@ -3,16 +3,7 @@
 	"proxy_method":"alived",
 	"reserve_proxy":[
 		{
-			"domain":"api.golang.com",
-			"clients":[
-			    {
-				   "host":"127.0.0.1",
-				   "port":"8080"	
-		        }
-			]
-		},
-		{
-			"domain":"api1.golang.com",
+			"domain":"proxy.12xue.com",
 			"clients":[
 			    {
 				   "host":"127.0.0.1",
