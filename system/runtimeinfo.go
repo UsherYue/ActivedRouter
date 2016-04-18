@@ -72,7 +72,9 @@ func SysInfo(cluster, domain string) string {
 	//info.CPUS, _ = cpu.CPUInfo()
 	//cpu counts
 	info.CpuNums = runtime.NumCPU()
-	testNc()
+	//testNc()
+
+	info.NC, _ = net.NetConnections("tcp4")
 	bts, _ := json.Marshal(info)
 	return strings.TrimSpace(strings.Trim(strings.Trim(string(bts), "\n"), "\t"))
 }
@@ -80,8 +82,9 @@ func SysInfo(cluster, domain string) string {
 func testNc() {
 	//nc
 	nc, _ := net.NetConnections("tcp4")
-	//bts1, _ := json.MarshalIndent(nc, "", " ")
+	bts1, _ := json.MarshalIndent(nc, "", " ")
 	fmt.Println(len(nc))
+	fmt.Println(string(bts1))
 
 }
 
