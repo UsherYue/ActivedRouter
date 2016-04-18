@@ -10,23 +10,24 @@ import (
 	"ActivedRouter/gopsutil/host"
 	"ActivedRouter/gopsutil/load"
 	"ActivedRouter/gopsutil/mem"
+	"ActivedRouter/gopsutil/net"
 )
 
 //系统信息定义
 type SystemInfo struct {
-	VM      *mem.VirtualMemoryStat `json:"VM"`      //虚拟内存
-	LD      *load.LoadAvgStat      `json:"LD"`      //load average
-	DISK    *disk.DiskUsageStat    `json:"DISK"`    //dis
-	HOST    *host.HostInfoStat     `json:"HOST"`    //host
-	Cluster string                 `json:"Cluster"` //集群分组
-	Domain  string                 `json:"Domain"`  //domain
-	IP      string                 `json:"IP"`
-	CpuNums int                    `json:"CpuNums"` //cpu number
-	Weight  int                    ///host weight
+	VM      *mem.VirtualMemoryStat  `json:"VM"`      //虚拟内存
+	LD      *load.LoadAvgStat       `json:"LD"`      //load average
+	DISK    *disk.DiskUsageStat     `json:"DISK"`    //dis
+	HOST    *host.HostInfoStat      `json:"HOST"`    //host
+	Cluster string                  `json:"Cluster"` //集群分组
+	Domain  string                  `json:"Domain"`  //domain
+	IP      string                  `json:"IP"`
+	CpuNums int                     `json:"CpuNums"` //cpu number
+	Weight  int                     ///host weight
+	NC      []net.NetConnectionStat `json:"NC"` //网络
 	//CPUS    []cpu.CPUInfoStat      `json:"CPUS"`    //cpu
 	//CPUTIMES []cpu.CPUTimesStat     `json:"CPUTIMES"` //cpu times
 	//SM *mem.SwapMemoryStat    `json:"SM"` //交换内存
-	//NC       []net.NetConnectionStat `json:"NC"`       //网络
 }
 
 //获取系统信息 返回json
