@@ -69,7 +69,8 @@ echo $PATH
 sourcecode=$(pwd) && cp -fr $sourcecode ${GOPATH}src
 #获取目录名字
 directory=$(echo $sourcecode | awk -F "/" '{print $NF}')
-
+echo 'install http router......'
+go get github.com/julienschmidt/httprouter
 #change work directory
 echo $directory
 cd ${GOPATH}src/${directory}

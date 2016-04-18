@@ -3,6 +3,7 @@ package system
 
 import (
 	"encoding/json"
+	"fmt"
 	"runtime"
 	"strings"
 
@@ -12,6 +13,23 @@ import (
 	"ActivedRouter/gopsutil/mem"
 	"ActivedRouter/gopsutil/net"
 )
+
+//网络信息
+//各种网络状态
+type NetInfo struct {
+	ClosedWaitCount  int
+	ClosedCount      int
+	ListenCount      int
+	EstablishedCount int
+	FinWait2Count    int
+	FinWait1Count    int
+	ClosingCount     int
+	SynSentCount     int
+	SynReceivedCount int
+	TimeWaitCount    int
+	LastAckCount     int
+	AllConnectCount  int
+}
 
 //系统信息定义
 type SystemInfo struct {
@@ -54,10 +72,17 @@ func SysInfo(cluster, domain string) string {
 	//info.CPUS, _ = cpu.CPUInfo()
 	//cpu counts
 	info.CpuNums = runtime.NumCPU()
-	//nc
-	info.NC, _ = net.NetConnections("tcp4")
+	testNc()
 	bts, _ := json.Marshal(info)
 	return strings.TrimSpace(strings.Trim(strings.Trim(string(bts), "\n"), "\t"))
+}
+
+func testNc() {
+	//nc
+	nc, _ := net.NetConnections("tcp4")
+	//bts1, _ := json.MarshalIndent(nc, "", " ")
+	fmt.Println(len(nc))
+
 }
 
 //转换成本地结构体
