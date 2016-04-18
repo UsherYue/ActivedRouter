@@ -74,6 +74,7 @@ func (self *HostInfoTable) UpdateHostStatus() {
 		self.InsertSortHostWeight(*hostInfo)
 		//self.DumpSortedByWeightInfo()
 	}
+	self.DumpInfo()
 }
 
 //主机是否在排序列表中
@@ -131,7 +132,6 @@ func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 
 //calc host weight
 //根据服务器负载状态  计算 权重
-//根据负载 和 内存 以及网络链接来确定
 func (self *HostInfoTable) CalcHostWeight(hostInfo *HostInfo) {
 	fmt.Println("计算服务器权重...........")
 	//load average
