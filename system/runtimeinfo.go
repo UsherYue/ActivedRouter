@@ -18,15 +18,15 @@ import (
 //各种tcp网络状态
 type TCPNetInfo struct {
 	ClosedWaitCount int `json:"CLOSED_WAIT"`
-	//	ClosedCount      int `json:"CLOSED"`
+	//ClosedCount      int `json:"CLOSED"`
 	ListenCount      int `json:"LISTEN"`
 	EstablishedCount int `json:"ESTABLISH"`
-	//	FinWait2Count    int `json:"FIN_WAIT_2"`
-	//	FinWait1Count    int `json:"FIN_WAIT_1"`
-	//	ClosingCount     int `json:"CLOSING"`
-	//	SynSentCount     int `json:"SYN_SENT"`
-	//	SynReceivedCount int `json:"SYN_RECV"`
-	TimeWaitCount int `json:"TIME_WAIT"`
+	FinWait2Count    int `json:"FIN_WAIT_2"`
+	FinWait1Count    int `json:"FIN_WAIT_1"`
+	//ClosingCount     int `json:"CLOSING"`
+	SynSentCount     int `json:"SYN_SENT"`
+	SynReceivedCount int `json:"SYN_RECV"`
+	TimeWaitCount    int `json:"TIME_WAIT"`
 	//	LastAckCount     int `json:"LAST_ACK"`
 	AllConnectCount int `json:"ALLCOUNT"`
 }
@@ -95,6 +95,22 @@ func SysInfo(cluster, domain string) string {
 			{
 				info.NC.TimeWaitCount++
 			}
+		case "FIN_WAIT_1":
+			{
+				info.NC.FinWait1Count++
+			}
+		case "FIN_WAIT_2":
+			{
+				info.NC.FinWait2Count++
+			}
+		case "SYN_SENT":
+			{
+				info.NC.SynSentCount++
+			}
+		case "SYN_RECV":
+			{
+				info.NC.SynReceivedCount++
+			}
 		}
 		info.NC.AllConnectCount++
 	}
@@ -109,7 +125,6 @@ func testNc() {
 	bts1, _ := json.MarshalIndent(nc, "", " ")
 	fmt.Println(len(nc))
 	fmt.Println(string(bts1))
-
 }
 
 //转换成本地结构体

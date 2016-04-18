@@ -56,6 +56,16 @@ var TableAdvanced = function () {
 			sOut += '<tr><td>已经使用内存:</td><td>'+(item.Info.VM.used/1024/1024/1024).toFixed(2).toString()+'GB</td></tr>';
 		    sOut += '<tr><td>空闲内存:</td><td>'+(item.Info.VM.free/1024/1024/1024).toFixed(2).toString()+'GB</td></tr>';
 			sOut += '<tr><td>Inactive:</td><td>'+(item.Info.VM.inactive/1024/1024/1024).toFixed(2).toString()+'GB</td></tr>';
+			sOut += '<tr><td ><strong style="color:red">服务器TCP连接网络:</strong></td></tr>';
+			sOut += '<tr><td>所有连接数:</td><td>'+item.Info.NC.ALLCOUNT+'</td></tr>';
+			sOut += '<tr><td>CLOSED_WAIT:</td><td>'+item.Info.NC.CLOSED_WAIT+'</td></tr>';
+			sOut += '<tr><td>ESTABLISH:</td><td>'+item.Info.NC.ESTABLISH+'</td></tr>';
+			sOut += '<tr><td>LISTEN:</td><td>'+item.Info.NC.LISTEN+'</td></tr>';
+			sOut += '<tr><td>TIME_WAIT:</td><td>'+item.Info.NC.TIME_WAIT+'</td></tr>';
+			sOut += '<tr><td>SYN_SENT:</td><td>'+item.Info.NC.SYN_SENT+'</td></tr>';
+			sOut += '<tr><td>SYN_RECV:</td><td>'+item.Info.NC.SYN_RECV+'</td></tr>';
+			sOut += '<tr><td>FIN_WAIT_1:</td><td>'+item.Info.NC.FIN_WAIT_1+'</td></tr>';
+			sOut += '<tr><td>FIN_WAIT_2:</td><td>'+item.Info.NC.FIN_WAIT_2+'</td></tr>';
 			sOut += '</table>';     
             return sOut;
         }
