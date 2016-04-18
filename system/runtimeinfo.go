@@ -17,18 +17,18 @@ import (
 //网络信息
 //各种tcp网络状态
 type TCPNetInfo struct {
-	ClosedWaitCount  int
-	ClosedCount      int
-	ListenCount      int
-	EstablishedCount int
-	FinWait2Count    int
-	FinWait1Count    int
-	ClosingCount     int
-	SynSentCount     int
-	SynReceivedCount int
-	TimeWaitCount    int
-	LastAckCount     int
-	AllConnectCount  int
+	ClosedWaitCount int `json:"CLOSED_WAIT"`
+	//	ClosedCount      int `json:"CLOSED"`
+	ListenCount      int `json:"LISTEN"`
+	EstablishedCount int `json:"ESTABLISH"`
+	//	FinWait2Count    int `json:"FIN_WAIT_2"`
+	//	FinWait1Count    int `json:"FIN_WAIT_1"`
+	//	ClosingCount     int `json:"CLOSING"`
+	//	SynSentCount     int `json:"SYN_SENT"`
+	//	SynReceivedCount int `json:"SYN_RECV"`
+	TimeWaitCount int `json:"TIME_WAIT"`
+	//	LastAckCount     int `json:"LAST_ACK"`
+	AllConnectCount int `json:"ALLCOUNT"`
 }
 
 //系统信息定义
@@ -45,7 +45,7 @@ type SystemInfo struct {
 	//CPUS    []cpu.CPUInfoStat      `json:"CPUS"`    //cpu
 	//CPUTIMES []cpu.CPUTimesStat     `json:"CPUTIMES"` //cpu times
 	//SM *mem.SwapMemoryStat    `json:"SM"` //交换内存
-	NC *[]net.NetConnectionStat `json:"NC"` //网络
+	NC *TCPNetInfo `json:"NC"` //网络
 
 }
 
@@ -70,13 +70,35 @@ func SysInfo(cluster, domain string) string {
 	info.Cluster = cluster
 	//domain
 	info.Domain = domain
-	//info.CPUS, _ = cpu.CPUInfo()
-	//cpu counts
-	//info.CpuNums = runtime.NumCPU()
-	//testNc()
-
+	//nc
 	nc, _ := net.NetConnections("tcp4")
-	info.NC = &nc
+	tcpNc := TCPNetInfo{}
+	//所有网络链接
+	tcpNc.AllConnectCount = len(nc)
+	info.NC = &tcpNc
+	//ESTABLISHED  CLOSE_WAIT  LISTEN
+	for _, ncItem := range nc {
+		switch ncItem.Status {
+		case "ESTABLISHED":
+			{
+				info.NC.EstablishedCount++
+			}
+		case "CLOSE_WAIT":
+			{
+				info.NC.ClosedWaitCount++
+			}
+		case "LISTEN":
+			{
+				info.NC.ListenCount++
+			}
+		case "TIME_WAIT":
+			{
+				info.NC.TimeWaitCount++
+			}
+		}
+		info.NC.AllConnectCount++
+	}
+	//testNc()
 	bts, _ := json.Marshal(info)
 	return strings.TrimSpace(strings.Trim(strings.Trim(string(bts), "\n"), "\t"))
 }
