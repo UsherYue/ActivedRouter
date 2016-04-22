@@ -29,7 +29,7 @@ func parseConfigfile() {
 	case global.ProxyMode:
 		{
 			//proxy config
-			netservice.ProxyHandler.LoadProxyConfig(global.ProxyConfig)
+			netservice.ProxyHandler.LoadProxyConfig(global.HttpProxyConfig)
 			return
 		}
 	case global.MixMode:
@@ -37,7 +37,7 @@ func parseConfigfile() {
 			//server config
 			loadServerModeConfig(global.ServerConfig)
 			//proxy config
-			netservice.ProxyHandler.LoadProxyConfig(global.ProxyConfig)
+			netservice.ProxyHandler.LoadProxyConfig(global.HttpProxyConfig)
 		}
 	}
 }
