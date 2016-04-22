@@ -37,34 +37,45 @@ Email:   usher.yue@gmail.com
 
 配置文件：
         
- 		{
-			"proxy_addr":"127.0.0.1:80",
-			"proxy_method":"random",
-			"reserve_proxy":[
-				{
-					"domain":"api.golang.com",
+ 	{	
+ 		"http_switch":"on",           //http开关 on off
+  		"proxy_addr":"127.0.0.1:80",  //http监听端口
+		"proxy_method":"random",      //proxy方法 random 混合模式下可支持alived方法
+		"https_switch":"off",        //是否开启https
+		"https_crt":"a.crt",         //https证书
+		"https_key":"a.key",         //https key
+		"https_proxy_addr":"127.0.0.1:443",//https监听地址
+		"reserve_proxy":[
+			{
+				"domain":"1.12xue.com",
+				"clients":[
+				    {
+					   "host":"12xuetest.com",
+					   "port":"80"	
+			        }
+				]
+			},
+			{
+				"domain":"2.12xue.com",
+				"clients":[
+				    {
+					   "host":"12xuedev.com",
+					   "port":"80"	
+			        }
+				]
+			},
+			{
+					"domain":"proxy.12xue.com",
 					"clients":[
-					    {
-					 	  "host":"uia.com",
-						   "port":"80"	
-		    	   		 },
-						{
-					 	  "host":"uiatest.com",
-					 	  "port":"80"	
-		    	    	}
-					]
-				},
-				{
-					"domain":"api1.golang.com",
-					"clients":[
-					    {
+				 	   {
 						   "host":"goapi.com",
 						   "port":"80"	
-		      		  }
+		  		  	    }
 					]
-				}
-			]
-		}
+			}
+		
+		]
+	}
 ### 2、server和client模式可以配合完全服务器监控,以及路由转发
         ActivedRouter --runmode=server  
         
