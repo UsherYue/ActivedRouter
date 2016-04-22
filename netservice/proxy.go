@@ -19,17 +19,33 @@ import (
 	"strings"
 )
 
-var HTTPADDR string
+// var define
+var (
+	HttpAddr    string
+	HttpsAddr   string
+	HttpSwitch  string //on off
+	HttpsSwitch string //on off
+	HttpsCrt    string //https 证书
+	HttpsKey    string //https key
+)
 
-var DefaultHttpAddr = "127.0.0.1:8888"
+//default
+var (
+	DefaultHttpAddr = "127.0.0.1:8888"
+	DefaultHttsAddr = "127.0.0.1:443"
+	SwitchOn        = "on"
+	SwitchOff       = "off"
+)
+
+//hander
+var (
+	ProxyHandler = &ReseveProxyHandler{}
+)
 
 type HostInfo struct {
 	Port string
 	Host string
 }
-
-//hander
-var ProxyHandler = &ReseveProxyHandler{}
 
 //reserver
 type ReseveProxyHandler struct {
@@ -133,11 +149,58 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 	} else {
 		var proxyConfig map[string]interface{}
 		json.Unmarshal(bts, &proxyConfig)
-		if v, ok := proxyConfig["proxy_addr"]; !ok {
-			HTTPADDR = DefaultHttpAddr
+		//获取http和https开关 缺省是off
+		if httpSwitch, b := proxyConfig["http_switch"]; !b {
+			HttpSwitch = SwitchOff
 		} else {
-			HTTPADDR, _ = v.(string)
+			HttpSwitch = httpSwitch.(string)
 		}
+		if httpsSwitch, b := proxyConfig["https_switch"]; !b {
+			HttpsSwitch = SwitchOff
+		} else {
+			HttpsSwitch = httpsSwitch.(string)
+		}
+		//http https  off
+		if HttpSwitch == SwitchOff && HttpsSwitch == SwitchOff {
+			log.Fatalln("请开启http或者https代理开关.....")
+		}
+		//获取http开关下的配置
+		if HttpSwitch == SwitchOn {
+			//获取http http_proxy_addr
+			if v, ok := proxyConfig["http_proxy_addr"]; !ok {
+				HttpAddr = DefaultHttpAddr
+			} else {
+				HttpAddr, _ = v.(string)
+			}
+			log.Println("Http Switch:" + HttpSwitch)
+			log.Println("Http  Addr:" + HttpAddr)
+		}
+		//获取https开关下的配置
+		if HttpsSwitch == SwitchOn {
+			//获取https https_proxy_addr
+			if v, ok := proxyConfig["https_proxy_addr"]; !ok {
+				HttpsAddr = DefaultHttsAddr
+			} else {
+				HttpsAddr, _ = v.(string)
+			}
+			//获取证书 和key
+			if v, ok := proxyConfig["https_crt"]; !ok {
+				log.Fatalln("https 缺少证书........")
+			} else {
+				HttpsCrt = v.(string)
+			}
+			if v, ok := proxyConfig["https_key"]; !ok {
+				log.Fatalln("https 缺少key.........")
+			} else {
+				HttpsKey = v.(string)
+			}
+			log.Println("Https Switch:" + HttpsSwitch)
+			log.Println("Https Addr:" + HttpsAddr)
+			log.Println("Https  Crt:" + HttpsCrt)
+			log.Println("Https  Key:" + HttpsKey)
+		}
+
+		//get proxy method
 		if v, ok := proxyConfig["proxy_method"]; !ok {
 			this.ProxyMethod = "random"
 		} else {
@@ -175,7 +238,7 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 //启动proxy
 func (this *ReseveProxyHandler) StartProxyServer() {
 	//被代理的服务器host和port
-	err := http.ListenAndServe(HTTPADDR, ProxyHandler)
+	err := http.ListenAndServe(HttpAddr, ProxyHandler)
 	if err != nil {
 		log.Fatalln("ListenAndServe: ", err)
 	}

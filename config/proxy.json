@@ -1,10 +1,9 @@
 {
-	"proxy_addr":"127.0.0.1:80",
 	"proxy_method":"random",
+	"http_proxy_addr":"127.0.0.1:8000",
 	"http_switch":"on",           
-  	"proxy_addr":"127.0.0.1:80",  
 	"proxy_method":"random",      
-	"https_switch":"off",     
+	"https_switch":"on",     
 	"https_crt":"a.crt",         
 	"https_key":"a.key",        
 	"https_proxy_addr":"127.0.0.1:443",
