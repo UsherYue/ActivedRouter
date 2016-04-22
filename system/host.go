@@ -72,9 +72,8 @@ func (self *HostInfoTable) UpdateHostStatus() {
 		self.ActiveHostList.UpdateHostList(hostInfo)
 		//对计算过后的活跃主机进行按照权重插入排序 unactive主机删除
 		self.InsertSortHostWeight(*hostInfo)
-		//self.DumpSortedByWeightInfo()
+		self.DumpSortedByWeightInfo()
 	}
-	//self.DumpInfo()
 }
 
 //主机是否在排序列表中
@@ -94,7 +93,6 @@ func (self *HostInfoTable) HostInfoSortList(hostinfo HostInfo) (*list.Element, b
 //根据权重对主机进行排序  只有权重改变的主机才进行排序
 func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 	fmt.Println("对服务器进行权重排序...........")
-	fmt.Println("SortListLen1:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
 	//列表空
 	if self.ActiveHostWeightList.Len() == 0 && hostinfo.Status == ACTIVE {
 		self.ActiveHostWeightList.PushFront(hostinfo)
@@ -132,17 +130,47 @@ func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 
 //calc host weight
 //根据服务器负载状态  计算 权重
+// cpu  0 1 2 3
+// load 0 1 2 3
+// mem  0 1 2 3
+//
 func (self *HostInfoTable) CalcHostWeight(hostInfo *HostInfo) {
-	fmt.Println("计算服务器权重...........")
-	//load average
-
-	//mem
-
+	hostWeight := 0
+	//cpu percent
+	cpuPercent := 0.0
+	cpuPercents := hostInfo.Info.CpuPercent
+	for _, v := range cpuPercents {
+		cpuPercent += v
+	}
+	cpuPercent = (cpuPercent / float64(len(cpuPercents)))
+	hostWeight += 3 - int(int(cpuPercent)/30)
+	//mem used
+	mem := hostInfo.Info.VM.UsedPercent
+	hostWeight += 3 - int(int(mem)/30)
 	//net connections
+	//网络连接暂时预留
+	nc := hostInfo.Info.NC.AllConnectCount
+	//load average
+	load := hostInfo.Info.LD.Load1
+	//good load
+	goodLoad := float64(hostInfo.Info.CpuNums) * 0.9
+	if load > 0.0 && load < (goodLoad/3) {
+		hostWeight += 3
+	} else if load >= (goodLoad/3) && load < (goodLoad*2/3) {
+		hostWeight += 2
+	} else {
+		hostWeight += 1
+	}
 
-	//disk
+	hostInfo.Info.Weight = hostWeight
+	fmt.Println("Calc Host Weight.......")
+	fmt.Println("Mem Used:", mem)
+	fmt.Println("Cpu Used:", cpuPercent)
+	fmt.Println("Load:", load)
+	fmt.Println("Good Load:", goodLoad)
+	fmt.Println("Net Connection:", nc)
+	fmt.Println("Host Weight:", hostInfo.Info.Weight)
 	//设置权重
-	hostInfo.Info.Weight = 10
 
 }
 
