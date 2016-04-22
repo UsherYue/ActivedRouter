@@ -237,9 +237,28 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 
 //启动proxy
 func (this *ReseveProxyHandler) StartProxyServer() {
-	//被代理的服务器host和port
-	err := http.ListenAndServe(HttpAddr, ProxyHandler)
-	if err != nil {
-		log.Fatalln("ListenAndServe: ", err)
+
+	if HttpSwitch == SwitchOn {
+		go func() {
+			//被代理的服务器host和port
+			err := http.ListenAndServe(HttpAddr, ProxyHandler)
+			if err != nil {
+				log.Fatalln("ListenAndServe HTTP: ", err)
+			} else {
+				log.Println("Listen Http :", HttpAddr)
+			}
+		}()
 	}
+	if HttpsSwitch == SwitchOn {
+		go func() {
+			//被代理的服务器host和port
+			err := http.ListenAndServeTLS(HttpsAddr, HttpsCrt, HttpsKey, ProxyHandler)
+			if err != nil {
+				log.Fatalln("ListenAndServe HTTP SSL: ", err)
+			} else {
+				log.Println("Listen Http SSL:", HttpsAddr)
+			}
+		}()
+	}
+
 }
