@@ -11,7 +11,7 @@ Email:   usher.yue@gmail.com
 	磁盘等信息。
 	
         
-	2、反向代理服务器功能,比如nginx! 可以针对不同的域名对不同的业务服务器集群进行反向代理。
+	2、反向代理服务器功能,例如Nginx的功能,可以针对不同的域名对不同的业务服务器集群进行反向代理。
         
 	3、Server & Client 模式组合下,可以用作服务器监控使用,并且可以设置监控报警,Server端可以选择性
 	开启监控Dashboard,用于直观的web界面监控。
@@ -23,19 +23,31 @@ Email:   usher.yue@gmail.com
         
 	6、快速配置反向代理服务,省去配置nginx反向代理的麻烦步骤,一般流量下的负载足以应付。 
         
-##  快速入门		
-###  编译安装
-在系统下运行如下脚本,会在当前目录
+##  二、快速入门		
+###  2.1、编译安装
+在系统下运行如下脚本,会在当前目录生成ActivedRouter二进制程序,然后我们配置相应的配置文件,并且运行二进制程序即可启动服务。
 
 	linux64下    boot_linux64.sh
 	darwin64下   boot_darwin64.sh
-	linux64下    boot_linux64.sh
+	linux32下    boot_linux32.sh
+## 三、详细配置教程
+</br>
+ 3.1、[ActivedRouter实现反向代理服务器](www.xxx.com)
+ 		
+ 	
+ 3.2、[ActivedRouter实现服务器监控功能](www.xxx.com)		
+ 		
+ 3.3、[ActivedRouter实现基于真机负载的反向代理服务器](www.xxx.com)
+	
+	
+ 3.4、[ActivedRouter配合第三方语言实现API路由](www.xxx.com)	
                
-##  工作模式 
-### 1、反向代理模式 Reserve Proxy ,类似nginx的反向代理功能
-运行命令： ActivedRouter --runmode=proxy		
+##  四、工作模式和配置文件
+### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能。
 
-配置文件：
+`运行命令： ActivedRouter --runmode=proxy`
+
+`配置文件：`
         
  	{	
  		"http_switch":"on",           //http开关 on off
@@ -76,11 +88,38 @@ Email:   usher.yue@gmail.com
 		
 		]
 	}
-### 2、server和client模式可以配合完全服务器监控,以及路由转发
-        ActivedRouter --runmode=server  
-        
-        ActivedRouter --runmode=client  
-### 3、钩子脚本 
+### 4.2、server和client模式可以配合完全服务器监控,提供web仪表盘。
+`客户端运行: ActivedRouter --runmode=server `	
+`client.json`	
+
+		{
+			"domain":"wwww.xxx.com",  //客户端服务器的域名可空
+			"cluster":"UIA集群",		  //服务器集群的标志 可自定义
+			"router_list":[          //要连接的远程路由服务器列表
+			"127.0.0.1:8888",
+			"172.16.200.202:9999"
+			]
+	   }
+		
+`服务器运行: ActivedRouter --runmode=client `	
+`server.ini`	
+
+		#服务器模式下的配置选项
+		#路由服务器监听的地址
+		host=127.0.0.1
+		#服务器监听的端口号
+		port=8888   
+		#服务模式 moniter & router  
+		srvmode=router
+		#http 提供http路由服务的ip,端口。
+		httphost=127.0.0.1
+		httpport=8080
+
+
+
+### 4.3、服务器监控模式触发脚本
+`当监控服务器下,路由服务器开启srvmode=moniter之后才会触发`		
+
 	{   
 			"script":[
 		{
@@ -149,6 +188,14 @@ Email:   usher.yue@gmail.com
     </tr>
     <tr>
       <td>
+         MixProxy
+      </td>
+      <td>
+         基于监控模式下,真机负载的反向代理服务。
+      </td>
+    </tr>
+    <tr>
+      <td>
          ThirdPartSDK
       </td>
       <td>
@@ -188,6 +235,14 @@ Email:   usher.yue@gmail.com
       </td>
       <td>
         时刻监控服务器的网络连接状态
+      </td>
+    </tr>
+    <tr>
+          <td>
+         CPU使用率
+      </td>
+            <td>
+         时刻监控CPU的使用率
       </td>
     </tr>
     <tr>
