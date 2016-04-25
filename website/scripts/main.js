@@ -16,6 +16,6 @@
 	});
 	//引用相关模块
 	requirejs(['bootstrap','index','template'], function() {  
-	     alert('loaded......')
+	  // alert('loading...');
 	});  
 })();

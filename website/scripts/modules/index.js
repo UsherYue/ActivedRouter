@@ -1,5 +1,5 @@
 var indexModule=function($,template){
-	alert('indexModule');
+	//https://api.github.com/repos/UsherYue/ActivedRouter
 }
 //定义模块
 define(['jquery','template'],indexModule);
