@@ -78,5 +78,6 @@ func (seft *Http) Run() {
 	router.GET("/bestclients", ActiveClientInfos)
 	router.GET("/", Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
+	router.ServeFiles("/website/*filepath", http.Dir("website"))
 	log.Fatal(http.ListenAndServe(seft.Host+":"+seft.Port, router))
 }
