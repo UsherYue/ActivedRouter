@@ -181,19 +181,32 @@ var initHttpLineChart=function(){
 	
 }
 
-
+var loadIndexContent=function(){
+	$('#center_content').load('tpl/index_content.html',function(){
+		//初始化内存
+		initMemPie();
+		//初始化cpu
+		initCpuPie();
+		//初始化磁盘
+		initDiskPie();
+		//init http
+		initHttpLineChart();
+	});
+};
 
 var indexModule=function($,template,Chart,Tools){
 	//初始化格式化函数
 	Tools.StringFormatInit();
-	//初始化内存
-	initMemPie();
-	//初始化cpu
-	initCpuPie();
-	//初始化磁盘
-	initDiskPie();
-	//init http
-	initHttpLineChart();
+	//加载首页
+	loadIndexContent();
+	//加载活跃主机
+	$("#activehost").click(function(){
+		$('#center_content').load('tpl/index_active.html'); 
+	});
+	//加载index
+	$("#indexcontent").click(function(){
+		loadIndexContent();
+	});
 
 }
 
