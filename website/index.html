@@ -13,19 +13,45 @@
 	padding:0px;
 }
 body{
-	background-color:#efefef;
+	background-color:#f3f3f3;
+}
+#center_content{
+	margin-top:-15px;
+	
+}
+.linkstyle{
+	color:#666666;
+	text-decoration:none;
+}
+.linkstyle:hover{
+	color:#555555;
+	cursor:pointer;
+}
+.textitem{
+	font-size:13px;
+	
+}
+
+.test{
+	border:1px solid red;
 }
 </style>
 </head>
 <body>
-<nav class="navbar navbar-default" role="navigation">
+<nav class="navbar navbar-inverse" role="navigation" style="border-radius:0px;">
    <div class="navbar-header">
+   		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+         <span class="sr-only">切换导航</span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+    </button>
       <a class="navbar-brand small" href="#" ><span class="glyphicon glyphicon-leaf"></span>&nbsp;&nbsp;Dashboard</a>
    </div>
-   <div class="collapse navbar-collapse" id="example-navbar-collapse" >   
+   <div class="collapse navbar-collapse" id="navbar-collapse" >   
       <ul class="nav navbar-nav" >
-         <li class=""><a href="#">ActiveHosts</a></li>
-         <li><a href="#">RouterStatus</a></li>
+	     <li class="active"><a href="#">RouterStatus</a></li>
+         <li ><a href="#">ActiveHosts</a></li>
          <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                Settings <b class="caret"></b>
@@ -49,6 +75,121 @@ body{
    </div>
 </nav>
 
+<!--content-->
+<div class="container-fluid" id="center_content">
+	<div class="row">
+		<!--MEM-->
+		<div class="col-md-3" style="margin-left:-5px;">
+			<div class="panel panel-danger">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">RouterServer Memory</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="memPie"></canvas>
+					</div>
+		      </div>
+		    </div>
+			<!--DISK-->
+			<div class="panel panel-danger" style="margin-top:-12px;">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">RouterServer Disk</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="diskPie"></canvas>
+					</div>
+		      </div>
+		    </div>
+			<!--CPU-->
+			<div class="panel panel-danger" style="margin-top:-12px;">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">RouterServer CPU</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="cpuPie"></canvas>
+					</div>
+		      </div>
+		    </div>
+		</div>
+	 	<!---HTTP ROUTER STATUS--->
+		<div class="col-md-9" style="margin-left:-25px;">
+			<!--服务器状态-->
+			<div class="panel panel-primary">
+		     	 <div class="panel-heading">
+		        <h3 class="panel-title">RouterServer Info</h3>
+		     	 </div>
+		     	 <div class="panel-body" >
+		        	<div class="row">
+						<div class="col-md-2" >
+						    <div class="bg-success" >服务器信息:</div>
+							<span class="textitem text-danger ">服务器内核:darwin</span></br>
+							<span class="textitem text-danger ">内核版本:15.3.0</span></br>
+							<div class="bg-success" style="margin-top:5px;">CPU状态</span></div>
+							<span class="textitem text-danger ">核数:8</span></br>
+							<span class="textitem text-danger ">使用百分比:88%</span></br>
+							<div class="bg-success" style="margin-top:5px;">内存状态:</div>
+							<span class="textitem text-danger ">使用百分比:88%</span></br>
+							<span class="textitem text-danger ">空闲百分比:12</span></br>
+							<span class="textitem text-danger ">剩余内存:12.5GB</span></br>
+						</div>
+						<div class="col-md-2">
+							<div class="bg-success" >服务器磁盘信息:</div>
+							<span class="textitem text-danger ">文件系统类型:hfs</span></br>
+							<span class="textitem text-danger ">使用百分比:88%</span></br>
+							<span class="textitem text-danger ">空闲百分比:12</span></br>
+							<span class="textitem text-danger ">剩余容量:122.5GB</span></br>
+							<span class="textitem text-danger ">已经使用:222GB</span></br>
+							<div class="bg-success" style="margin-top:8px;">服务器负载(Load Average):</div>
+							<span class="textitem text-danger ">Last 1 mins:1.35</span></br>
+							<span class="textitem text-danger ">Last 5 mins:2.22</span></br>
+							<span class="textitem text-danger ">Last 15 mins:1.14</span></br>
+						</div>	
+						<div class="col-md-3">
+							<div class="bg-success" >服务器TCP连接:</div>
+							<span class="textitem text-danger ">CLOSED_WAIT:122</span></br>
+							<span class="textitem text-danger ">ESTABLISH:83</span></br>
+							<span class="textitem text-danger ">LISTEN:12</span></br>
+							<span class="textitem text-danger ">TIME_WAIT:122</span></br>
+							<span class="textitem text-danger ">SYN_SENT:0</span></br>
+							<span class="textitem text-danger ">SYN_RECV:22</span></br>
+							<span class="textitem text-danger ">FIN_WAIT_1:55</span></br>
+							<span class="textitem text-danger ">FIN_WAIT_2:566</span></br>
+						</div>	
+					</div>
+		     	 </div>
+		    </div>	
+		   <!--HTTP-->
+			<div class="panel panel-primary">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">Clusters Http Request Status (单位:次)</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="httpLineChart"></canvas>
+					</div>
+		      </div>
+		    </div>	
+			<!--HTTP-->
+
+		</div>
+	</div>
+</div>
+
+
+<!--footer-->
+<div class="container-fluid" style="height:90px;background-color:#fff;" id="footer">
+	<div class="row">
+		<div class="col-md-4 col-md-offset-4 " >
+			<div style="margin-top:15px;"><strong><a class="linkstyle">关于</a></strong>｜<strong><a class="linkstyle">Link Github</a></strong> <div>
+			<div style="margin-top:10px;">
+			<span style="color:#ababab;">版权所有 © 2012-2014 ActivedRouter 授权许可遵循</span>  
+			Bsd License   By UsherYue
+			<div>
+		</div>
+	</div>
+</div>
 
 </body>
 </html>
