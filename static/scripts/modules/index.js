@@ -280,7 +280,7 @@ var indexModule=function($,template,Chart,Tools){
 		});
 		//查看服务器详细情况
 		$("#clientinfos tbody tr button").click(function(){
-			alert("查看服务器详细情况.....")
+			$('#dlg').modal('show')			
 		});
 	});
 	//加载index
