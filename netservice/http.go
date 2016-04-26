@@ -53,7 +53,7 @@ func (self *Http) BestClients(w http.ResponseWriter, r *http.Request, _ httprout
 
 //index redirect to static
 func (self *Http) Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	http.Redirect(w, r, "/website", 302)
+	http.Redirect(w, r, "/static", 302)
 }
 
 //路由服务器的信息
