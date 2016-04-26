@@ -1,0 +1,39 @@
+*{
+	margin:0px ;
+	padding:0px;
+}
+body{
+	background-color:#f3f3f3;
+}
+#center_content{
+	margin-top:-15px;
+	min-height: 85%;
+	
+}
+.linkstyle{
+	color:#666666;
+	text-decoration:none;
+}
+.linkstyle:hover{
+	color:#555555;
+	cursor:pointer;
+}
+.textitem{
+	font-size:13px;
+	
+}
+
+.test{
+	border:1px solid red;
+}
+body{
+	position:relative;
+}
+html, body {height: 100%;}
+
+#routerinfo div span{
+	display:inline-block;
+	 margin-top:10px;
+}
+
+

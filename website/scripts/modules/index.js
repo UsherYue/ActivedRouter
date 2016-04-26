@@ -1,16 +1,46 @@
+//默认的首页
+var currentPageID="indexcontent";
+//router info初始化的时候会加载
+var routerInfo=null ;
+var templateEngine =null;
+//cpu
+var cpuUsedPercent=0;
+var cpuFreePercent=0;
+
+//字节到gb
+function bytesToGB(bytes){
+	var gb=(bytes/1024/1024/1024).toFixed(2).toString();
+	return gb ;
+}
+
+//加载script模板
+var loadScriptTpl=function(scriptid,data){	
+	var src=$("#"+scriptid).get(0).src;
+	var tpl="";
+	$.get(src,function(data){
+		tpl=data;
+	});
+	var render=templateEngine.compile(tpl);
+	//返回渲染函数
+	var html=render(data);
+	return html;
+};
+
 //内存初始化
 var initMemPie=function(){
 	var ctx = $("#memPie").get(0).getContext("2d");
 	// For a pie chart
+	var usedPercent=routerInfo.VM.used_percent.toFixed(1);
+	var freePercent=(100-usedPercent).toFixed(1);
 	var data = {
 	    labels: [
-	        "Mem Used (35%)",
-	        "Mem Free  (65%)",
+	        "Mem Used ({0}%)".format(usedPercent),
+	        "Mem Free  ({0}%)".format(freePercent),
 	
 	    ],
 	    datasets: [
 	        {
-	            data: [35, 65],
+	            data: [usedPercent, freePercent],
 	            backgroundColor: [
 	                "#FF6384",
 	                "#36A2EB"
@@ -18,8 +48,7 @@ var initMemPie=function(){
 	            ],
 	            hoverBackgroundColor: [
 	                "#FF6384",
-	                "#36A2EB"
-	          
+	                "#36A2EB"   
 	            ]
 	    }]
 	};
@@ -37,13 +66,13 @@ var initCpuPie=function(){
 	// For a pie chart
 	var data = {
 	    labels: [
-	        "CPU Used (25%)",
-	        "CPU Free (75%)",
+	        "CPU Used ({0}%)".format(cpuUsedPercent),
+	        "CPU Free ({0}%)".format(cpuFreePercent),
 	
 	    ],
 	    datasets: [
 	        {
-	            data: [25, 75],
+	            data: [cpuUsedPercent, cpuFreePercent],
 	            backgroundColor: [
 	                "#FF6384",
 	                "#36A2EB"
@@ -62,20 +91,23 @@ var initCpuPie=function(){
 	    data: data,
 	    options: null
 	});
+	console.log(routerInfo);
 }
 
 //cpu初始化
 var initDiskPie=function(){
 	var ctx = $("#diskPie").get(0).getContext("2d");
+	var usedPercent=routerInfo.DISK.used_percent.toFixed(1);
+	var freePercent=(100-usedPercent).toFixed(1);
 	// For a pie chart
 	var data = {
 	    labels: [
-	        "Disk Used  (33.3%)",
-	        "Disk Free  (66.7%)",
+	        "Disk Used  ({0}%)".format(usedPercent),
+	        "Disk Free  ({0}%)".format(freePercent),
 	    ],
 	    datasets: [
 	        {
-	            data: [33.3, 66.7],
+	            data: [usedPercent,freePercent],
 	            backgroundColor: [
 	                "#FF6384",
 	                "#36A2EB"
@@ -178,34 +210,84 @@ var initHttpLineChart=function(){
 	    data: data,
 	    options: null
 	});
-	
 }
 
+
+
+
+//加载content
 var loadIndexContent=function(){
-	$('#center_content').load('tpl/index_content.html',function(){
-		//初始化内存
-		initMemPie();
-		//初始化cpu
-		initCpuPie();
-		//初始化磁盘
-		initDiskPie();
-		//init http
-		initHttpLineChart();
+	//加载路由服务器信息
+	$.get("/routerinfo",function(data){
+		routerInfo=data;
+		var cpuPercentArr=routerInfo.CPUPERCENTS;
+		var usedPercent=0;
+		for (var i=0;i<cpuPercentArr.length;i++){
+			usedPercent+=cpuPercentArr[i];
+		}
+		cpuUsedPercent=(usedPercent/cpuPercentArr.length).toFixed(1);
+		cpuFreePercent=(100-cpuUsedPercent).toFixed(1)
+		routerInfo.cpuFree=cpuFreePercent ;
+		routerInfo.cpuUsed=cpuUsedPercent
 	});
+	//加载模板
+    var html=loadScriptTpl("tpl_indexconent",routerInfo);
+	//设置html
+	$("#center_content").html(html);
+	//初始化内存
+	initMemPie();
+	//初始化cpu
+	initCpuPie();
+	//初始化磁盘
+	initDiskPie();
+	//init http
+	initHttpLineChart();
+
 };
 
+
+//加载footer
+var loadIndexFooter=function(){
+	$('#footer').load('tpl/index_footer.html');  
+};
+
+
+//导出模块
 var indexModule=function($,template,Chart,Tools){
+	templateEngine=template;
 	//初始化格式化函数
 	Tools.StringFormatInit();
+	//同步ajax
+	$.ajaxSetup({  
+   		 async : false  
+	});  
 	//加载首页
 	loadIndexContent();
+	//加载页脚
+	loadIndexFooter();
 	//加载活跃主机
 	$("#activehost").click(function(){
-		$('#center_content').load('tpl/index_active.html'); 
+		//加载模板
+    	var html=loadScriptTpl("tpl_indexactive",routerInfo);
+		$("#center_content").html(html);
+		$('#activehost').parent().siblings().removeClass('active');
+		$('#activehost').parent().removeClass('active').addClass('active');
+		//$("#clientinfos tbody tr:even").addClass("success");
+		$("#clientinfos tbody tr:odd").addClass("warning");
+		$("#clientinfos tbody tr").css("height","40px");
+		$("#clientinfos tbody tr").hover(function(){
+			$(this).css("cursor","pointer");
+			console.log("hoverd!");
+		});
+		$("#clientinfos tbody tr button").click(function(){
+			alert("查看服务器详细情况.....")
+		});
 	});
 	//加载index
 	$("#indexcontent").click(function(){
 		loadIndexContent();
+		$('#indexcontent').parent().siblings().removeClass('active');
+		$('#indexcontent').parent().removeClass('active').addClass('active');
 	});
 
 }

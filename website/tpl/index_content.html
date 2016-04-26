@@ -1,0 +1,104 @@
+<div class="row">
+		<!--MEM-->
+		<div class="col-md-3" style="margin-left:-5px;">
+			<div class="panel panel-danger">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">RealTime RouterServer Memory</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="memPie"></canvas>
+					</div>
+		      </div>
+		    </div>
+			<!--DISK-->
+			<div class="panel panel-danger" style="margin-top:-12px;">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">RealTime RouterServer Disk</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="diskPie"></canvas>
+					</div>
+		      </div>
+		    </div>
+			<!--CPU-->
+			<div class="panel panel-danger" style="margin-top:-12px;">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">RealTime RouterServer CPU</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="cpuPie"></canvas>
+					</div>
+		      </div>
+		    </div>
+		</div>
+	 	<!---HTTP ROUTER STATUS--->
+		<div class="col-md-9" style="margin-left:-25px;">
+			<!--服务器状态-->
+			<div class="panel panel-primary" >
+		     	 <div class="panel-heading">
+		        <h3 class="panel-title">RealTime RouterServer Info</h3>
+		     	 </div>
+		     	 <div class="panel-body" >
+		        	<div class="row" id="routerinfo" >
+						<div class="col-md-3" style="margin-top:5px;" >
+						    <div class="bg-success" >路由服务器</div>
+							<span class="textitem text-danger ">服务器内核:{{ HOST.os  }}</span></br>
+							<span class="textitem text-danger ">内核版本:{{HOST.platform_version }}</span></br>
+							<div class="bg-success" style="margin-top:5px;">CPU状态</span></div>
+							<span class="textitem text-danger ">核数:{{CPUPERCENTS.length}}</span></br>
+							<span class="textitem text-danger ">使用百分比:{{cpuUsed}}%</span></br>
+							<span class="textitem text-danger ">空闲百分比:{{cpuFree}}%</span></br>
+							<div class="bg-success" style="margin-top:5px;">内存状态</div>
+							<span class="textitem text-danger ">使用百分比:{{VM.used_percent.toFixed(2)}}%</span></br>
+							<span class="textitem text-danger ">空闲百分比:{{(100-VM.used_percent).toFixed(2)}}</span></br>
+							<span class="textitem text-danger ">所有内存:{{(VM.total/1024/1024/1024).toFixed(0)+'GB'}}</span></br>
+							<span class="textitem text-danger ">使用内存:{{(VM.used/1024/1024/1024).toFixed(0)+'GB'}}</span></br>
+							<span class="textitem text-danger ">交换内存:{{(VM.inactive/1024/1024/1024).toFixed(0)+'GB'}}</span></br>
+							<span class="textitem text-danger ">剩余内存:{{(VM.free/1024/1024/1024).toFixed(2)+'GB'}}</span></br>
+						</div>
+						<div class="col-md-3" style="margin-top:5px;">
+							<div class="bg-success" >磁盘信息</div>
+							<span class="textitem text-danger ">文件系统类型:{{DISK.fstype}}</span></br>
+							<span class="textitem text-danger ">使用百分比:{{DISK.used_percent.toFixed(2)}}%</span></br>
+							<span class="textitem text-danger ">空闲百分比:{{(100-DISK.used_percent).toFixed(2)}}%</span></br>
+							<span class="textitem text-danger ">总容量:{{(DISK.total/1024/1024/1024).toFixed(1)}}GB</span></br>
+							<span class="textitem text-danger ">剩余容量:{{(DISK.free/1024/1024/1024).toFixed(1)}}GB</span></br>
+							<span class="textitem text-danger ">已经使用:{{(DISK.used/1024/1024/1024).toFixed(1)}}GB</span></br>
+							<div class="bg-success" style="margin-top:8px;">服务器负载(Load Average)</div>
+							<span class="textitem text-danger ">Last 1 mins:{{LD.load1}}</span></br>
+							<span class="textitem text-danger ">Last 5 mins:{{LD.load5}}</span></br>
+							<span class="textitem text-danger ">Last 15 mins:{{LD.load15}}</span></br>
+						</div>	
+						<div class="col-md-3" style="margin-top:5px;">
+							<div class="bg-success"  >TCP连接</div>
+							<span class="textitem text-danger ">ALL COUNT:{{NC.ALLCOUNT}}</span></br>
+							<span class="textitem text-danger ">CLOSED_WAIT:{{NC.CLOSED_WAIT}}</span></br>
+							<span class="textitem text-danger ">ESTABLISH:{{NC.ESTABLISH}}</span></br>
+							<span class="textitem text-danger ">LISTEN:{{NC.LISTEN}}</span></br>
+							<span class="textitem text-danger ">TIME_WAIT:{{NC.TIME_WAIT}}</span></br>
+							<span class="textitem text-danger ">SYN_SENT:{{NC.SYN_SENT}}</span></br>
+							<span class="textitem text-danger ">SYN_RECV:{{NC.SYN_RECV}}</span></br>
+							<span class="textitem text-danger ">FIN_WAIT_1:{{NC.FIN_WAIT_1}}</span></br>
+							<span class="textitem text-danger ">FIN_WAIT_2:{{NC.FIN_WAIT_2}}</span></br>
+						</div>	
+					</div>
+		     	 </div>
+		    </div>	
+		   <!--HTTP-->
+			<div class="panel panel-primary">
+		      <div class="panel-heading">
+		        <h3 class="panel-title">Clusters Http Request Status (单位:次)</h3>
+		      </div>
+		      <div class="panel-body">
+		        	<div >
+						<canvas id="httpLineChart"></canvas>
+					</div>
+		      </div>
+		    </div>	
+			<!--HTTP-->
+
+		</div>
+	</div>

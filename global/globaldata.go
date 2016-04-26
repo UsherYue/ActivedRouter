@@ -6,6 +6,7 @@ package global
 import (
 	"ActivedRouter/cache"
 	"ActivedRouter/system"
+	"sync"
 )
 
 //global mem cache
@@ -13,6 +14,9 @@ var GlobalCache cache.Cache = cache.Newcache("memory")
 
 //存储服务器相关状态
 var GHostInfoTable = system.NewHostInfoTable()
+
+//路由服务器信息
+var GRouterInfo string = ""
 
 //dns配置脚本
 var DnsScript []map[string]interface{}
@@ -28,3 +32,21 @@ var Cluster = ""
 
 // 客户端配置下的域名
 var Domain = "www.api1.com"
+
+//安全的设置GRouterInfo
+var rwMutexRouterInfo = &sync.RWMutex{}
+
+//安全的设置安全的设置GRouterInfo
+func SetRouterInfo(info string) {
+	rwMutexRouterInfo.Lock()
+	GRouterInfo = info
+	rwMutexRouterInfo.Unlock()
+}
+
+//安全的检索GRouterInfo
+func RouterInfo() string {
+	rwMutexRouterInfo.RLock()
+	info := GRouterInfo
+	rwMutexRouterInfo.RUnlock()
+	return info
+}

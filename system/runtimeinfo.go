@@ -121,7 +121,7 @@ func SysInfo(cluster, domain string) string {
 		info.NC.AllConnectCount++
 	}
 	//testNc()
-	bts, _ := json.Marshal(info)
+	bts, _ := json.MarshalIndent(info, "", " ")
 	return strings.TrimSpace(strings.Trim(strings.Trim(string(bts), "\n"), "\t"))
 }
 

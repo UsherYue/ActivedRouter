@@ -16,6 +16,7 @@ import (
 const (
 	CHECK_INTERCAL          = 1
 	CHECK_ACTIVE_INTERVAL   = 2                 //活跃检测周期
+	CHECK_ROUTER_INTERVAL   = 5                 //定期检查路由服务器状态
 	DISPATCH_EVENT_INTERVAL = 5                 //事件分发检测
 	BUFFER_SIZE             = 100 * 1024 * 1024 //‘缓存buffer大小
 )
@@ -57,15 +58,6 @@ func (self *Server) OnDataRecv(c net.Conn) {
 			//更新服务器列表 如果不存在那么添加到服务器列表
 			data.IP = addrs[0]
 			global.GHostInfoTable.UpdateHostTable(addrs[0], data)
-			//			srvmode, _ := global.ConfigMap["srvmode"]
-			//			switch srvmode {
-			//			case "moniter":
-			//				{
-			//					log.Println("-------event begin------------")
-			//					hook.DispatchEvent()
-			//					log.Println("-------event end------------")
-			//				}
-			//			}
 		}
 	}
 }
@@ -75,6 +67,62 @@ func (self *Server) StopServer() {
 	//停止服务器之前先关闭所有连接
 	//发送关闭消息
 	<-self.TaskFlag
+}
+
+//定时监测路由服务器信息
+func (self *Server) checkRouterInfo() {
+	timerRouterInfo := time.NewTimer(time.Second * CHECK_ROUTER_INTERVAL)
+	for {
+		select {
+		case <-timerRouterInfo.C:
+			{
+				routerInfo := system.SysInfo("Router", "")
+				global.SetRouterInfo(routerInfo)
+				timerRouterInfo.Reset(time.Second * CHECK_ROUTER_INTERVAL)
+			}
+		}
+	}
+
+}
+
+//event dispatch
+func (self *Server) dispatcher() {
+	closureFunc := func() {
+		timerDispathcEvent := time.NewTimer(time.Second * DISPATCH_EVENT_INTERVAL)
+		for {
+			select {
+			case <-timerDispathcEvent.C:
+				{
+					log.Println("-------event begin------------")
+					hook.DispatchEvent()
+					log.Println("-------event end------------")
+					timerDispathcEvent.Reset(time.Second * DISPATCH_EVENT_INTERVAL)
+				}
+			}
+		}
+	}
+	srvmode, _ := global.ConfigMap["srvmode"]
+	switch srvmode {
+	case "moniter":
+		{
+			go closureFunc()
+		}
+	}
+}
+
+//监控client
+func (self *Server) moniterClient() {
+	timerCheckActive := time.NewTimer(time.Second * CHECK_ACTIVE_INTERVAL)
+	for {
+		select {
+		case <-timerCheckActive.C:
+			{
+				timerCheckActive.Reset(time.Second * CHECK_ACTIVE_INTERVAL)
+				//更新服务器状态
+				global.GHostInfoTable.UpdateHostStatus()
+			}
+		}
+	}
 }
 
 //run router server
@@ -105,45 +153,12 @@ func (self *Server) Run() {
 			go self.OnDataRecv(conn)
 		}
 	}()
-	//监控
-	go func() {
-		t1 := time.NewTimer(time.Second * CHECK_ACTIVE_INTERVAL)
-		for {
-			select {
-			case <-t1.C:
-				{
-					t1.Reset(time.Second * CHECK_ACTIVE_INTERVAL)
-					//更新服务器状态
-					global.GHostInfoTable.UpdateHostStatus()
-				}
-			}
-		}
-	}()
-	//hook event dispatch
-	dispather := func() {
-		t1 := time.NewTimer(time.Second * DISPATCH_EVENT_INTERVAL)
-		for {
-			select {
-			case <-t1.C:
-				{
-					log.Println("-------event begin------------")
-					hook.DispatchEvent()
-					log.Println("空事件测试...............")
-					log.Println("-------event end------------")
-					t1.Reset(time.Second * DISPATCH_EVENT_INTERVAL)
-				}
-			}
-		}
-	}
+	//监控client
+	go self.moniterClient()
+	//定期收集路由服务器信息
+	go self.checkRouterInfo()
 	//moniter 模式下分发事件
-	srvmode, _ := global.ConfigMap["srvmode"]
-	switch srvmode {
-	case "moniter":
-		{
-
-			go dispather()
-		}
-	}
+	go self.dispatcher()
 	//等待任务结束
 	self.TaskFlag <- false
 }

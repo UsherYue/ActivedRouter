@@ -4,43 +4,11 @@
 <title>ActivedRouter Admin</title>
 <!-- 新 Bootstrap 核心 CSS 文件 -->
 <link rel="stylesheet" href="styles/bootstrap3.3.5.min.css">
+<!--index.css-->
+<link rel="stylesheet" href="styles/index.css"/>
 <!-- 可选的Bootstrap主题文件（一般不用引入） -->
 <link rel="stylesheet" href="styles/bootstrap3.3.5-theme.min.css">
 <script src="scripts/require.js" data-main="scripts/main"> </script>
-<style>
-*{
-	margin:0px ;
-	padding:0px;
-}
-body{
-	background-color:#f3f3f3;
-}
-#center_content{
-	margin-top:-15px;
-	min-height: 85%;
-	
-}
-.linkstyle{
-	color:#666666;
-	text-decoration:none;
-}
-.linkstyle:hover{
-	color:#555555;
-	cursor:pointer;
-}
-.textitem{
-	font-size:13px;
-	
-}
-
-.test{
-	border:1px solid red;
-}
-body{
-	position:relative;
-}
-html, body {height: 100%;}
-</style>
 </head>
 <body>
 <nav class="navbar navbar-inverse" role="navigation" style="border-radius:0px;">
@@ -57,18 +25,27 @@ html, body {height: 100%;}
       <ul class="nav navbar-nav" >
 	     <li class="active"><a href="#" id="indexcontent">RouterStatus</a></li>
          <li ><a href="#" id="activehost">ActiveHosts</a></li>
+		 <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+               Alarm Settings <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+               <li><a href="#">Email  Alarm</a></li>
+               <li><a href="#">Phone  Alarm</a></li>
+               <li><a href="#">WeiXin Alarm </a></li>
+               <li class="divider"></li>
+               <li><a href="#">Edit Alarm Condition</a></li>
+            </ul>
+         </li>
          <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                Settings <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-               <li><a href="#">test1</a></li>
-               <li><a href="#">test1</a></li>
-               <li><a href="#">test1</a></li>
-               <li class="divider"></li>
-               <li><a href="#">test1</a></li>
-               <li class="divider"></li>
-               <li><a href="#">test1</a></li>
+               <li><a href="#">Reserve Proxy Config</a></li>
+               <li><a href="#">Server Mode Config</a></li>
+			   <li class="divider"></li>
+               <li><a href="#">Mix Mode Config</a></li>
             </ul>
          </li>
        </ul>
@@ -81,24 +58,11 @@ html, body {height: 100%;}
 </nav>
 
 <!--content-->
-<div class="container-fluid" id="center_content">
-	
-</div>
-
-
+<div class="container-fluid" id="center_content"></div>
 <!--footer-->
-<div class="container-fluid" style="height:90px;background-color:#fff;" id="footer">
-	<div class="row">
-		<div class="col-md-4 col-md-offset-4 " >
-			<div style="margin-top:15px;"><strong><a class="linkstyle">关于</a></strong>｜<strong><a class="linkstyle">Link Github</a></strong> <div>
-			<div style="margin-top:10px;">
-			<span style="color:#ababab;">版权所有 © 2012-2014 ActivedRouter 授权许可遵循</span>  
-			Bsd License   By UsherYue
-			<div>
-		</div>
-	</div>
-</div>
-
+<div class="container-fluid" style="height:90px;background-color:#fff;" id="footer"></div>
 </body>
+<script type="text/html" src="tpl/index_content.html" id="tpl_indexconent"></script>
+<script type="text/html" src="tpl/index_active.html" id="tpl_indexactive"></script>
 </html>
 

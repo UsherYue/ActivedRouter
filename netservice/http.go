@@ -3,6 +3,7 @@ package netservice
 
 import (
 	"ActivedRouter/global"
+	"ActivedRouter/system"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -16,18 +17,21 @@ type Http struct {
 	Port string
 }
 
-var templates = `
-<html>
-
-
-
-</html>
-`
-
 //ClientInfos
 //所有服务器 活跃和非活跃
-func ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (self *Http) ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.HostsInfo.GetMemory().GetData()
+	self.WriteJsonInterface(w, data)
+}
+
+//输出json
+func (self *Http) WriteJsonString(w http.ResponseWriter, str string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(str))
+}
+
+//输出interface
+func (self *Http) WriteJsonInterface(w http.ResponseWriter, data interface{}) {
 	bts, _ := json.MarshalIndent(data, "", " ")
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, string(bts))
@@ -35,32 +39,31 @@ func ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 //Active ClientInfos
 //活跃列表
-func ActiveClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (self *Http) ActiveClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.ActiveHostList.ActiveHostInfo.GetMemory().GetData()
-	bts, _ := json.MarshalIndent(data, "", " ")
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, string(bts))
+	self.WriteJsonInterface(w, data)
 }
 
 //BEST  ClientInfos
 //权重最高的服务器
-func BestClients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (self *Http) BestClients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.ActiveHostWeightList.Front().Value
-	bts, _ := json.MarshalIndent(data, "", " ")
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, string(bts))
+	self.WriteJsonInterface(w, data)
 }
 
 //index redirect to static
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	http.Redirect(w, r, "/static", 302)
+func (self *Http) Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	http.Redirect(w, r, "/website", 302)
 }
 
-//domain
-func TestDomain(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	//w.Write([]byte("hello,world"))
-	bts, _ := json.Marshal(r.Host)
-	w.Write(bts)
+//路由服务器的信息
+func (self *Http) RouterInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	info := global.RouterInfo()
+	if info == "" {
+		info = system.SysInfo("Router", "")
+		global.SetRouterInfo(info)
+	}
+	self.WriteJsonString(w, info)
 }
 
 //创建http服务
@@ -69,15 +72,15 @@ func NewHttp(host, port string) *Http {
 }
 
 //run router server
-func (seft *Http) Run() {
-	log.Printf("开始启动http服务,%s:%s........\n", seft.Host, seft.Port)
+func (self *Http) Run() {
+	log.Printf("开始启动http服务,%s:%s........\n", self.Host, self.Port)
 	router := httprouter.New()
-	router.GET("/domain", TestDomain)
-	router.GET("/clientinfos", ClientInfos)
-	router.GET("/activeclients", ActiveClientInfos)
-	router.GET("/bestclients", ActiveClientInfos)
-	router.GET("/", Index)
+	router.GET("/clientinfos", self.ClientInfos)
+	router.GET("/routerinfo", self.RouterInfo)
+	router.GET("/activeclients", self.ActiveClientInfos)
+	router.GET("/bestclients", self.ActiveClientInfos)
+	router.GET("/", self.Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	router.ServeFiles("/website/*filepath", http.Dir("website"))
-	log.Fatal(http.ListenAndServe(seft.Host+":"+seft.Port, router))
+	log.Fatal(http.ListenAndServe(self.Host+":"+self.Port, router))
 }
