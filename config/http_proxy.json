@@ -2,7 +2,7 @@
 	"proxy_method":"random",
 	"http_proxy_addr":"127.0.0.1:80",
 	"http_switch":"on",           
-	"proxy_method":"random",      
+	"proxy_method":"alived",      
 	"https_switch":"off",     
 	"https_crt":"a.crt",         
 	"https_key":"a.key",        
@@ -12,8 +12,8 @@
 			"domain":"proxy.12xue.com",
 			"clients":[
 			    {
-				   "host":"git.gridinfo.com.cn",
-				   "port":"80"	
+				   "host":"127.0.0.1",
+				   "port":"8080"	
 		        }
 			]
 		}

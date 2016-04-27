@@ -28,6 +28,8 @@ func parseConfigfile() {
 		}
 	case global.ProxyMode:
 		{
+			//server config
+			loadServerModeConfig(global.ServerConfig)
 			//proxy config
 			netservice.ProxyHandler.LoadProxyConfig(global.HttpProxyConfig)
 			return
