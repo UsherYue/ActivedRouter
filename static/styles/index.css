@@ -36,4 +36,14 @@ html, body {height: 100%;}
 	 margin-top:10px;
 }
 
-
+#clientinfos tbody tr td{
+	height:40px;
+	line-height:40px;
+}
+#clientinfos  thead{
+	font-size:11px;
+}
+#clientinfos tbody tr:hover{
+	cursor:pointer;
+	background-color:#f0f0f0;
+}

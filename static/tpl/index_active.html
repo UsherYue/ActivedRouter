@@ -26,186 +26,29 @@
 							        </tr>
 						      </thead>
 						      <tbody>
-							        <tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
+									{{each hostlist as value key}}
+							        <tr>
+							          <td>{{value.Info.HOST.os}}</td>
+							          <td>{{key}}</td>
+							          <td>{{value.Info.Domain}}</td>
+									  <td>{{value.Info.Cluster}}</td>
+									  <td>{{value.Info.NC.ALLCOUNT}}</td>
+									  <td>{{value.Info.NC.TIME_WAIT}}</td>
+									  <td>{{value.Info.NC.ESTABLISH}}</td>
+									  <td>{{value.Info.VM.used_percent.toFixed(2)}}</td>
+									  <td>{{value.Info.DISK.used_percent.toFixed(2)}}</td>
+									  <td>
+									  {{value.Info.CPUPERCENT}}
+									  </td>
+									  <td>{{value.Info.LD.load1+","+value.Info.LD.load5+","+value.Info.LD.load15}}</td>
+									  {{if value.Status=='active'}} 											  
+										<td class="text-success">Online</td>
+									  {{else}}
+										<td class="text-danger">Offline</td>
+									  {{/if}}
 									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
 							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
-									<tr class="active"  >
-							          <td>Darwin</td>
-							          <td>127.0.0.1</td>
-							          <td>api.uia.com</td>
-									  <td>OpenApi</td>
-									  <td>100</td>
-									  <td>22</td>
-									  <td>78</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>67%</td>
-									  <td>1.1   2.2   3.3</td>
-									  <td>offline</td>
-									  <td><button class="btn btn-success" type="submit">查看详情</button></td>
-							        </tr>
+									{{/each}}
 						      </tbody>
 					    </table>
 					</div>
@@ -233,8 +76,8 @@
 
 <!--  服务器信息 -->
 <div class="modal fade" id="dlg" tabindex="-1" role="dialog" 
-   aria-labelledby="myModalLabel" aria-hidden="true" style="display:none">
-   <div class="modal-dialog">
+   aria-labelledby="myModalLabel" aria-hidden="true" style="display:none;">
+   <div class="modal-dialog" style="width:80%;">
       <div class="modal-content">
          <div class="modal-header">
             <button type="button" class="close" 
@@ -242,11 +85,11 @@
                   &times;
             </button>
             <h4 class="modal-title" id="myModalLabel">
-               挂载客户端服务器详细信息
+               服务器详细信息
             </h4>
          </div>
-         <div class="modal-body">
-            balabalabala......
+         <div class="modal-body" id="dlg_hostinfo">
+             
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-primary" 

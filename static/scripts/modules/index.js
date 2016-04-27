@@ -6,6 +6,9 @@ var templateEngine =null;
 //cpu
 var cpuUsedPercent=0;
 var cpuFreePercent=0;
+var $=null;
+//
+var hostClientsInfo=null;
 
 //字节到gb
 function bytesToGB(bytes){
@@ -212,9 +215,6 @@ var initHttpLineChart=function(){
 	});
 }
 
-
-
-
 //加载content
 var loadIndexContent=function(){
 	//加载路由服务器信息
@@ -242,8 +242,56 @@ var loadIndexContent=function(){
 	initDiskPie();
 	//init http
 	initHttpLineChart();
-
 };
+
+
+//加载活跃主机列表
+var loadActiveContent=function(){
+	$.get('/clientinfos',function(data){
+		//计算cpu
+		for(var key in data){
+			var cpuPercent=0.0;
+			for(var i =0;i<data[key].Info.CPUPERCENTS.length;i++){
+				cpuPercent+=data[key].Info.CPUPERCENTS[i];
+			}
+			data[key].Info.CPUPERCENT=(cpuPercent/8).toFixed(2);
+		}
+		//保存数据
+		hostClientsInfo=data;
+		var html=loadScriptTpl("tpl_indexactive",{hostlist:data});
+		$("#center_content").html(html);
+		$("#clientinfos tbody tr:even").addClass("warning");
+		//查看服务器详细情况
+		$("#clientinfos tbody td").dblclick(function(){
+			var ip=$(this).siblings().eq(1).html();
+			var hostInfo=hostClientsInfo[ip];
+			var html=loadScriptTpl('tpl_activehost',hostInfo.Info)
+			$("#dlg_hostinfo").html(html);
+			//初始化内存
+			initMemPie();
+			//初始化cpu
+			initCpuPie();
+			//初始化磁盘
+			initDiskPie();
+			$('#dlg').modal('show')	
+		});
+		//查看服务器详细情况
+		$("#clientinfos tbody tr button").click(function(){
+			var ip=$(this).parent().siblings().eq(1).html();
+			var hostInfo=hostClientsInfo[ip];
+			var html=loadScriptTpl('tpl_activehost',hostInfo.Info)
+			$("#dlg_hostinfo").html(html);
+			//初始化内存
+			initMemPie();
+			//初始化cpu
+			initCpuPie();
+			//初始化磁盘
+			initDiskPie();
+			$('#dlg').modal('show')	
+		});
+	});
+};
+
 
 
 //加载footer
@@ -255,6 +303,7 @@ var loadIndexFooter=function(){
 //导出模块
 var indexModule=function($,template,Chart,Tools){
 	templateEngine=template;
+	window.$=$;
 	//初始化格式化函数
 	Tools.StringFormatInit();
 	//同步ajax
@@ -267,21 +316,9 @@ var indexModule=function($,template,Chart,Tools){
 	loadIndexFooter();
 	//加载活跃主机
 	$("#activehost").click(function(){
-		//加载模板
-    	var html=loadScriptTpl("tpl_indexactive",routerInfo);
-		$("#center_content").html(html);
+	    loadActiveContent();
 		$('#activehost').parent().siblings().removeClass('active');
 		$('#activehost').parent().removeClass('active').addClass('active');
-		$("#clientinfos tbody tr:odd").addClass("warning");
-		$("#clientinfos tbody tr").css("height","40px");
-		$("#clientinfos tbody tr").hover(function(){
-			$(this).css("cursor","pointer");
-			console.log("hoverd!");
-		});
-		//查看服务器详细情况
-		$("#clientinfos tbody tr button").click(function(){
-			$('#dlg').modal('show')			
-		});
 	});
 	//加载index
 	$("#indexcontent").click(function(){
