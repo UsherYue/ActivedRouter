@@ -32,9 +32,10 @@ func StartNetworkService() {
 		{
 			log.Println("Running Reserve Proxy.......")
 			//开启server服务
-			if ProxyHandler.ProxyMethod == global.Alived {
-				go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
-			}
+			//			if ProxyHandler.ProxyMethod == global.Alived {
+
+			//			}
+			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
 			//开启http服务
 			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
 			//开启反向代理服务
