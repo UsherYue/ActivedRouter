@@ -65,6 +65,7 @@ func loadJsonConfig(config string) {
 		global.ConfigMap["domain"] = domain
 		global.ConfigMap["cluster"] = cluster
 		global.Cluster = cluster
+		global.Domain = domain
 		//服务器列表
 		var serverArr []string
 		for _, v := range serverList {
