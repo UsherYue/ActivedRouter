@@ -1,6 +1,6 @@
 {
 	"proxy_method":"random",
-	"http_proxy_addr":"127.0.0.1:80",
+	"http_proxy_addr":"127.0.0.1:8000",
 	"http_switch":"on",           
 	"proxy_method":"alived",      
 	"https_switch":"off",     

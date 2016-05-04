@@ -31,7 +31,10 @@ var RunMode = ""
 var Cluster = ""
 
 // 客户端配置下的域名
-var Domain = "www.api1.com"
+var Domain = ""
+
+//全局http反向代理统计
+var GHttpStatistics = system.NewSysHttpStatistics()
 
 //安全的设置GRouterInfo
 var rwMutexRouterInfo = &sync.RWMutex{}
