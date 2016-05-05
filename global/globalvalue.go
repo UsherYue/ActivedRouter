@@ -19,7 +19,6 @@ var (
 )
 
 //负载方法
-
 var (
 	Alived = "alived"
 	Random = "random"

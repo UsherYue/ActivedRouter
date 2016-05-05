@@ -1,5 +1,11 @@
 package system
 
+import (
+	"ActivedRouter/tools"
+	"log"
+	"sync"
+)
+
 //http 反向代理请求统计
 type HttpProxyStatistics struct {
 	Timestamp    int64 //时间戳
@@ -7,7 +13,16 @@ type HttpProxyStatistics struct {
 }
 
 //http请求分析
-type SysHttpStatistics map[string][]*HttpProxyStatistics
+type StatisticsMap map[string][]*HttpProxyStatistics
+
+type SysHttpStatistics struct {
+	//统计列表
+	statistic StatisticsMap
+	//当前的节点
+	currentNode map[string]*HttpProxyStatistics
+	//rw lock
+	mutexUpdate *sync.RWMutex
+}
 
 //创建一个反向代理统计对象
 func newHttpProxyStatistics(timestamp, reqCount int64) *HttpProxyStatistics {
@@ -15,18 +30,62 @@ func newHttpProxyStatistics(timestamp, reqCount int64) *HttpProxyStatistics {
 }
 
 //CREATE SYSHTTPSTATISTICS
-func NewSysHttpStatistics() SysHttpStatistics {
-	return make(SysHttpStatistics)
+func NewSysHttpStatistics() *SysHttpStatistics {
+	return &SysHttpStatistics{statistic: make(StatisticsMap),
+		currentNode: make(map[string]*HttpProxyStatistics), mutexUpdate: &sync.RWMutex{},
+	}
+}
+
+//获取统计列表
+func (self *SysHttpStatistics) GetStatisticsList() StatisticsMap {
+	return self.statistic
 }
 
 //更新集群请求统计
-func (self SysHttpStatistics) UpdateClusterStatistics(cluster string, timestamp, reqCount int64) {
-	//创建统计对象
-	if _, ok := self[cluster]; !ok {
-		self[cluster] = []*HttpProxyStatistics{newHttpProxyStatistics(timestamp, reqCount)}
+//cluster 集群名称
+//reqCount 请求次数
+//updateType  0 1 分别代表请求更新,只增加请求次数    时间段更新,添加新的时间段统计。
+func (self *SysHttpStatistics) UpdateClusterStatistics(cluster string, updateType int) {
+	self.mutexUpdate.Lock()
+	//创建统计对象 当该集群统计列表不存在的时候
+	if _, ok := self.statistic[cluster]; !ok {
+		dataTool := tools.DateTool{}
+		timestamp := dataTool.CurrentUnixTimestamp()
+		var reqCount int64 = 0
+		if updateType == 0 {
+			reqCount = 1
+		}
+		self.statistic[cluster] = []*HttpProxyStatistics{newHttpProxyStatistics(timestamp, reqCount)}
+		//unlock
+		self.mutexUpdate.Unlock()
 		return
 	}
-	//如果存在那么直接更新统计数据
-	//时间肯定是生序的
-	self[cluster] = append(self[cluster], newHttpProxyStatistics(timestamp, reqCount))
+
+	//增加一个新的统计对象
+	if updateType == 1 {
+		dataTool := tools.DateTool{}
+		timestamp := dataTool.CurrentUnixTimestamp()
+		//复制前一个节点的数据
+		//递增增加列表
+		for k, _ := range self.statistic {
+			lastIndex := len(self.statistic[k]) - 1
+			self.statistic[k] = append(self.statistic[k], newHttpProxyStatistics(timestamp, self.statistic[k][lastIndex].RequestCount))
+		}
+	} else {
+		//取出最后一个统计索引
+		lastIndex := len(self.statistic[cluster]) - 1
+		//增加指定集群请求次数
+		self.statistic[cluster][lastIndex].RequestCount++
+	}
+	self.mutexUpdate.Unlock()
+}
+
+//存储当天的统计数据到json日志 或者数据库中
+func (self *SysHttpStatistics) SaveDataLog() {
+
+}
+
+//清空当天的请求统计日志 并且清空内存
+func (self *SysHttpStatistics) ResetData() {
+
 }

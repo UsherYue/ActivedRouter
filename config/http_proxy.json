@@ -12,7 +12,7 @@
 			"domain":"proxy.12xue.com",
 			"clients":[
 			    {
-				   "host":"127.0.0.1",
+				   "host":"proxy.12xue.com",
 				   "port":"8080"	
 		        }
 			]

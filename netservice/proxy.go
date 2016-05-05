@@ -17,6 +17,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
 
 // var define
@@ -35,6 +36,10 @@ var (
 	DefaultHttsAddr = "127.0.0.1:443"
 	SwitchOn        = "on"
 	SwitchOff       = "off"
+)
+
+const (
+	HTTP_STATISTICS_INTERVAL = 1 //http统计周期 5min
 )
 
 //hander
@@ -80,6 +85,10 @@ func (this *ReseveProxyHandler) BestHostInfo(hosts []*HostInfo) *HostInfo {
 	for el := hostSortedList.Front(); el != nil; el = el.Next() {
 		bestHost := el.Value.(system.HostInfo)
 		for _, host := range hosts {
+			//			log.Println(host.Host)
+			//			log.Println(host.Port)
+			//			log.Println(bestHost.Info.IP)
+			//			log.Println(bestHost.Info.Domain)
 			if bestHost.Info.IP == host.Host || bestHost.Info.Domain == host.Host {
 				return host
 			}
@@ -124,6 +133,7 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 			return
 		}
 	}
+	//重定向http请求
 	redirect := fmt.Sprintf("http://%s:%s", hostinfo.Host, hostinfo.Port)
 	remote, err := url.Parse(redirect)
 	if err != nil {
@@ -132,6 +142,9 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	//不修改 http request header
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, r)
+	//更新转发统计
+	global.GHttpStatistics.UpdateClusterStatistics(hostinfo.Host, 0)
+
 }
 
 //load proxy
@@ -229,10 +242,27 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 				}
 				this.DomainHostList.Set(subDomain, subClientList)
 			}
-			data := *this.DomainHostList.GetMemory().GetData()
-			log.Println(data)
+			//this.DomainHostList.GetMemory().GetData()
+			//log.Println(data)
 		}
 	}
+}
+
+//开始进入定时统计
+func (this *ReseveProxyHandler) BeginHttpStatistics() {
+	timerStatistics := time.NewTimer(time.Second * HTTP_STATISTICS_INTERVAL)
+	for {
+		select {
+		case <-timerStatistics.C:
+			{
+				log.Println("xxxxxxxxxxxxx")
+				timerStatistics.Reset(time.Second * HTTP_STATISTICS_INTERVAL)
+				//递增统计
+				global.GHttpStatistics.UpdateClusterStatistics("", 1)
+			}
+		}
+	}
+
 }
 
 //启动proxy
@@ -260,5 +290,5 @@ func (this *ReseveProxyHandler) StartProxyServer() {
 			}
 		}()
 	}
-
+	go this.BeginHttpStatistics()
 }

@@ -72,7 +72,7 @@ func (self *HostInfoTable) UpdateHostStatus() {
 		self.ActiveHostList.UpdateHostList(hostInfo)
 		//对计算过后的活跃主机进行按照权重插入排序 unactive主机删除
 		self.InsertSortHostWeight(*hostInfo)
-		self.DumpSortedByWeightInfo()
+		//self.DumpSortedByWeightInfo()
 	}
 }
 

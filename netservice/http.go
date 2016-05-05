@@ -24,6 +24,12 @@ func (self *Http) ClientInfos(w http.ResponseWriter, r *http.Request, _ httprout
 	self.WriteJsonInterface(w, data)
 }
 
+//statistics
+func (self *Http) Statistics(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	data := global.GHttpStatistics.GetStatisticsList()
+	self.WriteJsonInterface(w, data)
+}
+
 //输出json
 func (self *Http) WriteJsonString(w http.ResponseWriter, str string) {
 	w.Header().Set("Content-Type", "application/json")
@@ -76,6 +82,7 @@ func (self *Http) Run() {
 	log.Printf("开始启动http服务,%s:%s........\n", self.Host, self.Port)
 	router := httprouter.New()
 	router.GET("/clientinfos", self.ClientInfos)
+	router.GET("/statistics", self.Statistics)
 	router.GET("/routerinfo", self.RouterInfo)
 	router.GET("/activeclients", self.ActiveClientInfos)
 	router.GET("/bestclients", self.ActiveClientInfos)
