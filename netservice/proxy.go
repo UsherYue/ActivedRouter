@@ -39,7 +39,7 @@ var (
 )
 
 const (
-	HTTP_STATISTICS_INTERVAL = 1 //http统计周期 5min
+	HTTP_STATISTICS_INTERVAL = 60 //http统计周期 5min
 )
 
 //hander
@@ -139,11 +139,12 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(remote)
 	//不修改 http request header
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, r)
 	//更新转发统计
-	global.GHttpStatistics.UpdateClusterStatistics(hostinfo.Host, 0)
+	global.GHttpStatistics.UpdateClusterStatistics(r.Host, 0)
 
 }
 
@@ -255,19 +256,18 @@ func (this *ReseveProxyHandler) BeginHttpStatistics() {
 		select {
 		case <-timerStatistics.C:
 			{
-				log.Println("xxxxxxxxxxxxx")
+				//reset timer
 				timerStatistics.Reset(time.Second * HTTP_STATISTICS_INTERVAL)
-				//递增统计
+				//递增统计曲线
 				global.GHttpStatistics.UpdateClusterStatistics("", 1)
 			}
 		}
 	}
-
 }
 
 //启动proxy
 func (this *ReseveProxyHandler) StartProxyServer() {
-
+	//http switch
 	if HttpSwitch == SwitchOn {
 		go func() {
 			//被代理的服务器host和port
@@ -279,6 +279,7 @@ func (this *ReseveProxyHandler) StartProxyServer() {
 			}
 		}()
 	}
+	//https switch
 	if HttpsSwitch == SwitchOn {
 		go func() {
 			//被代理的服务器host和port
@@ -290,5 +291,7 @@ func (this *ReseveProxyHandler) StartProxyServer() {
 			}
 		}()
 	}
+	//开启http反向代理统计
+	//可选择是否开启 因为此选项会影响http请求速度 关闭可优化速度
 	go this.BeginHttpStatistics()
 }

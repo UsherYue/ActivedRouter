@@ -2,7 +2,7 @@ package system
 
 import (
 	"ActivedRouter/tools"
-	"log"
+
 	"sync"
 )
 
@@ -48,7 +48,7 @@ func (self *SysHttpStatistics) GetStatisticsList() StatisticsMap {
 func (self *SysHttpStatistics) UpdateClusterStatistics(cluster string, updateType int) {
 	self.mutexUpdate.Lock()
 	//创建统计对象 当该集群统计列表不存在的时候
-	if _, ok := self.statistic[cluster]; !ok {
+	if _, ok := self.statistic[cluster]; !ok && updateType == 0 {
 		dataTool := tools.DateTool{}
 		timestamp := dataTool.CurrentUnixTimestamp()
 		var reqCount int64 = 0
@@ -60,16 +60,15 @@ func (self *SysHttpStatistics) UpdateClusterStatistics(cluster string, updateTyp
 		self.mutexUpdate.Unlock()
 		return
 	}
-
 	//增加一个新的统计对象
 	if updateType == 1 {
 		dataTool := tools.DateTool{}
 		timestamp := dataTool.CurrentUnixTimestamp()
-		//复制前一个节点的数据
+		//直接递增新的节点数据
 		//递增增加列表
 		for k, _ := range self.statistic {
-			lastIndex := len(self.statistic[k]) - 1
-			self.statistic[k] = append(self.statistic[k], newHttpProxyStatistics(timestamp, self.statistic[k][lastIndex].RequestCount))
+			//lastIndex := len(self.statistic[k]) - 1
+			self.statistic[k] = append(self.statistic[k], newHttpProxyStatistics(timestamp, 0))
 		}
 	} else {
 		//取出最后一个统计索引

@@ -134,85 +134,71 @@ var initDiskPie=function(){
 
 //init http requ   line chart 
 var initHttpLineChart=function(){
-	var ctx = $("#httpLineChart").get(0).getContext("2d");
-	var data = {
-		labels : ["-35min","-30min","-25min","-20min","-15min","-10min","当前状态"],
-		datasets : [
-			{   
-				label:"UIA集群",
-	            //是否填充
-	            fill: false,
-	            // Tension - bezier curve tension of the line. Set to 0 to draw straight lines connecting points
-	            // Used to be called "tension" but was renamed for consistency. The old option name continues to work for compatibility.
-	            lineTension: 0.1,
-	            // 设置贝塞尔曲线下的argb颜色
-	            backgroundColor: "rgba(75,192,192,0.4)",
-	            //设置曲线颜色
-	            borderColor: "rgba(75,192,192,1)",
-				//线帽样式
-	            borderCapStyle: 'butt',
-	            // Array - Length and spacing of dashes. See https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
-	            borderDash: [],
-	            // Number - Offset for line dashes. See https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineDashOffset
-	            borderDashOffset: 0.0,
-	            // String - line join style. See https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineJoin
-	            borderJoinStyle: 'miter',
-	            // The properties below allow an array to be specified to change the value of the item at the given index
-	            // String or Array - Point stroke color
-	            pointBorderColor: "rgba(75,192,192,1)",
-	            // String or Array - Point fill color
-	            pointBackgroundColor: "#fff",
-	            // Number or Array - Stroke width of point border
-	            pointBorderWidth: 1,
-	            // Number or Array - Radius of point when hovered
-	            pointHoverRadius: 5,
-	            // String or Array - point background color when hovered
-	            pointHoverBackgroundColor: "rgba(75,192,192,1)",
-	            // String or Array - Point border color when hovered
-	            pointHoverBorderColor: "rgba(220,220,220,1)",
-	            // 点的圆角 当 hover的时候
-	            pointRadius: 1,
-	            //数据
-	            data: [65, 59, 80, 81, 56, 55, 122],
-	            // String - If specified, binds the dataset to a certain y-axis. If not specified, the first y-axis is used. First id is y-axis-0
-	            yAxisID: "y-axis-0",
-			},
-			{   
-				label:"学情分析",
-				fill: false,
-	            backgroundColor: "rgba(255,205,86,0.4)",
-	            borderColor: "rgba(255,205,86,1)",
-	            pointBorderColor: "rgba(255,205,86,1)",
-	            pointBackgroundColor: "#fff",
-	            pointBorderWidth: 1,
-	            pointHoverRadius: 5,
-	            pointHoverBackgroundColor: "rgba(255,205,86,1)",
-	            pointHoverBorderColor: "rgba(255,205,86,1)",
-	            pointHoverBorderWidth: 2,
-	            data: [28, 48, 40, 19, 86, 27, 190]
-			},
-			{   
-				label:"统一资源平台",
-				fill: false,
-	            backgroundColor: "rgba(175,192,192,0.4)",
-	           borderColor: "rgba(99,152,192,1)",
-	            pointBorderColor: "rgba(222,66,222,1)",
-	            pointBackgroundColor: "#fff",
-	            pointBorderWidth: 1,
-	            pointHoverRadius: 5,
-	            pointHoverBackgroundColor: "rgba(255,205,86,1)",
-	            pointHoverBorderColor: "rgba(255,205,86,1)",
-	            pointHoverBorderWidth: 2,
-	            data:  [25, 47, 36, 19, 45, 66, 121]
+	var colorTable=[
+		["rgba(75,192,192,0.4)","rgba(75,192,192,1)"],
+		["rgba(225,192,92,0.4)","rgba(225,192,92,1)"],
+		["rgba(175,92,192,0.4)","rgba(175,92,192,1)"],	
+		["rgba(65,192,92,0.4)","rgba(65,192,92,1)"],
+		["rgba(115,32,92,0.4)","rgba(115,32,92,1)"],
+	];
+	//加载路由服务器信息
+	$.get("/statistics",function(data){
+		// alert(JSON.stringify(data));
+		var colorIndex=0;
+		  //lables
+		  var labels=['-50','-45min','-40min','-35min','-30min','-25min','-20min','-15min','-10min','-5min','当前'];
+		 //每条曲线的数据集合
+		  var datasets=[];
+			for(var key in data){
+				//每一个集群
+				var tmpData=[];
+				var tmpLen=data[key].length;
+				var endIndex=tmpLen-1-10;
+				var timeSep=0;
+				var tmpReqCount=0;
+				for(var i=endIndex;i<=tmpLen-1;i++ ){
+					if(i<0){
+						tmpReqCount=0;
+					}else{
+						tmpReqCount=data[key][i].RequestCount;
+					}
+					timeSep=tmpLen-1-i;
+					tmpData.push(tmpReqCount)
+				}
+				datasets.push({   
+					label:key,
+		            //是否填充
+		            fill: false,
+		            // 设置贝塞尔曲线下的argb颜色
+		            backgroundColor: colorTable[colorIndex][0],
+		            //设置曲线颜色
+		            borderColor: colorTable[colorIndex][1],
+					pointBackgroundColor: "#fff",
+		            pointBorderWidth: 1,
+		            pointHoverRadius: 5,
+		            pointHoverBackgroundColor: "rgba(255,205,86,1)",
+		            pointHoverBorderColor: "rgba(255,205,86,1)",
+		            pointHoverBorderWidth: 2,
+		            //数据
+		            data: tmpData,
+				});
+				colorIndex++;
 			}
-		]
-	};
-	//myLineChart
-	var myLineChart = new Chart(ctx,{
-	    type: 'line',
-	    data: data,
-	    options: null
+			//渲染chart
+			var ctx = $("#httpLineChart").get(0).getContext("2d");
+			var data = {
+				labels : labels,
+				datasets :datasets 
+			};
+			//myLineChart
+			var myLineChart = new Chart(ctx,{
+			    type: 'line',
+			    data: data,
+			    options: null
+			});
+		
 	});
+
 }
 
 //加载content
