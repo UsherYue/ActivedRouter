@@ -53,6 +53,28 @@ func checkScriptItem(scriptItem map[string]interface{}) {
 //解析钩子脚本
 func ParseHookScript(configfile string) {
 	loadHookScript(configfile)
+	//发送通知的smtp 和xxxxxxxxxx
+	if v, ok := _hookScript["email_open"]; ok {
+		mailOpen, ok := v.(string)
+		if !ok {
+			GEventQueue.EmailOpen = false
+		} else {
+			//是否开启email事件通知
+			if mailOpen == "1" {
+				mailTo := _hookScript["emailto"].(string)
+				mailUsername := _hookScript["username"].(string)
+				mailPwd := _hookScript["password"].(string)
+				mailSmtpServer := _hookScript["smtp_server"].(string)
+				GEventQueue.EmailOpen = true
+				GEventQueue.EmailUser = mailUsername
+				GEventQueue.EmailPwd = mailPwd
+				GEventQueue.SmtpHost = mailSmtpServer
+				GEventQueue.EmailTo = mailTo
+			} else {
+				GEventQueue.EmailOpen = false
+			}
+		}
+	}
 	scriptList := _hookScript["script"]
 	eventList := scriptList.([]interface{})
 	for _, event := range eventList {
@@ -123,7 +145,8 @@ func processDiskEvent(hostip string, event *Event) {
 	}
 	//触发事件执行
 	if GScriptSyntax.CheckFloadValue(exprData, used) {
-		event.ExecCallback()
+		//event.ExecCallback()
+		log.Println("Send Disk Email......")
 	}
 }
 
@@ -145,7 +168,8 @@ func processMemEvent(hostip string, event *Event) {
 	}
 	//触发事件执行
 	if GScriptSyntax.CheckFloadValue(exprData, used) {
-		event.ExecCallback()
+		//event.ExecCallback()
+		log.Println("Send VM Email......")
 	}
 }
 
@@ -171,7 +195,8 @@ func processLoadEvent(hostip string, event *Event) {
 	if GScriptSyntax.CheckFloadValue(exprData, load1) ||
 		GScriptSyntax.CheckFloadValue(exprData, load5) ||
 		GScriptSyntax.CheckFloadValue(exprData, load15) {
-		event.ExecCallback()
+		//event.ExecCallback()
+		log.Println("Send load Email......")
 	}
 }
 

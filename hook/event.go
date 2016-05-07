@@ -55,6 +55,12 @@ func (self *Event) ExecCallback() (string, error) {
 //事件列表
 type EventQueue struct {
 	EventCache cache.Cache
+	//email监控
+	EmailOpen bool
+	EmailUser string
+	EmailPwd  string
+	SmtpHost  string
+	EmailTo   string
 }
 
 //new  memory event list

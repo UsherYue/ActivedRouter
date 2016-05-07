@@ -1,4 +1,9 @@
 {   
+	"emailto":"",
+	"username":"",
+	"password":"",
+	"smtp_server":"",
+	"email_open":"1",
 	"script":[
 		{
 			"host":"127.0.0.1",

@@ -149,7 +149,7 @@ func (self *HostInfoTable) CalcHostWeight(hostInfo *HostInfo) {
 	hostWeight += 3 - int(int(mem)/30)
 	//net connections
 	//网络连接暂时预留
-	nc := hostInfo.Info.NC.AllConnectCount
+	///	nc := hostInfo.Info.NC.AllConnectCount
 	//load average
 	load := hostInfo.Info.LD.Load1
 	//good load
@@ -163,13 +163,13 @@ func (self *HostInfoTable) CalcHostWeight(hostInfo *HostInfo) {
 	}
 
 	hostInfo.Info.Weight = hostWeight
-	fmt.Println("Calc Host Weight.......")
-	fmt.Println("Mem Used:", mem)
-	fmt.Println("Cpu Used:", cpuPercent)
-	fmt.Println("Load:", load)
-	fmt.Println("Good Load:", goodLoad)
-	fmt.Println("Net Connection:", nc)
-	fmt.Println("Host Weight:", hostInfo.Info.Weight)
+	//	fmt.Println("Calc Host Weight.......")
+	//	fmt.Println("Mem Used:", mem)
+	//	fmt.Println("Cpu Used:", cpuPercent)
+	//	fmt.Println("Load:", load)
+	//	fmt.Println("Good Load:", goodLoad)
+	//	fmt.Println("Net Connection:", nc)
+	//	fmt.Println("Host Weight:", hostInfo.Info.Weight)
 	//设置权重
 
 }

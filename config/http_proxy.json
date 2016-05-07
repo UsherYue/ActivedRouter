@@ -2,7 +2,7 @@
 	"proxy_method":"random",
 	"http_proxy_addr":"127.0.0.1:8000",
 	"http_switch":"on",           
-	"proxy_method":"random",      
+	"proxy_method":"alived",      
 	"https_switch":"off",     
 	"https_crt":"a.crt",         
 	"https_key":"a.key",        

@@ -144,7 +144,7 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, r)
 	//更新转发统计
-	global.GHttpStatistics.UpdateClusterStatistics(r.Host, 0)
+	global.GProxyHttpStatistics.UpdateClusterStatistics(r.Host, 0)
 
 }
 
@@ -259,7 +259,7 @@ func (this *ReseveProxyHandler) BeginHttpStatistics() {
 				//reset timer
 				timerStatistics.Reset(time.Second * HTTP_STATISTICS_INTERVAL)
 				//递增统计曲线
-				global.GHttpStatistics.UpdateClusterStatistics("", 1)
+				global.GProxyHttpStatistics.UpdateClusterStatistics("", 1)
 			}
 		}
 	}

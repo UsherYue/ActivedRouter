@@ -34,7 +34,7 @@ var Cluster = ""
 var Domain = ""
 
 //全局http反向代理统计
-var GHttpStatistics = system.NewSysHttpStatistics()
+var GProxyHttpStatistics = system.NewSysHttpStatistics()
 
 //安全的设置GRouterInfo
 var rwMutexRouterInfo = &sync.RWMutex{}

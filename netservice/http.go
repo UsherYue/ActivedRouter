@@ -26,7 +26,7 @@ func (self *Http) ClientInfos(w http.ResponseWriter, r *http.Request, _ httprout
 
 //statistics
 func (self *Http) Statistics(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	data := global.GHttpStatistics.GetStatisticsList()
+	data := global.GProxyHttpStatistics.GetStatisticsList()
 	self.WriteJsonInterface(w, data)
 }
 
