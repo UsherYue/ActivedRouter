@@ -1,8 +1,8 @@
 {   
-	"emailto":"",
-	"username":"",
-	"password":"",
-	"smtp_server":"",
+	"emailto":"4223665@qq.com",
+	"username":"dongweiyue@gridinfo.com.cn",
+	"password":"yue13780673743",
+	"smtp_server":"smtp.ym.163.com:25",
 	"email_open":"1",
 	"script":[
 		{
@@ -23,8 +23,17 @@
 				{
 					"eventtarget":"mem",
 					"attr":"used",
-					"gt":"99",
+					"gt":"11",
 					"callback":"netstat -ant"
+				},
+				{
+					"eventtarget":"cpu",
+					"attr":"used",
+					"gt":"5",
+					"callback":"netstat -ant"
+				},{
+					"eventtarget":"status",
+					"attr":"active,unactive"
 				}
 			]
 		}

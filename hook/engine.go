@@ -203,6 +203,24 @@ func processLoadEvent(hostip string, event *Event) {
 //处理cpu event
 func processCPUEvent(hostip string, event *Event) {
 	log.Println("cpu event")
+	//获取服务器信息
+	info := global.GHostInfoTable.GetHostInfo(hostip)
+	//获取失败返回
+	if info == nil {
+		return
+	}
+	//表达式数据
+	exprData := GScriptSyntax.GetExpt(event)
+	var cpuPercent float64 = 0
+	for _, p := range info.Info.CpuPercent {
+		cpuPercent += p
+	}
+	//cpu 利用率
+	cpuPercent = cpuPercent / float64(info.Info.CpuNums)
+	//除法cpu报警事件
+	if GScriptSyntax.CheckFloadValue(exprData, cpuPercent) {
+		log.Println("Send cpu info Email......")
+	}
 
 }
 
@@ -214,6 +232,16 @@ func processStatusEvent(hostip string, event *Event) {
 	//获取失败返回
 	if info == nil {
 		return
+	}
+	switch info.Status {
+	case "active":
+		{
+			log.Println("Send  info active Email......")
+		}
+	case "unactive":
+		{
+			log.Println("Send  info unactive Email......")
+		}
 	}
 
 }
