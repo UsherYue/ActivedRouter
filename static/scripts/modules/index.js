@@ -71,7 +71,6 @@ var initCpuPie=function(){
 	    labels: [
 	        "CPU Used ({0}%)".format(cpuUsedPercent),
 	        "CPU Free ({0}%)".format(cpuFreePercent),
-	
 	    ],
 	    datasets: [
 	        {
@@ -237,10 +236,11 @@ var loadActiveContent=function(){
 		//计算cpu
 		for(var key in data){
 			var cpuPercent=0.0;
+			var cpuLen=data[key].Info.CPUPERCENTS.length;
 			for(var i =0;i<data[key].Info.CPUPERCENTS.length;i++){
 				cpuPercent+=data[key].Info.CPUPERCENTS[i];
 			}
-			data[key].Info.CPUPERCENT=(cpuPercent/8).toFixed(2);
+			data[key].Info.CPUPERCENT=(cpuPercent/cpuLen).toFixed(2);
 		}
 		//保存数据
 		hostClientsInfo=data;
