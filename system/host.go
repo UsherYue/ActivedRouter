@@ -5,7 +5,6 @@ import (
 	"container/list"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -92,7 +91,7 @@ func (self *HostInfoTable) HostInfoSortList(hostinfo HostInfo) (*list.Element, b
 
 //根据权重对主机进行排序  只有权重改变的主机才进行排序
 func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
-	fmt.Println("对服务器进行权重排序...........")
+	//fmt.Println("对服务器进行权重排序...........")
 	//列表空
 	if self.ActiveHostWeightList.Len() == 0 && hostinfo.Status == ACTIVE {
 		self.ActiveHostWeightList.PushFront(hostinfo)
@@ -119,7 +118,7 @@ func (self *HostInfoTable) InsertSortHostWeight(hostinfo HostInfo) {
 			//降序排序 插入并返回
 			if hostItem.Info.Weight <= hostinfo.Info.Weight {
 				self.ActiveHostWeightList.InsertBefore(hostinfo, e)
-				fmt.Println("SortListLen4:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
+				//fmt.Println("SortListLen4:" + strconv.Itoa(self.ActiveHostWeightList.Len()))
 				return
 			}
 		}

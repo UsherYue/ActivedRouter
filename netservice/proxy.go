@@ -139,7 +139,7 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(remote)
+	//fmt.Println(remote)
 	//不修改 http request header
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, r)

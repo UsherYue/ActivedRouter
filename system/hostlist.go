@@ -30,7 +30,7 @@ func (self *HostList) UpdateHostList(pHostInfo *HostInfo) {
 	self.rwMutex.RUnlock()
 	if !ok {
 		if pHostInfo.Status == "active" {
-			fmt.Println(strTargetIp + "已经上线.......")
+			//fmt.Println(strTargetIp + "已经上线.......")
 			self.rwMutex.Lock()
 			//加入活跃主机
 			self.ActiveHostInfo.Set(strTargetIp, pHostInfo)
@@ -39,7 +39,7 @@ func (self *HostList) UpdateHostList(pHostInfo *HostInfo) {
 	} else {
 		if pHostInfo.Status == "unactive" {
 			self.rwMutex.Lock()
-			fmt.Println(strTargetIp + "已经下线.......")
+			//fmt.Println(strTargetIp + "已经下线.......")
 			//加入活跃主机
 			self.ActiveHostInfo.Del(strTargetIp)
 			self.rwMutex.Unlock()

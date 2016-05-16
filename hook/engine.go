@@ -207,7 +207,7 @@ func processDiskEvent(hostip string, event *Event) {
 	//触发事件执行
 	if GScriptSyntax.CheckFloadValue(exprData, used) {
 		//event.ExecCallback()
-		log.Println("Send Disk Email......")
+		//log.Println("Send Disk Email......")
 		//发送警报
 		tipinfo := fmt.Sprintf("%s%.2f%s", "服务器磁盘使用率:", used, "超出限制阀值")
 		bts, _ := json.MarshalIndent(info, "", " ")
@@ -234,7 +234,7 @@ func processMemEvent(hostip string, event *Event) {
 	//触发事件执行
 	if GScriptSyntax.CheckFloadValue(exprData, used) {
 		//event.ExecCallback()
-		log.Println("Send VM Email......")
+		//log.Println("Send VM Email......")
 		//发送警报
 		tipinfo := fmt.Sprintf("%s%.2f%s", "服务器虚拟内存使用率:", used, "超出限制阀值")
 		bts, _ := json.MarshalIndent(info, "", " ")
@@ -265,7 +265,7 @@ func processLoadEvent(hostip string, event *Event) {
 		GScriptSyntax.CheckFloadValue(exprData, load5) ||
 		GScriptSyntax.CheckFloadValue(exprData, load15) {
 		//event.ExecCallback()
-		log.Println("Send load Email......")
+		//log.Println("Send load Email......")
 		//发送警报
 		tipinfo := fmt.Sprintf("%s%.2f,%.2f,%.2f%s", "服务器负载:", load1, load5, load15, " 超出限制阀值")
 		bts, _ := json.MarshalIndent(info, "", " ")
@@ -292,7 +292,7 @@ func processCPUEvent(hostip string, event *Event) {
 	cpuPercent = cpuPercent / float64(info.Info.CpuNums)
 	//除法cpu报警事件
 	if GScriptSyntax.CheckFloadValue(exprData, cpuPercent) {
-		log.Println("Send cpu info Email......")
+		//log.Println("Send cpu info Email......")
 		//发送警报
 		tipinfo := fmt.Sprintf("%s%.2f%s", "服务器CPU使用率:", cpuPercent, "超出限制阀值")
 		bts, _ := json.MarshalIndent(info, "", " ")
@@ -303,7 +303,7 @@ func processCPUEvent(hostip string, event *Event) {
 
 //处理status event
 func processStatusEvent(hostip string, event *Event) {
-	log.Println("status event")
+	//log.Println("status event")
 	//获取服务器
 	info := global.GHostInfoTable.GetHostInfo(hostip)
 	//获取失败返回
@@ -313,11 +313,12 @@ func processStatusEvent(hostip string, event *Event) {
 	switch info.Status {
 	case "active":
 		{
-			log.Println("Send  info active Email......")
+			//log.Println("Send  info active Email......")
+			//发送警报
 		}
 	case "unactive":
 		{
-			log.Println("Send  info unactive Email......")
+			//log.Println("Send  info unactive Email......")
 			//发送警报
 			tipinfo := fmt.Sprintf("%s", "服务器下线或者宕机!!!")
 			bts, _ := json.MarshalIndent(info, "", " ")
@@ -335,7 +336,7 @@ func DispatchEvent() {
 		//跳过没有挂载的主机事件
 		//如果host 是* 那么标示对所有主机进行监控
 		if info := global.GHostInfoTable.GetHostInfo(host); info == nil {
-			log.Println("没有发现主机,忽略主机", host, "的钩子脚本!")
+			//log.Println("没有发现主机,忽略主机", host, "的钩子脚本!")
 			continue
 		} else {
 			//触发事件
