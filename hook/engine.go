@@ -145,7 +145,7 @@ func SendEmailTo(user, password, host, to, subject, body, mailtype string) error
 		content_type = "Content-Type: text/plain" + "; charset=UTF-8"
 	}
 	//email body
-	msg := []byte("To: " + to + "\r\nFrom: " + user + ">\r\nSubject: " + "\r\n" + content_type + "\r\n\r\n" + body)
+	msg := []byte("To: " + to + "\r\nFrom: " + user + ">\r\nSubject: " + subject + "\r\n" + content_type + "\r\n\r\n" + body)
 	send_to := strings.Split(to, ";")
 	err := smtp.SendMail(host, auth, user, send_to, msg)
 	return err
