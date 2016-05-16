@@ -333,6 +333,7 @@ func DispatchEvent() {
 	mapData := GEventQueue.GetEvents()
 	for host, eventList := range mapData {
 		//跳过没有挂载的主机事件
+		//如果host 是* 那么标示对所有主机进行监控
 		if info := global.GHostInfoTable.GetHostInfo(host); info == nil {
 			log.Println("没有发现主机,忽略主机", host, "的钩子脚本!")
 			continue
