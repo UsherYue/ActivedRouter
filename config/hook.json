@@ -1,8 +1,8 @@
 {   
-	"emailto":"4223665@qq.com",
-	"username":"dongweiyue@gridinfo.com.cn",
-	"password":"yue13780673743",
-	"smtp_server":"smtp.ym.163.com:25",
+	"emailto":"",
+	"username":"",
+	"password":"",
+	"smtp_server":"",
 	"email_open":"1",
 	"script":[
 		{

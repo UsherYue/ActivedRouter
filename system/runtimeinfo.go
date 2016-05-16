@@ -48,8 +48,8 @@ type SystemInfo struct {
 	//CPUS     []cpu.CPUInfoStat      `json:"CPUS"`     //cpu
 	//CPUTIMES []cpu.CPUTimesStat     `json:"CPUTIMES"` //cpu times
 	//SM *mem.SwapMemoryStat    `json:"SM"` //交换内存
-	NC         *TCPNetInfo `json:"NC"`          //网络
-	CpuPercent []float64   `json:"CPUPERCENTS"` //cpu percent
+	NC         *TCPNetInfo `json:"NC"` //网络
+	CpuPercent []float64   `json:"e"`  //cpu percent
 }
 
 //获取系统信息 返回json
