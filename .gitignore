@@ -1,1 +1,3 @@
 ActivedRouter
+config/*
+.gitignore
