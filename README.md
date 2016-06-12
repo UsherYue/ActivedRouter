@@ -32,22 +32,23 @@ Email:   usher.yue@gmail.com
 	linux32下    boot_linux32.sh
 ## 三、详细配置教程
 </br>
- 3.1、[ActivedRouter实现反向代理服务器(待编写)](www.xxx.com)
+ 3.1、[ActivedRouter实现反向代理服务器](www.xxx.com)
  		
  	
- 3.2、[ActivedRouter实现服务器监控功能(待编写)](www.xxx.com)		
+ 3.2、[ActivedRouter实现服务器监控功能](www.xxx.com)		
  		
- 3.3、[ActivedRouter实现基于真机负载的反向代理服务器(待编写)](www.xxx.com)
+ 3.3、[ActivedRouter实现基于真机负载的反向代理服务器](www.xxx.com)
 	
 	
- 3.4、[ActivedRouter配合第三方语言实现API路由(待编写)](www.xxx.com)	
+ 3.4、[ActivedRouter配合第三方语言实现API路由](www.xxx.com)	
                
 ##  四、工作模式和配置文件
 ### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能。
 
 `运行命令： ActivedRouter --runmode=proxy`
 
-`配置文件：`       
+`配置文件：`
+        
  	{	
  		"http_switch":"on",           //http开关 on off
   		"proxy_addr":"127.0.0.1:80",  //http监听端口
@@ -116,7 +117,7 @@ Email:   usher.yue@gmail.com
 
 
 
-### 4.3、服务器监控模式触发脚本(文档待完善)
+### 4.3、服务器监控模式触发脚本
 `当监控服务器下,路由服务器开启srvmode=moniter之后才会触发`		
 
 	{   
