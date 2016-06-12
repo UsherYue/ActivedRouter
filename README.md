@@ -43,7 +43,7 @@ Email:   usher.yue@gmail.com
  3.4、[ActivedRouter配合第三方语言实现API路由](www.xxx.com)	
                
 ##  四、工作模式和配置文件
-### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能。
+### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能 。
 
 `运行命令： ActivedRouter --runmode=proxy`
 
@@ -52,42 +52,34 @@ Email:   usher.yue@gmail.com
  	{	
  		"http_switch":"on",           //http开关 on off
   		"proxy_addr":"127.0.0.1:80",  //http监听端口
-		"proxy_method":"random",      //proxy方法 random 混合模式下可支持alived方法
-		"https_switch":"off",        //是否开启https
+		"proxy_method":"random",      //proxy方法 random 混合模式下可支持alived方法,简单实现nginx功能食用 random即可
+		"https_switch":"off",        //是否开启https http模式设置为 off  https模式设置为 on  目前只支持一种代理模式
 		"https_crt":"a.crt",         //https证书
 		"https_key":"a.key",         //https key
 		"https_proxy_addr":"127.0.0.1:443",//https监听地址
 		"reserve_proxy":[
 			{
-				"domain":"1.12xue.com",
-				"clients":[
+				"domain":"1.12xue.com",     //代理域名
+				"clients":[      //代理主机列表
 				    {
-					   "host":"12xuetest.com",
+					   "host":"12xuetest.com",  
 					   "port":"80"	
 			        }
 				]
-			},
-			{
-				"domain":"2.12xue.com",
-				"clients":[
-				    {
-					   "host":"12xuedev.com",
-					   "port":"80"	
-			        }
-				]
-			},
-			{
-					"domain":"proxy.12xue.com",
-					"clients":[
-				 	   {
-						   "host":"goapi.com",
-						   "port":"80"	
-		  		  	    }
-					]
 			}
-		
 		]
 	}
+`启动代理服务器:`
+	分别运行不同平台下的boot文件
+	boot_darwin64.sh
+	boot_linux32.sh
+	boot_linux64.sh
+	编译安装完毕之后 运行 ./ActivedRouter --runmode=proxy 即可 , 可自行编写shell脚本实现系统级启动 和守护进程。
+
+
+
+
+
 ### 4.2、server和client模式可以配合完全服务器监控,提供web仪表盘。
 `客户端运行: ActivedRouter --runmode=server `	
 `client.json`	
