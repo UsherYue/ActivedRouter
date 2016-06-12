@@ -45,15 +45,15 @@ Email:   usher.yue@gmail.com
 ##  四、工作模式和配置文件
 ### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能。
 
-`运行命令： ActivedRouter --runmode=proxy`
-
+`编译命令： boot_*.sh 选择不通平台的boot文件开始编译安装`
+`运行命令： ActivedRouter --runmode=proxy 运行反向代理服务`
 `配置文件：`
         
  	{	
  		"http_switch":"on",           //http开关 on off
   		"proxy_addr":"127.0.0.1:80",  //http监听端口
 		"proxy_method":"random",      //proxy方法 random 混合模式下可支持alived方法
-		"https_switch":"off",        //是否开启https
+		"https_switch":"off",        //是否开启https  on开启https 支持
 		"https_crt":"a.crt",         //https证书
 		"https_key":"a.key",         //https key
 		"https_proxy_addr":"127.0.0.1:443",//https监听地址
