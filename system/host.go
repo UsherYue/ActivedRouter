@@ -33,7 +33,7 @@ type HostInfo struct {
 
 //host info list
 type HostInfoTable struct {
-	HostsInfo cache.Cache
+	HostsInfo cache.Cacher
 	//active router
 	ActiveHostList *HostList
 	//active host weight list,sorted by weight
@@ -56,7 +56,7 @@ func NewHostInfoTable() *HostInfoTable {
 func (self *HostInfoTable) UpdateHostStatus() {
 	hosttableMutex.Lock()
 	defer hosttableMutex.Unlock()
-	cacheMap := *self.HostsInfo.GetMemory().GetData()
+	cacheMap := *self.HostsInfo.GetStorage().GetData()
 	for _, v := range cacheMap {
 		hostInfo := v.(*HostInfo)
 		//超过最大非活跃时间间隔
@@ -189,7 +189,7 @@ func (self *HostInfoTable) UpdateHostTable(ip string, info *SystemInfo) {
 
 //dump挂载的服务器列表
 func (self *HostInfoTable) DumpInfo() {
-	mapChan := *self.HostsInfo.GetMemory().GetData()
+	mapChan := *self.HostsInfo.GetStorage().GetData()
 	for k, v := range mapChan {
 		fmt.Println(k)
 		bts, _ := json.MarshalIndent(v, "", " ")

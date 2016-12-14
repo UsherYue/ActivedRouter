@@ -54,7 +54,7 @@ func (self *Event) ExecCallback() (string, error) {
 
 //事件列表
 type EventQueue struct {
-	EventCache cache.Cache
+	EventCache cache.Cacher
 	//email监控
 	EmailOpen bool
 	EmailUser string
@@ -77,7 +77,7 @@ func (self *EventQueue) PushEvent(k string, v interface{}) {
 
 //get event
 func (self *EventQueue) GetEvent(k string) []*Event {
-	mp := *self.EventCache.GetMemory().GetData()
+	mp := *self.EventCache.GetStorage().GetData()
 	if eventList, ok := mp[k]; ok {
 		if ret, ok := eventList.([]*Event); ok {
 			return ret
@@ -89,5 +89,5 @@ func (self *EventQueue) GetEvent(k string) []*Event {
 
 //events
 func (self *EventQueue) GetEvents() map[string]interface{} {
-	return *GEventQueue.EventCache.GetMemory().GetData()
+	return *GEventQueue.EventCache.GetStorage().GetData()
 }

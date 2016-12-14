@@ -20,7 +20,7 @@ type Http struct {
 //ClientInfos
 //所有服务器 活跃和非活跃
 func (self *Http) ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	data := global.GHostInfoTable.HostsInfo.GetMemory().GetData()
+	data := global.GHostInfoTable.HostsInfo.GetStorage().GetData()
 	self.WriteJsonInterface(w, data)
 }
 
@@ -46,7 +46,7 @@ func (self *Http) WriteJsonInterface(w http.ResponseWriter, data interface{}) {
 //Active ClientInfos
 //活跃列表
 func (self *Http) ActiveClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	data := global.GHostInfoTable.ActiveHostList.ActiveHostInfo.GetMemory().GetData()
+	data := global.GHostInfoTable.ActiveHostList.ActiveHostInfo.GetStorage().GetData()
 	self.WriteJsonInterface(w, data)
 }
 

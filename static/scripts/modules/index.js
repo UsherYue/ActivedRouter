@@ -279,7 +279,6 @@ var loadActiveContent=function(){
 };
 
 
-
 //加载footer
 var loadIndexFooter=function(){
 	$('#footer').load('tpl/index_footer.html');  
@@ -312,7 +311,6 @@ var indexModule=function($,template,Chart,Tools){
 		$('#indexcontent').parent().siblings().removeClass('active');
 		$('#indexcontent').parent().removeClass('active').addClass('active');
 	});
-
 }
 
 //定义模块

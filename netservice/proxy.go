@@ -55,7 +55,7 @@ type HostInfo struct {
 //reserver
 type ReseveProxyHandler struct {
 	HostList       []*HostInfo
-	DomainHostList cache.Cache
+	DomainHostList cache.Cacher
 	ProxyMethod    string
 }
 

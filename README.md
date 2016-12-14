@@ -2,6 +2,8 @@
 当前版本: Beta 0.1	by usher.yue	
 
 Email:   usher.yue@gmail.com		
+
+目前正在开发中........
 			
 <br>
 ##  <b>简单介绍</b>		
@@ -151,18 +153,16 @@ Email:   usher.yue@gmail.com
    <tbody>
     <tr>
       <td>
-         ServerMode
+         Server
       </td>
       <td>
             在服务器模式下监听客户端的状态 <br/>
-            1、 第三方应用通过sdk提供的功能进行自动路由到合适的api服务器上,此处属于代理转发功能。<br/>
-            2、 第三方应用通过sdk提供的功能获取到一个空闲合适的服务器域名或ip。<br/>
-            3、 监听客户端模式下的服务器的服务状态
+            1、 监听客户端模式下的服务器的服务状态
       </td>
     </tr>
     <tr>
       <td>
-         ClientMode
+         Client
       </td>
       <td>
             在客服端模式下通告服务器当前服务状态 <br/>
@@ -172,26 +172,10 @@ Email:   usher.yue@gmail.com
     </tr>
 	<tr>
       <td>
-         Reserve Proxy
+         ReserveProxy
       </td>
       <td>
          内网集群配置反向代理功能
-      </td>
-    </tr>
-    <tr>
-      <td>
-         MixProxy
-      </td>
-      <td>
-         基于监控模式下,真机负载的反向代理服务。
-      </td>
-    </tr>
-    <tr>
-      <td>
-         ThirdPartSDK
-      </td>
-      <td>
-        针对第三方提供php golang 等sdk,提供基于路由负载、以及反向代理负载的http请求机制。
       </td>
     </tr>
    </tbody>

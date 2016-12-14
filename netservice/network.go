@@ -1,58 +1,59 @@
 package netservice
 
 import (
-	"ActivedRouter/global"
 	"log"
 	"strings"
+
+	"ActivedRouter/global"
 )
 
-//控制服务启停
-var NetworkChan = make(chan bool, 0)
-
-//启动网络相关服务
+//start networkservice
 func StartNetworkService() {
 	switch global.RunMode {
-	case "server":
+	case global.ServerMode:
 		{
-			log.Printf("Running Server Mode Service.......")
+			//启动路由服务
 			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
+			//运行http服务
 			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
+			log.Println("ActivedRouter is Running In Server Mode...")
 		}
-	case "client":
+	case global.ClientMode:
 		{
-			log.Printf("Running Client Mode Service.......")
 			serverList := global.ConfigMap["serverlist"]
 			serverListArr := strings.Split(serverList, "|")
 			for _, server := range serverListArr {
 				hostinfo := strings.Split(server, ":")
+				//运行客户端代理
 				go NewClient(hostinfo[0], hostinfo[1]).Run()
 			}
+			log.Println("ActivedRouter is Running  In Client Mode...")
 		}
-	case "proxy":
+	case global.ReserveProxyMode:
 		{
-			log.Println("Running Reserve Proxy.......")
-			//开启server服务
-			//			if ProxyHandler.ProxyMethod == global.Alived {
-
-			//			}
+			//启动路由服务
 			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
 			//开启http服务
 			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
 			//开启反向代理服务
 			go ProxyHandler.StartProxyServer()
+			log.Println("ActivedRouter is Running  In ReserveProxy Mode...")
 		}
-		//	case "mix":
-		//		{
-		//			log.Printf("Running Mix Mode Service .......")
-		//			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
-		//			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
-		//			go ProxyHandler.StartProxyServer()
-		//		}
+	case global.MixMode:
+		{
+			//启动路由服务
+			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
+			//启动http服务
+			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
+			//启动反向代理
+			go ProxyHandler.StartProxyServer()
+			log.Println("ActivedRouter is Running  In Mix Mode...")
+		}
 	}
-	NetworkChan <- true
+	global.NetworkSwitch <- true
 }
 
 //stop service
 func StopNetworkService() {
-	<-NetworkChan
+	<-global.NetworkSwitch
 }

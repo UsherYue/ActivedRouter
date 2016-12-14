@@ -9,7 +9,7 @@ import (
 
 //active ROUTER LIST
 type HostList struct {
-	ActiveHostInfo cache.Cache
+	ActiveHostInfo cache.Cacher
 	rwMutex        sync.RWMutex
 }
 
@@ -51,7 +51,7 @@ func (self *HostList) UpdateHostList(pHostInfo *HostInfo) {
 //dump
 func (self *HostList) DumpInfo() {
 
-	mapChan := *self.ActiveHostInfo.GetMemory().GetData()
+	mapChan := *self.ActiveHostInfo.GetStorage().GetData()
 	for k, v := range mapChan {
 		fmt.Println(k)
 		bts, _ := json.MarshalIndent(v, "", " ")
