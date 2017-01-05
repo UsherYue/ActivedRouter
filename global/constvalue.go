@@ -3,10 +3,11 @@ package global
 //全局数据
 //配置文件相关
 const (
-	ServerConfig    = "config/server.ini"
-	HookConfig      = "config/hook.json"
-	ClientConfig    = "config/client.json"
-	HttpProxyConfig = "config/http_proxy.json"
+	ServerConfig     = "config/server.ini"
+	ServerJsonConfig = "config/server.json"
+	HookConfig       = "config/hook.json"
+	ClientConfig     = "config/client.json"
+	HttpProxyConfig  = "config/http_proxy.json"
 )
 
 //运行模式相关

@@ -19,19 +19,19 @@ func parseConfigfile() {
 	case ServerMode:
 		{
 			//server config
-			loadServerModeConfig(ServerConfig)
+			loadServerJsonConfig(ServerJsonConfig)
 			//hook script
 			hook.ParseHookScript(HookConfig)
 		}
 	case ClientMode:
 		{
 			//client mode
-			loadJsonConfig(ClientConfig)
+			loadClientJsonConfig(ClientConfig)
 		}
 	case ReserveProxyMode:
 		{
 			//server config
-			loadServerModeConfig(ServerConfig)
+			loadServerJsonConfig(ServerJsonConfig)
 			//proxy config
 			netservice.ProxyHandler.LoadProxyConfig(HttpProxyConfig)
 		}
@@ -46,7 +46,7 @@ func parseConfigfile() {
 }
 
 //加载json文件
-func loadJsonConfig(config string) {
+func loadClientJsonConfig(config string) {
 	file, err := os.Open(config)
 	defer file.Close()
 	if err != nil {
@@ -80,7 +80,6 @@ func loadJsonConfig(config string) {
 //加载服务器模式配置
 func loadServerModeConfig(config string) {
 	loadIni(ServerConfig)
-	log.Println(ConfigMap)
 	if val, ok := ConfigMap["host"]; !ok || val == "" {
 		log.Fatalln("配置文件缺少host键值......")
 	}
@@ -99,6 +98,33 @@ func loadServerModeConfig(config string) {
 			log.Fatalln("配置文件缺少srvmode键值......")
 		}
 	}
+}
+
+//加载服务器json
+func loadServerJsonConfig(config string) {
+	if file, err := os.Open(config); err == nil {
+		if bts, err := ioutil.ReadAll(file); err == nil {
+			var serverConfig ServerConfigData
+			if json.Unmarshal(bts, &serverConfig) != nil {
+				goto Exit
+			} else {
+				//解析
+				//log.Println(sercerConfig)
+				ConfigMap["host"] = serverConfig.Host
+				ConfigMap["port"] = serverConfig.Port
+				ConfigMap["srvmode"] = serverConfig.ServerMode
+				ConfigMap["httpport"] = serverConfig.HttpPort
+				ConfigMap["httphost"] = serverConfig.HttpHost
+				return
+			}
+		} else {
+			goto Exit
+		}
+	} else {
+		goto Exit
+	}
+Exit:
+	log.Fatalln("server config load error!")
 }
 
 //load dns router

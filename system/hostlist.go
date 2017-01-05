@@ -45,7 +45,6 @@ func (self *HostList) UpdateHostList(pHostInfo *HostInfo) {
 			self.rwMutex.Unlock()
 		}
 	}
-
 }
 
 //dump
