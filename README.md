@@ -45,13 +45,11 @@ Email:   usher.yue@gmail.com
  3.4、[ActivedRouter配合第三方语言实现API路由](www.xxx.com)	
                
 ##  四、工作模式和配置文件
-<<<<<<< HEAD
-### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能。
-=======
+
 ### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能 。
 
 `运行命令： ActivedRouter --runmode=reserveproxy`
->>>>>>> dev
+
 
 `编译命令： boot_*.sh 选择不通平台的boot文件开始编译安装`
 `运行命令： ActivedRouter --runmode=proxy 运行反向代理服务`
@@ -96,7 +94,6 @@ Email:   usher.yue@gmail.com
 		
 		]
 	}
-=======
 `启动代理服务器:`
 	分别运行不同平台下的boot文件
 	boot_darwin64.sh
@@ -164,7 +161,7 @@ Email:   usher.yue@gmail.com
 		]
 	}
 ##  <b>运行模式</b>
-        服务器模式和客户端模式
+服务器模式和客户端模式
 <table >
    <thead>
      <tr>
