@@ -25,6 +25,5 @@ define([],function(){
 			    return result;
 			}
 		}
-
 	};
 });

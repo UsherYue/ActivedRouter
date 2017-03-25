@@ -5,6 +5,7 @@ import (
 	"flag"
 	"html/template"
 	"log"
+	"os"
 	"strings"
 
 	. "ActivedRouter/global"
@@ -16,7 +17,8 @@ func parseCmdline() {
 	flag.Parse()
 	//如果没设置运行模式
 	if *runmode == "" {
-		//log.Println(UsageTemplate)
+		log.Println(UsageTemplate)
+		os.Exit(0)
 	} else {
 		if strings.ToLower(*runmode) != ServerMode &&
 			strings.ToLower(*runmode) != ClientMode &&
@@ -24,13 +26,11 @@ func parseCmdline() {
 			strings.ToLower(*runmode) != MixMode {
 			t, _ := template.New("info").Parse(UsageRunmodeTemplate)
 			buffer := &bytes.Buffer{}
-			t.Execute(buffer, struct{ Msg string }{Msg: "runmode参数错误,参考 ActiveRouter --runmode=Server或Client或Reserveproxy 或Mix"})
+			t.Execute(buffer, struct{ Msg string }{Msg: "runmode参数错误,参考 ActiveRouter --runmode=Client或Reserveproxy,Server和Mix模式开发中......"})
 			log.Println(string(buffer.Bytes()))
 		} else {
 			//set run mode
-			RunMode = *runmode
+			RunMode = strings.ToLower(*runmode)
 		}
 	}
-	//EXIT:
-	//	os.Exit(0)
 }
