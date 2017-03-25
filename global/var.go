@@ -1,16 +1,28 @@
-/*
-* global data
- */
+//ActivedRouter
+//Author:usher.yue
+//Amail:usher.yue@gmail.com
+//TencentQQ:4223665
+//Global Var
+
 package global
 
 import (
+	"sync"
+
 	"ActivedRouter/cache"
 	"ActivedRouter/system"
-	"sync"
 )
 
-//global mem cache
-var GlobalCache cache.Cache = cache.Newcache("memory")
+//cache driver
+//memory
+//mysql
+//file
+//redis
+//mongodb
+var GlobalCache cache.Cacher = cache.Newcache("memory")
+
+//控制服务启停
+var NetworkSwitch = make(chan bool, 0)
 
 //存储服务器相关状态
 var GHostInfoTable = system.NewHostInfoTable()

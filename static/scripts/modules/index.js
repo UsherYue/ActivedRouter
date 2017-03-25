@@ -139,6 +139,8 @@ var initHttpLineChart=function(){
 		["rgba(175,92,192,0.4)","rgba(175,92,192,1)"],	
 		["rgba(65,192,92,0.4)","rgba(65,192,92,1)"],
 		["rgba(115,32,92,0.4)","rgba(115,32,92,1)"],
+		["rgba(65,192,92,0.4)","rgba(65,192,92,1)"],
+		["rgba(115,32,92,0.4)","rgba(115,32,92,1)"]
 	];
 	//加载路由服务器信息
 	$.get("/statistics",function(data){
@@ -279,7 +281,6 @@ var loadActiveContent=function(){
 };
 
 
-
 //加载footer
 var loadIndexFooter=function(){
 	$('#footer').load('tpl/index_footer.html');  
@@ -312,7 +313,6 @@ var indexModule=function($,template,Chart,Tools){
 		$('#indexcontent').parent().siblings().removeClass('active');
 		$('#indexcontent').parent().removeClass('active').addClass('active');
 	});
-
 }
 
 //定义模块

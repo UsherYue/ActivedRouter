@@ -1,51 +1,52 @@
 package boot
 
 import (
-	"ActivedRouter/global"
-	"ActivedRouter/hook"
-	"ActivedRouter/netservice"
 	"bufio"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	. "ActivedRouter/global"
+	"ActivedRouter/hook"
+	"ActivedRouter/netservice"
 )
 
+//解析配置文件
 func parseConfigfile() {
-	switch global.RunMode {
-	case global.ServerMode:
+	switch RunMode {
+	case ServerMode:
 		{
 			//server config
-			loadServerModeConfig(global.ServerConfig)
+			loadServerJsonConfig(ServerJsonConfig)
 			//hook script
-			hook.ParseHookScript(global.HookConfig)
+			hook.ParseHookScript(HookConfig)
 		}
-	case global.ClientMode:
+	case ClientMode:
 		{
 			//client mode
-			loadJsonConfig(global.ClientConfig)
+			loadClientJsonConfig(ClientConfig)
 		}
-	case global.ProxyMode:
+	case ReserveProxyMode:
 		{
 			//server config
-			loadServerModeConfig(global.ServerConfig)
+			loadServerJsonConfig(ServerJsonConfig)
 			//proxy config
-			netservice.ProxyHandler.LoadProxyConfig(global.HttpProxyConfig)
-			return
+			netservice.ProxyHandler.LoadProxyConfig(HttpProxyConfig)
 		}
-	case global.MixMode:
+	case MixMode:
 		{
-			//server config
-			loadServerModeConfig(global.ServerConfig)
-			//proxy config
-			netservice.ProxyHandler.LoadProxyConfig(global.HttpProxyConfig)
+			//			//server config
+			//			loadServerModeConfig(global.ServerConfig)
+			//			//proxy config
+			//			netservice.ProxyHandler.LoadProxyConfig(global.HttpProxyConfig)
 		}
 	}
 }
 
 //加载json文件
-func loadJsonConfig(config string) {
+func loadClientJsonConfig(config string) {
 	file, err := os.Open(config)
 	defer file.Close()
 	if err != nil {
@@ -62,42 +63,68 @@ func loadJsonConfig(config string) {
 		domain, _ := ClientMap["domain"].(string)
 		cluster, _ := ClientMap["cluster"].(string)
 		serverList := ClientMap["router_list"].([]interface{})
-		global.ConfigMap["domain"] = domain
-		global.ConfigMap["cluster"] = cluster
-		global.Cluster = cluster
-		global.Domain = domain
+		ConfigMap["domain"] = domain
+		ConfigMap["cluster"] = cluster
+		Cluster = cluster
+		Domain = domain
 		//服务器列表
 		var serverArr []string
 		for _, v := range serverList {
 			serverArr = append(serverArr, v.(string))
 		}
-		global.ConfigMap["serverlist"] = strings.Join(serverArr, "|")
-		log.Println(global.ConfigMap)
+		ConfigMap["serverlist"] = strings.Join(serverArr, "|")
+		log.Println(ConfigMap)
 	}
 }
 
 //加载服务器模式配置
 func loadServerModeConfig(config string) {
-	loadIni(global.ServerConfig)
-	log.Println(global.ConfigMap)
-	if val, ok := global.ConfigMap["host"]; !ok || val == "" {
-		log.Fatalln("-------配置文件缺少host键值-------")
+	loadIni(ServerConfig)
+	if val, ok := ConfigMap["host"]; !ok || val == "" {
+		log.Fatalln("配置文件缺少host键值......")
 	}
-	if val, ok := global.ConfigMap["port"]; !ok || val == "" {
-		log.Fatalln("-------配置文件缺少port键值-------")
+	if val, ok := ConfigMap["port"]; !ok || val == "" {
+		log.Fatalln("配置文件缺少port键值......")
 	}
 	//server模式下必须配置http服务器的ip端口号
-	if global.RunMode == "server" {
-		if val, ok := global.ConfigMap["httphost"]; !ok || val == "" {
-			log.Fatalln("-------配置文件缺少httphost键值-------")
+	if RunMode == "server" {
+		if val, ok := ConfigMap["httphost"]; !ok || val == "" {
+			log.Fatalln("配置文件缺少httphost键值......")
 		}
-		if val, ok := global.ConfigMap["httpport"]; !ok || val == "" {
-			log.Fatalln("-------配置文件缺少httpport键值-------")
+		if val, ok := ConfigMap["httpport"]; !ok || val == "" {
+			log.Fatalln("配置文件缺少httpport键值......")
 		}
-		if val, ok := global.ConfigMap["srvmode"]; !ok || val == "" {
-			log.Fatalln("-------配置文件缺少srvmode键值-------")
+		if val, ok := ConfigMap["srvmode"]; !ok || val == "" {
+			log.Fatalln("配置文件缺少srvmode键值......")
 		}
 	}
+}
+
+//加载服务器json
+func loadServerJsonConfig(config string) {
+	if file, err := os.Open(config); err == nil {
+		if bts, err := ioutil.ReadAll(file); err == nil {
+			var serverConfig ServerConfigData
+			if json.Unmarshal(bts, &serverConfig) != nil {
+				goto Exit
+			} else {
+				//解析
+				//log.Println(sercerConfig)
+				ConfigMap["host"] = serverConfig.Host
+				ConfigMap["port"] = serverConfig.Port
+				ConfigMap["srvmode"] = serverConfig.ServerMode
+				ConfigMap["httpport"] = serverConfig.HttpPort
+				ConfigMap["httphost"] = serverConfig.HttpHost
+				return
+			}
+		} else {
+			goto Exit
+		}
+	} else {
+		goto Exit
+	}
+Exit:
+	log.Fatalln("server config load error!")
 }
 
 //load dns router
@@ -118,7 +145,7 @@ func loadDnsRouterConfig(routerFile string) {
 		if err != nil {
 			log.Fatalln(err.Error())
 		} else {
-			global.DnsScript = DnsMap
+			DnsScript = DnsMap
 			log.Println(string(bts))
 		}
 	}
@@ -157,7 +184,7 @@ func loadIni(config string) {
 			continue
 		}
 		kvs := strings.Split(itemStr, "=")
-		global.ConfigMap[kvs[0]] = kvs[1]
+		ConfigMap[kvs[0]] = kvs[1]
 	}
 
 }

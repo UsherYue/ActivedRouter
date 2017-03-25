@@ -2,6 +2,8 @@
 当前版本: Beta 0.1	by usher.yue	
 
 Email:   usher.yue@gmail.com		
+
+目前正在开发中........
 			
 <br>
 ##  <b>简单介绍</b>		
@@ -43,7 +45,13 @@ Email:   usher.yue@gmail.com
  3.4、[ActivedRouter配合第三方语言实现API路由](www.xxx.com)	
                
 ##  四、工作模式和配置文件
+<<<<<<< HEAD
 ### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能。
+=======
+### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能 。
+
+`运行命令： ActivedRouter --runmode=reserveproxy`
+>>>>>>> dev
 
 `编译命令： boot_*.sh 选择不通平台的boot文件开始编译安装`
 `运行命令： ActivedRouter --runmode=proxy 运行反向代理服务`
@@ -88,6 +96,14 @@ Email:   usher.yue@gmail.com
 		
 		]
 	}
+=======
+`启动代理服务器:`
+	分别运行不同平台下的boot文件
+	boot_darwin64.sh
+	boot_linux32.sh
+	boot_linux64.sh
+	编译安装完毕之后 运行 ./ActivedRouter --runmode=reserveproxy 即可 , 可自行编写shell脚本实现系统级启动 和守护进程。
+
 ### 4.2、server和client模式可以配合完全服务器监控,提供web仪表盘。
 `客户端运行: ActivedRouter --runmode=server `	
 `client.json`	
@@ -159,18 +175,7 @@ Email:   usher.yue@gmail.com
    <tbody>
     <tr>
       <td>
-         ServerMode
-      </td>
-      <td>
-            在服务器模式下监听客户端的状态 <br/>
-            1、 第三方应用通过sdk提供的功能进行自动路由到合适的api服务器上,此处属于代理转发功能。<br/>
-            2、 第三方应用通过sdk提供的功能获取到一个空闲合适的服务器域名或ip。<br/>
-            3、 监听客户端模式下的服务器的服务状态
-      </td>
-    </tr>
-    <tr>
-      <td>
-         ClientMode
+         Client
       </td>
       <td>
             在客服端模式下通告服务器当前服务状态 <br/>
@@ -178,28 +183,21 @@ Email:   usher.yue@gmail.com
             2、 实时通告路由服务器当前服务器信息,用作路由分析。
       </td>
     </tr>
+      <tr>
+      <td>
+         Server
+      </td>
+      <td>
+            在服务器模式下监听客户端的状态 <br/>
+            1、 监听客户端模式下的服务器的服务状态
+      </td>
+    </tr>
 	<tr>
       <td>
-         Reserve Proxy
+         ReserveProxy
       </td>
       <td>
-         内网集群配置反向代理功能
-      </td>
-    </tr>
-    <tr>
-      <td>
-         MixProxy
-      </td>
-      <td>
-         基于监控模式下,真机负载的反向代理服务。
-      </td>
-    </tr>
-    <tr>
-      <td>
-         ThirdPartSDK
-      </td>
-      <td>
-        针对第三方提供php golang 等sdk,提供基于路由负载、以及反向代理负载的http请求机制。
+         内网集群配置反向代理功能,并提供简单的监控服务
       </td>
     </tr>
    </tbody>
@@ -251,14 +249,6 @@ Email:   usher.yue@gmail.com
       </td>
       <td>
         时刻监控服务器的磁盘存储容量
-      </td>
-    </tr>
-    <tr>
-      <td>
-         ThirdPartSDK
-      </td>
-      <td>
-         为应用提供监控接口,可直接展示监控内容
       </td>
     </tr>
    </tbody>
