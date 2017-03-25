@@ -47,14 +47,14 @@ Email:   usher.yue@gmail.com
 ##  四、工作模式和配置文件
 ### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能 。
 
-`运行命令： ActivedRouter --runmode=proxy`
+`运行命令： ActivedRouter --runmode=reserveproxy`
 
 `配置文件：`
         
  	{	
  		"http_switch":"on",           //http开关 on off
   		"proxy_addr":"127.0.0.1:80",  //http监听端口
-		"proxy_method":"random",      //proxy方法 random 混合模式下可支持alived方法,简单实现nginx功能食用 random即可
+		"proxy_method":"random",      //proxy方法 random,简单实现nginx功能, 混合模式下可支持alived方法(开发中)
 		"https_switch":"off",        //是否开启https http模式设置为 off  https模式设置为 on  目前只支持一种代理模式
 		"https_crt":"a.crt",         //https证书
 		"https_key":"a.key",         //https key
@@ -76,7 +76,7 @@ Email:   usher.yue@gmail.com
 	boot_darwin64.sh
 	boot_linux32.sh
 	boot_linux64.sh
-	编译安装完毕之后 运行 ./ActivedRouter --runmode=proxy 即可 , 可自行编写shell脚本实现系统级启动 和守护进程。
+	编译安装完毕之后 运行 ./ActivedRouter --runmode=reserveproxy 即可 , 可自行编写shell脚本实现系统级启动 和守护进程。
 
 
 
@@ -153,15 +153,6 @@ Email:   usher.yue@gmail.com
    <tbody>
     <tr>
       <td>
-         Server
-      </td>
-      <td>
-            在服务器模式下监听客户端的状态 <br/>
-            1、 监听客户端模式下的服务器的服务状态
-      </td>
-    </tr>
-    <tr>
-      <td>
          Client
       </td>
       <td>
@@ -170,12 +161,21 @@ Email:   usher.yue@gmail.com
             2、 实时通告路由服务器当前服务器信息,用作路由分析。
       </td>
     </tr>
+      <tr>
+      <td>
+         Server
+      </td>
+      <td>
+            在服务器模式下监听客户端的状态 <br/>
+            1、 监听客户端模式下的服务器的服务状态
+      </td>
+    </tr>
 	<tr>
       <td>
          ReserveProxy
       </td>
       <td>
-         内网集群配置反向代理功能
+         内网集群配置反向代理功能,并提供简单的监控服务
       </td>
     </tr>
    </tbody>
@@ -227,14 +227,6 @@ Email:   usher.yue@gmail.com
       </td>
       <td>
         时刻监控服务器的磁盘存储容量
-      </td>
-    </tr>
-    <tr>
-      <td>
-         ThirdPartSDK
-      </td>
-      <td>
-         为应用提供监控接口,可直接展示监控内容
       </td>
     </tr>
    </tbody>
