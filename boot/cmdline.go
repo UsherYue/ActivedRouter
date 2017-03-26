@@ -26,7 +26,7 @@ func parseCmdline() {
 			strings.ToLower(*runmode) != MixMode {
 			t, _ := template.New("info").Parse(UsageRunmodeTemplate)
 			buffer := &bytes.Buffer{}
-			t.Execute(buffer, struct{ Msg string }{Msg: "runmode参数错误,参考 ActiveRouter --runmode=Client或Reserveproxy,Server和Mix模式开发中......"})
+			t.Execute(buffer, struct{ Msg string }{Msg: "runmode参数错误,参考 ActiveRouter --runmode=Client或Reserveproxy,Server"})
 			log.Println(string(buffer.Bytes()))
 		} else {
 			//set run mode

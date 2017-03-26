@@ -35,13 +35,6 @@ func parseConfigfile() {
 			//proxy config
 			netservice.ProxyHandler.LoadProxyConfig(HttpProxyConfig)
 		}
-	case MixMode:
-		{
-			//			//server config
-			//			loadServerModeConfig(global.ServerConfig)
-			//			//proxy config
-			//			netservice.ProxyHandler.LoadProxyConfig(global.HttpProxyConfig)
-		}
 	}
 }
 
