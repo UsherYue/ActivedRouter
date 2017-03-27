@@ -19,8 +19,8 @@
 			}
 	    }  
 	});
-	//引用相关模块
-	requirejs(['bootstrap','index','template','chartjs'], function() {  
-	    
+	//引用相关模块 公共模块在此处引入
+	requirejs(['bootstrap','index'], function() {  
+	
 	});  
 })();
