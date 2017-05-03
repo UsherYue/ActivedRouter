@@ -40,6 +40,7 @@ type SystemInfo struct {
 	DISK    *disk.DiskUsageStat    `json:"DISK"`    //dis
 	HOST    *host.HostInfoStat     `json:"HOST"`    //host
 	Cluster string                 `json:"Cluster"` //集群分组
+	RunMode string                 `json:"RunMode"` //runmode
 	Domain  string                 `json:"Domain"`  //domain
 	IP      string                 `json:"IP"`
 	CpuNums int                    `json:"CpuNums"` //cpu number
@@ -52,7 +53,7 @@ type SystemInfo struct {
 }
 
 //获取系统信息 返回json
-func SysInfo(cluster, domain string) string {
+func SysInfo(runMode, cluster, domain string) string {
 	//内存
 	virtualMem, _ := mem.VirtualMemory()
 	//交换内存
@@ -61,6 +62,8 @@ func SysInfo(cluster, domain string) string {
 	loadAvg, _ := load.LoadAvg()
 	info := &SystemInfo{}
 	info.CpuNums = runtime.NumCPU()
+	//runmode
+	info.RunMode = runMode
 	//vm
 	info.VM = virtualMem
 	//load

@@ -54,7 +54,7 @@ func (self *Client) ConnectToServer(addr string) {
 				//控制发送数据
 				//ch <- true
 				t1.Reset(time.Second * HEARTBEAT_INTERVAL)
-				info := system.SysInfo(global.Cluster, global.Domain)
+				info := system.SysInfo(global.RunMode, global.Cluster, global.Domain)
 				_, err := self.ConnSocket.Write([]byte(tools.Base64Encode([]byte(info))))
 				//如果断开连接重复连接 直到连接到路由服务器为止
 				if err != nil && !self.Closed {

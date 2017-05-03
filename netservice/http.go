@@ -66,7 +66,7 @@ func (self *Http) Index(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 func (self *Http) RouterInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	info := global.RouterInfo()
 	if info == "" {
-		info = system.SysInfo("Router", "")
+		info = system.SysInfo(global.RunMode, "Router", "")
 		global.SetRouterInfo(info)
 	}
 	self.WriteJsonString(w, info)

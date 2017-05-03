@@ -1,14 +1,15 @@
 package netservice
 
 import (
-	"ActivedRouter/global"
-	"ActivedRouter/hook"
-	"ActivedRouter/system"
-	"ActivedRouter/tools"
 	"log"
 	"net"
 	"strings"
 	"time"
+
+	"ActivedRouter/global"
+	"ActivedRouter/hook"
+	"ActivedRouter/system"
+	"ActivedRouter/tools"
 )
 
 //服务器检测时间5s一次
@@ -76,7 +77,7 @@ func (self *Server) checkRouterInfo() {
 		select {
 		case <-timerRouterInfo.C:
 			{
-				routerInfo := system.SysInfo("Router", "")
+				routerInfo := system.SysInfo(global.RunMode, "ActivedRouterInfo", "")
 				global.SetRouterInfo(routerInfo)
 				timerRouterInfo.Reset(time.Second * CHECK_ROUTER_INTERVAL)
 			}
