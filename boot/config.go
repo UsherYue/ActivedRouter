@@ -1,7 +1,6 @@
 package boot
 
 import (
-	"bufio"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -70,29 +69,6 @@ func loadClientJsonConfig(config string) {
 	}
 }
 
-//加载服务器模式配置
-func loadServerModeConfig(config string) {
-	loadIni(ServerConfig)
-	if val, ok := ConfigMap["host"]; !ok || val == "" {
-		log.Fatalln("配置文件缺少host键值......")
-	}
-	if val, ok := ConfigMap["port"]; !ok || val == "" {
-		log.Fatalln("配置文件缺少port键值......")
-	}
-	//server模式下必须配置http服务器的ip端口号
-	if RunMode == "server" {
-		if val, ok := ConfigMap["httphost"]; !ok || val == "" {
-			log.Fatalln("配置文件缺少httphost键值......")
-		}
-		if val, ok := ConfigMap["httpport"]; !ok || val == "" {
-			log.Fatalln("配置文件缺少httpport键值......")
-		}
-		if val, ok := ConfigMap["srvmode"]; !ok || val == "" {
-			log.Fatalln("配置文件缺少srvmode键值......")
-		}
-	}
-}
-
 //加载服务器json
 func loadServerJsonConfig(config string) {
 	if file, err := os.Open(config); err == nil {
@@ -142,42 +118,4 @@ func loadDnsRouterConfig(routerFile string) {
 			log.Println(string(bts))
 		}
 	}
-}
-
-//load ini config
-func loadIni(config string) {
-	//打开文件
-	file, err := os.Open(config)
-	defer func() {
-		file.Close()
-	}()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	//读取文件内容
-	reader := bufio.NewReader(file)
-	itemStr := ""
-	for {
-		lineStr, err := reader.ReadString(byte('\n'))
-		//判断文件读取结束
-		if err != nil {
-			break
-		}
-		//remove space
-		itemStr = strings.TrimSpace(lineStr)
-		if itemStr == "" {
-			continue
-		}
-		//注释
-		if strings.Index(itemStr, "#") == 0 {
-			continue
-		}
-		//配置文件语法错误
-		if -1 == strings.Index(itemStr, "=") {
-			continue
-		}
-		kvs := strings.Split(itemStr, "=")
-		ConfigMap[kvs[0]] = kvs[1]
-	}
-
 }
