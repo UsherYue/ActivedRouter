@@ -44,19 +44,15 @@ const (
 		ActiveRouter 是一个简单的基于路由分发和反向代理的负载均衡监控服务,并且提供一个方便管理的仪表盘用于快速配置、挂载、卸载.
 		Author:usher.yue
 		Email:ushe.yue@gmail.com
-		Tencent QQ:4223665
 		ActivedRouter Desceiption:
-			mode运行模式可以是 Server、Client、Reserveproxy、Mix,分别代表路由服务器模式、客户端模式、反向代理服务器模式、服务器模式&反向代理模式 。
-			服务器模式下加载server.ini。
-			客户端模式下记加载client.ini读取相关配置信息。	
+			mode运行模式可以是 Server、Client、Reserveproxy,分别代表路由服务器模式、客户端模式、反向代理服务器模式。
 		The commands are:
-			ActiveRouter --runmode=Server/Client/ReserveProxy/Mix
-			Client 模式运行在客户端的代理程序
-			Server 启动监控服务 
-			ReserveProxy 启动反向代理服务
-			Mix  启动反向dialing服务并启动监控服务
+			ActiveRouter --runmode=Server/Client/ReserveProxy
+			Client 启动客户端模式,一般运行在需要监控、代理的服务器上
+			Server 启动服务器模式
+			ReserveProxy 启动反向代理服务,可选择性的开启关闭服务器模式
 		The Help:
 		    ActiveRouter --help or  -h or -help
 		`
-	UsageRunmodeTemplate = `{{.Msg}}`
+	UsageRunmodeError = `"runmode参数错误,参考 ActiveRouter --runmode=Client/Reserveproxy/Server"`
 )
