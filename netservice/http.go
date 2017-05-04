@@ -97,6 +97,13 @@ func (self *Http) AddDomain(w http.ResponseWriter, r *http.Request, prms httprou
 		self.WriteJsonString(w, `{"status":"0"}`)
 	}
 }
+func (self *Http) DelDomain(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	if ProxyHandler.DeleteDomainConig(prms.ByName("domain")) {
+		self.WriteJsonString(w, `{"status":"1"}`)
+	} else {
+		self.WriteJsonString(w, `{"status":"0"}`)
+	}
+}
 
 //创建http服务
 func NewHttp(host, port string) *Http {
@@ -114,6 +121,7 @@ func (self *Http) Run() {
 	router.GET("/bestclients", self.ActiveClientInfos)
 	router.GET("/proxyinfos/:domain", self.ProxyInfos)
 	router.GET("/adddomain/:domain", self.AddDomain)
+	router.GET("/deldomain/:domain", self.DelDomain)
 	router.GET("/addproxyclient/clientinfo/:clientinfo", self.AddProxyClient)
 	router.GET("/domaininfos", self.DomainInfos)
 	router.GET("/", self.Index)

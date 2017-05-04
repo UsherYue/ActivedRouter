@@ -4,9 +4,6 @@
 package netservice
 
 import (
-	"ActivedRouter/cache"
-	"ActivedRouter/global"
-	"ActivedRouter/system"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -18,6 +15,10 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"ActivedRouter/cache"
+	"ActivedRouter/global"
+	"ActivedRouter/system"
 )
 
 // var define
@@ -61,20 +62,21 @@ type LbNode struct {
 
 //反向代理配置
 type ReserveProxyConfigData struct {
-	ProxyMethod    string   `json:"proxy_method"`
-	HttpProxyAddr  string   `json:"http_proxy_addr"`
-	HttpSwitch     string   `json:"http_switch"`
-	HttpsSwitch    string   `json:"https_switch"`
-	HttpsCrt       string   `json:"https_crt"`
-	HttpsKey       string   `json:"https_key"`
-	HttpsProxyAddr string   `json:"https_proxy_addr"`
-	ReserveProxy   []LbNode `json:"reserve_proxy"`
+	ProxyMethod    string    `json:"proxy_method"`
+	HttpProxyAddr  string    `json:"http_proxy_addr"`
+	HttpSwitch     string    `json:"http_switch"`
+	HttpsSwitch    string    `json:"https_switch"`
+	HttpsCrt       string    `json:"https_crt"`
+	HttpsKey       string    `json:"https_key"`
+	HttpsProxyAddr string    `json:"https_proxy_addr"`
+	ReserveProxy   []*LbNode `json:"reserve_proxy"`
 }
 
 //reserver
 type ReseveProxyHandler struct {
-	DomainHostList cache.Cacher
-	ProxyMethod    string
+	DomainHostList   cache.Cacher
+	ProxyCongfigFile string
+	ProxyMethod      string
 }
 
 //domain list
@@ -94,19 +96,51 @@ func (this *ReseveProxyHandler) AddDomainConfig(domain string) bool {
 			return true
 		}
 	}
-	cfg.ReserveProxy = append(cfg.ReserveProxy, LbNode{Domain: domain})
+	cfg.ReserveProxy = append(cfg.ReserveProxy, &LbNode{Domain: domain})
+	this.SaveToFile()
+	return true
+}
+func (this *ReseveProxyHandler) SaveToFile() bool {
+	if bts, err := json.Marshal(cfg); err != nil {
+		return false
+	} else {
+		if file, err := os.OpenFile(this.ProxyCongfigFile, os.O_RDWR|os.O_TRUNC, os.ModePerm); err != nil {
+			defer file.Close()
+			return false
+		} else {
+			if _, err := file.Write(bts); err != nil {
+				return false
+			}
+		}
+	}
 	return true
 }
 
 //删除域名 同步到文件
 func (this *ReseveProxyHandler) DeleteDomainConig(domain string) bool {
+	for k, v := range cfg.ReserveProxy {
+		if v.Domain == domain {
+			cfg.ReserveProxy = append(cfg.ReserveProxy[:k], cfg.ReserveProxy[k+1:]...)
+		}
+	}
+	this.SaveToFile()
 	return true
 }
 
 //删除反向代理服务器 ,并且删除配置文件中信息
-func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) bool {
-
-	return true
+func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) (bool, string) {
+	for _, v := range cfg.ReserveProxy {
+		if v.Domain == domain {
+			for _, client := range v.Clients {
+				if client.Host == hostip && client.Port == port {
+					return false, "已经存在"
+				}
+			}
+			v.Clients = append(v.Clients, HostInfo{port, hostip})
+		}
+	}
+	this.SaveToFile()
+	return true, "成功添加!"
 }
 
 //增加反向代理服务器 ,并且增加配置文件中信息
@@ -212,10 +246,9 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 //load proxy
 func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
+	this.ProxyCongfigFile = proxyConfigFile
 	file, err := os.Open(proxyConfigFile)
-	defer func() {
-		file.Close()
-	}()
+	defer file.Close()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
