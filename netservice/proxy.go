@@ -32,7 +32,7 @@ var (
 
 //default
 var (
-	DefaultHttpAddr = "127.0.0.1:8888"
+	DefaultHttpAddr = "127.0.0.1:80"
 	DefaultHttsAddr = "127.0.0.1:443"
 	SwitchOn        = "on"
 	SwitchOff       = "off"
@@ -45,11 +45,33 @@ const (
 //hander
 var (
 	ProxyHandler = &ReseveProxyHandler{}
+	//ProxyConfig  map[string]interface{}
 )
 
 type HostInfo struct {
 	Port string
 	Host string
+}
+
+//负载均衡节点
+type LbNode struct {
+	Domain  string `json:"domain"`
+	Clients []struct {
+		Host string `json:"host"`
+		Port string `json:"port"`
+	} `json:"clients"`
+}
+
+//反向代理配置
+type ReserveProxyConfigData struct {
+	ProxyMethod    string   `json:"proxy_method"`
+	HttpProxyAddr  string   `json:"http_proxy_addr"`
+	HttpSwitch     string   `json:"http_switch"`
+	HttpsSwitch    string   `json:"https_switch"`
+	HttpsCrt       string   `json:"https_crt"`
+	HttpsKey       string   `json:"https_key"`
+	HttpsProxyAddr string   `json:"https_proxy_addr"`
+	ReserveProxy   []LbNode `json:"reserve_proxy"`
 }
 
 //reserver
@@ -66,6 +88,30 @@ func (this *ReseveProxyHandler) DomainInfos() []string {
 		keysArr = append(keysArr, k)
 	}
 	return keysArr
+}
+
+//增加域名 同步到文件
+func (this *ReseveProxyHandler) AddDomainConfig(domain string) bool {
+	if !this.DomainHostList.Has(domain) {
+		this.DomainHostList.Set(domain, []HostInfo{})
+	}
+	return true
+}
+
+//删除域名 同步到文件
+func (this *ReseveProxyHandler) DeleteDomainConig(domain string) bool {
+	return true
+}
+
+//删除反向代理服务器 ,并且删除配置文件中信息
+func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) bool {
+
+	return true
+}
+
+//增加反向代理服务器 ,并且增加配置文件中信息
+func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) bool {
+	return true
 }
 
 //hostlist by domain
@@ -177,19 +223,22 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 	if bts, err := ioutil.ReadAll(file); err != nil {
 		log.Fatalln(err.Error())
 	} else {
-		var proxyConfig map[string]interface{}
-		json.Unmarshal(bts, &proxyConfig)
+		cfg := &ReserveProxyConfigData{}
+		json.Unmarshal(bts, &cfg)
+		//		json.Unmarshal(bts, &ProxyConfig)
 		//获取http和https开关 缺省是off
-		if httpSwitch, b := proxyConfig["http_switch"]; !b {
-			HttpSwitch = SwitchOff
-		} else {
-			HttpSwitch = httpSwitch.(string)
-		}
-		if httpsSwitch, b := proxyConfig["https_switch"]; !b {
-			HttpsSwitch = SwitchOff
-		} else {
-			HttpsSwitch = httpsSwitch.(string)
-		}
+		//		if httpSwitch, b := ProxyConfig["http_switch"]; !b {
+		//			HttpSwitch = SwitchOff
+		//		} else {
+		//			HttpSwitch = httpSwitch.(string)
+		//		}
+		HttpSwitch = cfg.HttpSwitch
+		//		if httpsSwitch, b := ProxyConfig["https_switch"]; !b {
+		//			HttpsSwitch = SwitchOff
+		//		} else {
+		//			HttpsSwitch = httpsSwitch.(string)
+		//		}
+		HttpsSwitch = cfg.HttpsSwitch
 		//http https  off
 		if HttpSwitch == SwitchOff && HttpsSwitch == SwitchOff {
 			log.Fatalln("请开启http或者https代理开关.....")
@@ -197,10 +246,14 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		//获取http开关下的配置
 		if HttpSwitch == SwitchOn {
 			//获取http http_proxy_addr
-			if v, ok := proxyConfig["http_proxy_addr"]; !ok {
+			//			if v, ok := ProxyConfig["http_proxy_addr"]; !ok {
+			//				HttpAddr = DefaultHttpAddr
+			//			} else {
+			//				HttpAddr, _ = v.(string)
+			//			}
+			HttpAddr = cfg.HttpProxyAddr
+			if HttpAddr == "" {
 				HttpAddr = DefaultHttpAddr
-			} else {
-				HttpAddr, _ = v.(string)
 			}
 			log.Println("Http Switch:" + HttpSwitch)
 			log.Println("Http  Addr:" + HttpAddr)
@@ -208,22 +261,28 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		//获取https开关下的配置
 		if HttpsSwitch == SwitchOn {
 			//获取https https_proxy_addr
-			if v, ok := proxyConfig["https_proxy_addr"]; !ok {
+			//			if v, ok := ProxyConfig["https_proxy_addr"]; !ok {
+			//				HttpsAddr = DefaultHttsAddr
+			//			} else {
+			//				HttpsAddr, _ = v.(string)
+			//			}
+			HttpsAddr = cfg.HttpsProxyAddr
+			if HttpsAddr == "" {
 				HttpsAddr = DefaultHttsAddr
-			} else {
-				HttpsAddr, _ = v.(string)
 			}
 			//获取证书 和key
-			if v, ok := proxyConfig["https_crt"]; !ok {
-				log.Fatalln("https 缺少证书........")
-			} else {
-				HttpsCrt = v.(string)
-			}
-			if v, ok := proxyConfig["https_key"]; !ok {
-				log.Fatalln("https 缺少key.........")
-			} else {
-				HttpsKey = v.(string)
-			}
+			//			if v, ok := ProxyConfig["https_crt"]; !ok {
+			//				log.Fatalln("https 缺少证书........")
+			//			} else {
+			//				HttpsCrt = v.(string)
+			//			}
+			//			if v, ok := ProxyConfig["https_key"]; !ok {
+			//				log.Fatalln("https 缺少key.........")
+			//			} else {
+			//				HttpsKey = v.(string)
+			//			}
+			HttpsCrt = cfg.HttpsCrt
+			HttpsKey = cfg.HttpsKey
 			log.Println("Https Switch:" + HttpsSwitch)
 			log.Println("Https Addr:" + HttpsAddr)
 			log.Println("Https  Crt:" + HttpsCrt)
@@ -231,36 +290,53 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		}
 
 		//get proxy method
-		if v, ok := proxyConfig["proxy_method"]; !ok {
-			this.ProxyMethod = "random"
+		//		if v, ok := ProxyConfig["proxy_method"]; !ok {
+		//			this.ProxyMethod = "random"
+		//		} else {
+		//			this.ProxyMethod, _ = v.(string)
+		//		}
+		if cfg.ProxyMethod == "" {
+			this.ProxyMethod = global.Random
 		} else {
-			this.ProxyMethod, _ = v.(string)
+			this.ProxyMethod = cfg.ProxyMethod
 		}
-		if v, ok := proxyConfig["reserve_proxy"]; !ok {
-			log.Fatalln("Reserve Proxy Config file load error !!")
-		} else {
-			//获取到不同域名
-			this.DomainHostList = cache.Newcache("memory")
-			clients := v.([]interface{})
-			if len(clients) == 0 {
-				log.Fatalln("Config file miss proxy host......")
+		//		if v, ok := ProxyConfig["reserve_proxy"]; !ok {
+		//			log.Fatalln("Reserve Proxy Config file load error !!")
+		//		} else {
+		//			//获取到不同域名
+		//			this.DomainHostList = cache.Newcache("memory")
+		//			clients := v.([]interface{})
+		//			if len(clients) == 0 {
+		//				log.Fatalln("Config file miss proxy host......")
+		//			}
+		//			for _, client := range clients {
+		//				mapClient, _ := client.(map[string]interface{})
+		//				subDomain := mapClient["domain"].(string)
+		//				subClients := mapClient["clients"].([]interface{})
+		//				var subClientList []*HostInfo
+		//				for _, subClient := range subClients {
+		//					subClientMap := subClient.(map[string]interface{})
+		//					subClientHost := subClientMap["host"].(string)
+		//					subClientPort := subClientMap["port"].(string)
+		//					host := &HostInfo{Host: subClientHost, Port: subClientPort}
+		//					subClientList = append(subClientList, host)
+		//				}
+		//				this.DomainHostList.Set(subDomain, subClientList)
+		//			}
+		//		}
+		//获取到不同域名
+		this.DomainHostList = cache.Newcache("memory")
+		clients := cfg.ReserveProxy
+		if len(clients) == 0 {
+			log.Fatalln("Config file miss proxy host......")
+		}
+		for _, client := range clients {
+			subDomain := client.Domain
+			var subClientList []*HostInfo
+			for _, hostInfo := range client.Clients {
+				subClientList = append(subClientList, &HostInfo{Host: hostInfo.Host, Port: hostInfo.Port})
 			}
-			for _, client := range clients {
-				mapClient, _ := client.(map[string]interface{})
-				subDomain := mapClient["domain"].(string)
-				subClients := mapClient["clients"].([]interface{})
-				var subClientList []*HostInfo
-				for _, subClient := range subClients {
-					subClientMap := subClient.(map[string]interface{})
-					subClientHost := subClientMap["host"].(string)
-					subClientPort := subClientMap["port"].(string)
-					host := &HostInfo{Host: subClientHost, Port: subClientPort}
-					subClientList = append(subClientList, host)
-				}
-				this.DomainHostList.Set(subDomain, subClientList)
-			}
-			//this.DomainHostList.GetMemory().GetData()
-			//log.Println(data)
+			this.DomainHostList.Set(subDomain, subClientList)
 		}
 	}
 }

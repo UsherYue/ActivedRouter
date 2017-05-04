@@ -8,7 +8,9 @@ type MysqlContainer struct {
 func NewMysqlContainer() *MysqlContainer {
 	return nil
 }
-
+func (this *MysqlContainer) Exist(k interface{}) bool {
+	return true
+}
 func (this *MysqlContainer) PushKVPair(k, v interface{}) Containerer {
 	return nil
 }

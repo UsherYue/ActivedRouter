@@ -19,6 +19,10 @@ func (this *MapContainer) PushKVPair(k, v interface{}) Containerer {
 	return this
 }
 
+func (this *MapContainer) Exist(k interface{}) bool {
+	return true
+}
+
 func (this *MapContainer) EraseKVPair(k interface{}) Containerer {
 	if key, ok := k.(string); !ok {
 		panic("key必须是string类型!")

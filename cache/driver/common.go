@@ -16,12 +16,18 @@ type Containerer interface {
 	ResetOrAddKVPair(k string, v interface{}) Containerer
 	ResetKVPairs(kvMaps map[string]interface{}) Containerer
 	ResetOrAddKVPairs(kvMaps map[string]interface{}) Containerer
+	Exist(k interface{}) bool
 	GetData() *map[string]interface{}
 }
 
 //基于内存实现的缓存
 type CacheImpl struct {
 	Driver Containerer //数据缓存驱动
+}
+
+func (self *CacheImpl) Exist(k interface{}) bool {
+
+	return self.Driver.Exist(k)
 }
 
 func (self *CacheImpl) GetStorage() Containerer {

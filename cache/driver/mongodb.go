@@ -8,7 +8,9 @@ type MongoContainer struct {
 func NewMongoContainer() *MongoContainer {
 	return nil
 }
-
+func (this *MongoContainer) Exist(k interface{}) bool {
+	return true
+}
 func (this *MongoContainer) PushKVPair(k, v interface{}) Containerer {
 	return nil
 }

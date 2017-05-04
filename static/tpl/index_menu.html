@@ -16,9 +16,16 @@
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                Settings <b class="caret"></b>
             </a>
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu multi-level">
                <li><a  href="#" id="reserveproxy_setting">ReserveProxy Setting</a></li>
 			   <li><a  href="#"  id="domain_setting" >Domain Setting</a></li>
+			   <li class="dropdown-submenu">
+				 <a  href="#"  id="runmode_setting" >Runmode Setting</a>
+			     <ul class="dropdown-menu">  
+                  <li><a href="#">Server</a></li>  
+                  <li><a href="#">ReserveProxy</a></li>  
+             	</ul>  
+			  </li>
 			   <li class="divider"></li>
 			   <li><a href="#">balabala...</a></li>
             </ul>
@@ -85,9 +92,6 @@
          <div class="modal-footer">
             <button type="button" class="btn btn-default" 
                data-dismiss="modal">关闭
-            </button>
-            <button type="button" class="btn btn-primary">
-               提交更改
             </button>
          </div>
 

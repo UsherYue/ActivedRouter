@@ -8,7 +8,9 @@ type RedisContainer struct {
 func NewRedisContainer() *RedisContainer {
 	return nil
 }
-
+func (this *RedisContainer) Exist(k interface{}) bool {
+	return true
+}
 func (this *RedisContainer) PushKVPair(k, v interface{}) Containerer {
 	return nil
 }

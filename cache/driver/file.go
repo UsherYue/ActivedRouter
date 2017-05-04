@@ -9,6 +9,9 @@ func NewFileContainer() *FileContainer {
 	return nil
 }
 
+func (this *FileContainer) Exist(k interface{}) bool {
+	return true
+}
 func (this *FileContainer) PushKVPair(k, v interface{}) Containerer {
 	return nil
 }
