@@ -1,0 +1,134 @@
+<nav class="navbar navbar-inverse" role="navigation" style="border-radius:0px;">
+   <div class="navbar-header">
+   		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+         <span class="sr-only">切换导航</span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+    </button>
+      <a class="navbar-brand small" href="#" ><span class="glyphicon glyphicon-leaf"></span>&nbsp;&nbsp;Dashboard</a>
+   </div>
+   <div class="collapse navbar-collapse" id="navbar-collapse" >   
+      <ul class="nav navbar-nav" >
+	     <li class="active"><a href="#" id="indexcontent">RouterStatus</a></li>
+         <li ><a href="#" id="activehost">ActiveHosts</a></li>
+         <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+               Settings <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+               <li><a  href="#" id="reserveproxy_setting">ReserveProxy Setting</a></li>
+			   <li><a  href="#"  id="domain_setting" >Domain Setting</a></li>
+			   <li class="divider"></li>
+			   <li><a href="#">balabala...</a></li>
+            </ul>
+         </li>
+       </ul>
+		<div style="margin-top:8px;float:right;"  >
+		   <iframe src="https://ghbtns.com/github-btn.html?user=UsherYue&repo=ActivedRouter&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130px" height="30px"></iframe>
+		   <iframe src="https://ghbtns.com/github-btn.html?user=UsherYue&repo=ActivedRouter&type=fork&count=true&size=large" frameborder="0" scrolling="0" width="120px" height="30px"></iframe>
+           <iframe src="https://ghbtns.com/github-btn.html?user=UsherYue&type=follow&count=true&size=large" frameborder="0" scrolling="0" width="220px" height="30px"></iframe>
+		</div>
+   </div>
+</nav>
+
+
+<script id="Proxy_Client_List" type="text/html">
+<table class="table table-hover" style="margin-top:10px;"> 
+	<th>Server IP</th><th>Port</th><th>Statu</th><th>Operate</th>
+	{{each defaultHosts}}
+		<tr><td>{{$value.Host}}</td><td>{{$value.Port}}</td><td>Online</td><td>
+		<a href="#">remove</a>
+		&nbsp;/&nbsp;<a href="#">Edit</a>
+		</td></tr>
+	{{/each}}
+</table>
+</script>
+
+<script type="text/html" id="tpl_proxysetting">
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="proxy_setting_dlg" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content"  >
+         	<div class="modal-header">
+            <button type="button" class="close" 
+               data-dismiss="modal" aria-hidden="true">
+                  &times;
+            </button>
+            <h4 class="modal-title">
+                 ReserveProxy Setting
+            </h4>
+         </div>
+         <div class="modal-body">           
+				<div class="pull-left">Select Domain:</div>
+				<div class="dropdown pull-left" style="margin-left:5px;margin-top:-12px;">
+					<button type="button" class="btn dropdown-toggle "
+							data-toggle="dropdown" style="height:30px;">
+						<span class="default-domain">{{defaultDomain}}</span>
+						<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu select-domain-menu" role="menu" aria-labelledby="select-domain-menu">
+					<!--列出反向代理域名列表-->
+					{{each domainlist as domain index}}
+						<li role="presentation">
+							<a role="menuitem" tabindex="-1" href="#">{{domain}}</a>
+						</li>
+					{{/each}}
+					</ul>
+				</div>
+				<button type="button" class="btn btn-success  pull-right" style="margin-left:5px;margin-top:-12px;height:30px;">AddProxy</button>
+				<div class="clearfix  pre-scrollable proxy-domain-client" style="clear:both" >
+					{{include 'Proxy_Client_List'}}
+				</div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" 
+               data-dismiss="modal">关闭
+            </button>
+            <button type="button" class="btn btn-primary">
+               提交更改
+            </button>
+         </div>
+
+      </div><!-- /.modal-content -->
+</div><!-- /.modal -->
+</script>
+
+<script type="text/html" id="tpl_domainsetting">
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="domain_setting_dlg" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog" style="500px">
+      <div class="modal-content"  >
+         	<div class="modal-header">
+            <button type="button" class="close" 
+               data-dismiss="modal" aria-hidden="true">
+                  &times;
+            </button>
+            <h4 class="modal-title">
+                 Domain List
+            </h4>
+         </div>
+         <div class="modal-body" style="padding:0px;">           
+			<table class="table table-hover" style="margin-top:10px;"> 
+				<th>DomainName</th>
+				<th>Operate</th>
+				{{each domainInfos}}
+					<tr><td>{{$value}}</td><td>
+					<a href="#">remove</a>
+					&nbsp;/&nbsp;<a href="#">Edit</a>
+					</td></tr>
+				{{/each}}
+			</table>	
+			<div type="button" class="btn btn-success" style="margin-left:5px;">+Add A Domain</div>	
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" 
+               data-dismiss="modal">关闭
+            </button>
+         </div>
+
+      </div><!-- /.modal-content -->
+</div><!-- /.modal -->
+</script>

@@ -2,12 +2,13 @@
 package netservice
 
 import (
-	"ActivedRouter/global"
-	"ActivedRouter/system"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
+	"ActivedRouter/global"
+	"ActivedRouter/system"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -72,6 +73,17 @@ func (self *Http) RouterInfo(w http.ResponseWriter, r *http.Request, _ httproute
 	self.WriteJsonString(w, info)
 }
 
+//反向代理信息
+func (self *Http) ProxyInfos(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	hostInfos := ProxyHandler.GetDomainHostList(prms.ByName("domain"))
+	self.WriteJsonInterface(w, hostInfos)
+}
+
+func (self *Http) DomainInfos(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	keysArray := ProxyHandler.DomainInfos()
+	self.WriteJsonInterface(w, keysArray)
+}
+
 //创建http服务
 func NewHttp(host, port string) *Http {
 	return &Http{Host: host, Port: port}
@@ -86,6 +98,8 @@ func (self *Http) Run() {
 	router.GET("/routerinfo", self.RouterInfo)
 	router.GET("/activeclients", self.ActiveClientInfos)
 	router.GET("/bestclients", self.ActiveClientInfos)
+	router.GET("/proxyinfos/:domain", self.ProxyInfos)
+	router.GET("/domaininfos", self.DomainInfos)
 	router.GET("/", self.Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	router.ServeFiles("/website/*filepath", http.Dir("website"))

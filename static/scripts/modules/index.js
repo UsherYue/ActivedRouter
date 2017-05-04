@@ -2,11 +2,9 @@
 var currentPageID="indexcontent";
 //router info初始化的时候会加载
 var routerInfo=null ;
-var templateEngine =null;
 //cpu
 var cpuUsedPercent=0;
 var cpuFreePercent=0;
-var $=null;
 //
 var hostClientsInfo=null;
 
@@ -117,8 +115,7 @@ var initDiskPie=function(){
 	            ],
 	            hoverBackgroundColor: [
 	                "#FF6384",
-	                "#36A2EB"
-	          
+	                "#36A2EB"   
 	            ]
 	    }]
 	};
@@ -197,45 +194,54 @@ var initHttpLineChart=function(){
 			    data: data,
 			    options: null
 			});
-		
 	});
 
 }
 
-//加载content
-var loadIndexContent=function(){
-	//加载路由服务器信息
-	$.get("/routerinfo",function(data){
-		routerInfo=data;
-		var cpuPercentArr=routerInfo.CPUPERCENTS;
-		var usedPercent=0;
-		for (var i=0;i<cpuPercentArr.length;i++){
-			usedPercent+=cpuPercentArr[i];
-		}
-		cpuUsedPercent=(usedPercent/cpuPercentArr.length).toFixed(1);
-		cpuFreePercent=(100-cpuUsedPercent).toFixed(1)
-		routerInfo.cpuFree=cpuFreePercent ;
-		routerInfo.cpuUsed=cpuUsedPercent
+//初始化菜单事件
+var initMenuEvent=function(){
+	$("#reserveproxy_setting").click(function(){
+		//获取域名列表和缺省的client list
+		var clientList=[];
+		var domainList=[];
+		var defaultDomainSelect="暂无域名";
+		$.get("/domaininfos",function(data,status){
+			domainList=data;
+			if(0<domainList.length){
+				defaultDomainSelect=domainList[0];
+				$.get("/proxyinfos/{0}".format(defaultDomainSelect),function(data){
+					clientList=data;
+				});
+			}
+  		});
+		var html=templateEngine("tpl_proxysetting",{defaultDomain:defaultDomainSelect,domainlist:domainList,defaultHosts:clientList});
+		//动态增加dlg
+		$(html).appendTo($("body"));
+		//域名选择
+		$("#proxy_setting_dlg ul.select-domain-menu li a").click(function(){
+			defaultDomainSelect=$(this).text();
+			$.get("/proxyinfos/{0}".format(defaultDomainSelect),function(data){
+				var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
+				$("#proxy_setting_dlg div.proxy-domain-client").html(res);
+				$("#proxy_setting_dlg  button span.default-domain").text(defaultDomainSelect);
+			});
+			
+		});
+		$("#proxy_setting_dlg").modal("show");
 	});
-	//加载模板
-    var html=loadScriptTpl("tpl_indexconent",routerInfo);
-	//设置html
-	$("#center_content").html(html);
-	//初始化内存
-	initMemPie();
-	//初始化cpu
-	initCpuPie();
-	//初始化磁盘
-	initDiskPie();
-	//init http
-	if(routerInfo.RunMode=="reserveproxy"){
-			initHttpLineChart();
-	}else{
-		//非反向代理模式下隐藏折线图
-		$("#http-proxy-statistics").css("display","none");
-	}
-
-};
+	
+	//域名列表
+	$("#domain_setting").click(function(){
+		$.get("/domaininfos",function(data,status){
+			var html=templateEngine("tpl_domainsetting",{domainInfos:data});
+			//动态增加dlg
+			$(html).appendTo($("body"));
+			$("#domain_setting_dlg").modal("show");
+  		});
+		
+	 	
+	});
+}
 
 
 //加载活跃主机列表
@@ -286,16 +292,54 @@ var loadActiveContent=function(){
 	});
 };
 
+//加载content
+var loadIndexContent=function(){
+	//加载路由服务器信息
+	$.get("/routerinfo",function(data){
+		routerInfo=data;
+		var cpuPercentArr=routerInfo.CPUPERCENTS;
+		var usedPercent=0;
+		for (var i=0;i<cpuPercentArr.length;i++){
+			usedPercent+=cpuPercentArr[i];
+		}
+		cpuUsedPercent=(usedPercent/cpuPercentArr.length).toFixed(1);
+		cpuFreePercent=(100-cpuUsedPercent).toFixed(1)
+		routerInfo.cpuFree=cpuFreePercent ;
+		routerInfo.cpuUsed=cpuUsedPercent
+	});
+	//加载模板
+    var html=loadScriptTpl("tpl_indexconent",routerInfo);
+	//设置html
+	$("#center_content").html(html);
+	//初始化内存
+	initMemPie();
+	//初始化cpu
+	initCpuPie();
+	//初始化磁盘
+	initDiskPie();
+	//init http
+	if(routerInfo.RunMode=="reserveproxy"){
+			initHttpLineChart();
+	}else{
+		//非反向代理模式下隐藏折线图
+		$("#http-proxy-statistics").css("display","none");
+	}
+	initMenuEvent();
+};
 
 //加载footer
 var loadIndexFooter=function(){
 	$('#footer').load('tpl/index_footer.html');  
 };
 
+//加载menu
+var loadIndexMenu=function(){
+	$('#menu_content').load('tpl/index_menu.html');
+}
 
 //导出模块
 var indexModule=function($,template,Chart,Tools){
-	templateEngine=template;
+	window.templateEngine=template;
 	window.$=$;
 	//初始化格式化函数
 	Tools.StringFormatInit();
@@ -303,17 +347,19 @@ var indexModule=function($,template,Chart,Tools){
 	$.ajaxSetup({  
    		 async : false  
 	});  
+	//加载menu
+	loadIndexMenu();
 	//加载首页
 	loadIndexContent();
 	//加载页脚
 	loadIndexFooter();
-	//加载活跃主机
+	//点击加载活跃主机
 	$("#activehost").click(function(){
 	    loadActiveContent();
 		$('#activehost').parent().siblings().removeClass('active');
 		$('#activehost').parent().removeClass('active').addClass('active');
 	});
-	//加载index
+	//点击加载index
 	$("#indexcontent").click(function(){
 		loadIndexContent();
 		$('#indexcontent').parent().siblings().removeClass('active');

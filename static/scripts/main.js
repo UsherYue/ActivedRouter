@@ -20,7 +20,5 @@
 	    }  
 	});
 	//引用相关模块 公共模块在此处引入
-	requirejs(['bootstrap','index'], function() {  
-	
-	});  
+	requirejs(['tools','bootstrap','index']);  
 })();

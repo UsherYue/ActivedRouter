@@ -54,9 +54,25 @@ type HostInfo struct {
 
 //reserver
 type ReseveProxyHandler struct {
-	HostList       []*HostInfo
 	DomainHostList cache.Cacher
 	ProxyMethod    string
+}
+
+//domain list
+func (this *ReseveProxyHandler) DomainInfos() []string {
+	data := *this.DomainHostList.GetStorage().GetData()
+	keysArr := make([]string, 0)
+	for k, _ := range data {
+		keysArr = append(keysArr, k)
+	}
+	return keysArr
+}
+
+//hostlist by domain
+func (this *ReseveProxyHandler) GetDomainHostList(domain string) []*HostInfo {
+	v, _ := this.DomainHostList.Get(domain)
+	vArr, _ := v.([]*HostInfo)
+	return vArr
 }
 
 //random method
