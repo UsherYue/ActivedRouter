@@ -19,6 +19,7 @@ import (
 	"ActivedRouter/cache"
 	"ActivedRouter/global"
 	"ActivedRouter/system"
+	"ActivedRouter/tools"
 )
 
 // var define
@@ -45,8 +46,7 @@ const (
 
 //hander
 var (
-	ProxyHandler = &ReseveProxyHandler{}
-	cfg          = &ReserveProxyConfigData{}
+	ProxyHandler = &ReseveProxyHandler{Cfg: &ReserveProxyConfigData{}}
 )
 
 type HostInfo struct {
@@ -56,8 +56,8 @@ type HostInfo struct {
 
 //负载均衡节点
 type LbNode struct {
-	Domain  string     `json:"domain"`
-	Clients []HostInfo `json:"clients"`
+	Domain  string      `json:"domain"`
+	Clients []*HostInfo `json:"clients"`
 }
 
 //反向代理配置
@@ -75,6 +75,7 @@ type ReserveProxyConfigData struct {
 //reserver
 type ReseveProxyHandler struct {
 	DomainHostList   cache.Cacher
+	Cfg              *ReserveProxyConfigData
 	ProxyCongfigFile string
 	ProxyMethod      string
 }
@@ -91,17 +92,17 @@ func (this *ReseveProxyHandler) DomainInfos() []string {
 
 //增加域名 同步到文件
 func (this *ReseveProxyHandler) AddDomainConfig(domain string) bool {
-	for _, v := range cfg.ReserveProxy {
+	for _, v := range this.Cfg.ReserveProxy {
 		if v.Domain == domain {
 			return true
 		}
 	}
-	cfg.ReserveProxy = append(cfg.ReserveProxy, &LbNode{Domain: domain})
+	this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy, &LbNode{Domain: domain})
 	this.SaveToFile()
 	return true
 }
 func (this *ReseveProxyHandler) SaveToFile() bool {
-	if bts, err := json.Marshal(cfg); err != nil {
+	if bts, err := json.Marshal(this.Cfg); err != nil {
 		return false
 	} else {
 		if file, err := os.OpenFile(this.ProxyCongfigFile, os.O_RDWR|os.O_TRUNC, os.ModePerm); err != nil {
@@ -116,11 +117,39 @@ func (this *ReseveProxyHandler) SaveToFile() bool {
 	return true
 }
 
+func (this *ReseveProxyHandler) DeletenLbNodeSlice(slice []*LbNode, index int) []*LbNode {
+	length := len(slice)
+	if slice == nil || length == 0 || length < index {
+		return nil
+	}
+	if length-1 == index {
+		return slice[:index]
+	} else if length > index {
+		return append(slice[:index], slice[index+1:]...)
+	}
+	return nil
+}
+func (this *ReseveProxyHandler) DeleteClientSlice(slice []*HostInfo, index int) []*HostInfo {
+	length := len(slice)
+	if slice == nil || length == 0 || length < index {
+		return nil
+	}
+	if length-1 == index {
+		return slice[:index]
+	} else if length > index {
+		return append(slice[:index], slice[index+1:]...)
+	}
+	return nil
+}
+
 //删除域名 同步到文件
 func (this *ReseveProxyHandler) DeleteDomainConig(domain string) bool {
-	for k, v := range cfg.ReserveProxy {
+	for k, v := range this.Cfg.ReserveProxy {
 		if v.Domain == domain {
-			cfg.ReserveProxy = append(cfg.ReserveProxy[:k], cfg.ReserveProxy[k+1:]...)
+			//this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy[:k], this.Cfg.ReserveProxy[k+1:]...)
+			//this.Cfg.ReserveProxy = this.DeletenLbNodeSlice(this.Cfg.ReserveProxy, k)
+			ret, _ := tools.DeleteSlice(this.Cfg.ReserveProxy, k)
+			this.Cfg.ReserveProxy = ret.([]*LbNode)
 		}
 	}
 	this.SaveToFile()
@@ -128,24 +157,52 @@ func (this *ReseveProxyHandler) DeleteDomainConig(domain string) bool {
 }
 
 //删除反向代理服务器 ,并且删除配置文件中信息
-func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) (bool, string) {
-	for _, v := range cfg.ReserveProxy {
+func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) bool {
+	for _, v := range this.Cfg.ReserveProxy {
 		if v.Domain == domain {
-			for _, client := range v.Clients {
+			for index, client := range v.Clients {
 				if client.Host == hostip && client.Port == port {
-					return false, "已经存在"
+					//删除元素
+					//v.Clients = append(v.Clients[:index], v.Clients[index+1:]...)
+					//v.Clients = this.DeleteClientSlice(v.Clients[:index], index)
+					ret, _ := tools.DeleteSlice(v.Clients, index)
+					v.Clients = ret.([]*HostInfo)
+					if this.SaveToFile() {
+						return true
+					} else {
+						return false
+					}
+
 				}
 			}
-			v.Clients = append(v.Clients, HostInfo{port, hostip})
 		}
 	}
-	this.SaveToFile()
-	return true, "成功添加!"
+	return false
 }
 
 //增加反向代理服务器 ,并且增加配置文件中信息
-func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) bool {
-	return true
+//-1 重复添加 0 失败 1成功
+func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) (bool, int) {
+	for _, v := range this.Cfg.ReserveProxy {
+		if v.Domain == domain {
+			for _, client := range v.Clients {
+				if client.Host == hostip && client.Port == port {
+					return false, -1
+				}
+			}
+			//域名存在无重复配置添加client
+			v.Clients = append(v.Clients, &HostInfo{port, hostip})
+			if this.SaveToFile() {
+				return true, 1
+			} else {
+				return false, 0
+			}
+		}
+	}
+	//域名不存在添加域名=>clients
+	this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy, &LbNode{domain, []*HostInfo{&HostInfo{port, hostip}}})
+	this.SaveToFile()
+	return true, 1
 }
 
 //hostlist by domain
@@ -256,16 +313,16 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 	if bts, err := ioutil.ReadAll(file); err != nil {
 		log.Fatalln(err.Error())
 	} else {
-		json.Unmarshal(bts, &cfg)
-		HttpSwitch = cfg.HttpSwitch
-		HttpsSwitch = cfg.HttpsSwitch
+		json.Unmarshal(bts, &this.Cfg)
+		HttpSwitch = this.Cfg.HttpSwitch
+		HttpsSwitch = this.Cfg.HttpsSwitch
 		//http https  off
 		if HttpSwitch == SwitchOff && HttpsSwitch == SwitchOff {
 			log.Fatalln("请开启http或者https代理开关.....")
 		}
 		//获取http开关下的配置
 		if HttpSwitch == SwitchOn {
-			HttpAddr = cfg.HttpProxyAddr
+			HttpAddr = this.Cfg.HttpProxyAddr
 			if HttpAddr == "" {
 				HttpAddr = DefaultHttpAddr
 			}
@@ -274,26 +331,26 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		}
 		//获取https开关下的配置
 		if HttpsSwitch == SwitchOn {
-			HttpsAddr = cfg.HttpsProxyAddr
+			HttpsAddr = this.Cfg.HttpsProxyAddr
 			if HttpsAddr == "" {
 				HttpsAddr = DefaultHttsAddr
 			}
-			HttpsCrt = cfg.HttpsCrt
-			HttpsKey = cfg.HttpsKey
+			HttpsCrt = this.Cfg.HttpsCrt
+			HttpsKey = this.Cfg.HttpsKey
 			log.Println("Https Switch:" + HttpsSwitch)
 			log.Println("Https Addr:" + HttpsAddr)
 			log.Println("Https  Crt:" + HttpsCrt)
 			log.Println("Https  Key:" + HttpsKey)
 		}
 
-		if cfg.ProxyMethod == "" {
+		if this.Cfg.ProxyMethod == "" {
 			this.ProxyMethod = global.Random
 		} else {
-			this.ProxyMethod = cfg.ProxyMethod
+			this.ProxyMethod = this.Cfg.ProxyMethod
 		}
 		//获取到不同域名
 		this.DomainHostList = cache.Newcache("memory")
-		clients := cfg.ReserveProxy
+		clients := this.Cfg.ReserveProxy
 		if len(clients) == 0 {
 			log.Fatalln("Config file miss proxy host......")
 		}
@@ -301,7 +358,7 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 			subDomain := client.Domain
 			var subClientList []*HostInfo
 			for _, hostInfo := range client.Clients {
-				subClientList = append(subClientList, &hostInfo)
+				subClientList = append(subClientList, hostInfo)
 			}
 			this.DomainHostList.Set(subDomain, subClientList)
 		}
