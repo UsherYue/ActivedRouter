@@ -83,13 +83,7 @@ func (self *Http) DomainInfos(w http.ResponseWriter, r *http.Request, prms httpr
 	keysArray := ProxyHandler.DomainInfos()
 	self.WriteJsonInterface(w, keysArray)
 }
-func (self *Http) AddProxyClient(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
-	if ProxyHandler.AddDomainConfig(prms.ByName("domain")) {
-		self.WriteJsonString(w, "{status:1}")
-	} else {
-		self.WriteJsonString(w, "{status:0}")
-	}
-}
+
 func (self *Http) AddDomain(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
 	if ProxyHandler.AddDomainConfig(prms.ByName("domain")) {
 		self.WriteJsonString(w, `{"status":"1"}`)
@@ -102,6 +96,31 @@ func (self *Http) DelDomain(w http.ResponseWriter, r *http.Request, prms httprou
 		self.WriteJsonString(w, `{"status":"1"}`)
 	} else {
 		self.WriteJsonString(w, `{"status":"0"}`)
+	}
+}
+
+func (self *Http) AddProxyClient(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	r.ParseForm()
+	domain := r.Form.Get("domain")
+	host := r.Form.Get("host")
+	port := r.Form.Get("port")
+	if ret := ProxyHandler.AddProxyClient(domain, host, port); ret == -1 {
+		self.WriteJsonString(w, `{"status":0,"data":{"code":-1}}`)
+	} else if ret == 0 {
+		self.WriteJsonString(w, `{"status":0,"data":{"code":0}}`)
+	} else {
+		self.WriteJsonString(w, `{"status":1}`)
+	}
+}
+func (self *Http) DeleteProxyClient(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	r.ParseForm()
+	domain := r.Form.Get("domain")
+	host := r.Form.Get("host")
+	port := r.Form.Get("port")
+	if ret := ProxyHandler.DeleteProxyClient(domain, host, port); !ret {
+		self.WriteJsonString(w, `{"status":0}`)
+	} else {
+		self.WriteJsonString(w, `{"status":1}`)
 	}
 }
 
@@ -119,10 +138,12 @@ func (self *Http) Run() {
 	router.GET("/routerinfo", self.RouterInfo)
 	router.GET("/activeclients", self.ActiveClientInfos)
 	router.GET("/bestclients", self.ActiveClientInfos)
+	//反向代理配置文件读写
 	router.GET("/proxyinfos/:domain", self.ProxyInfos)
 	router.GET("/adddomain/:domain", self.AddDomain)
 	router.GET("/deldomain/:domain", self.DelDomain)
-	router.GET("/addproxyclient/clientinfo/:clientinfo", self.AddProxyClient)
+	router.GET("/addproxyclient", self.AddProxyClient)
+	router.GET("/delproxyclient", self.DeleteProxyClient)
 	router.GET("/domaininfos", self.DomainInfos)
 	router.GET("/", self.Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))

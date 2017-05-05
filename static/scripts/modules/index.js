@@ -195,8 +195,102 @@ var initHttpLineChart=function(){
 			    options: null
 			});
 	});
-
 }
+
+function InitProxyTableEvent(){
+	    var hostInput=$("#proxy_setting_dlg table tr:eq(1) input:eq(0)");
+		var portInput=$("#proxy_setting_dlg table tr:eq(1) input:eq(1)");
+		//提交
+		$("#proxy_setting_dlg table tr:eq(1) button:eq(0)").click(function(){
+			   var host=hostInput.val();
+			   var port=portInput.val();
+               if(!/^[\w\.]{1,255}$/i .test(host)||!/^[0-9]{1,5}$/i .test(port)){
+				  $("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('<div class="bg-danger" >参数不合法</div>');
+			   }else{
+				   //添加反向代理client
+					var domain=$("#proxy_setting_dlg span.default-domain").text();
+					 $.get('/addproxyclient',{host:host,port:port,domain:domain},function(data){
+						  $.get("/proxyinfos/{0}".format(domain),function(data){
+								var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
+								$("#proxy_setting_dlg div.proxy-domain-client").html(res);
+								$("#proxy_setting_dlg  button span.default-domain").text(domain);
+							});
+					});
+				}	 
+		});
+		//取消	
+		$("#proxy_setting_dlg table tr:eq(1) button:eq(1)").click(function(){
+			 hostInput.val('');
+			 portInput.val('');
+			 hostInput.parent().hasClass('has-success')?hostInput.parent().removeClass('has-success'):false
+			 hostInput.parent().hasClass('has-error')?hostInput.parent().removeClass('has-error'):false
+			 hostInput.next().hasClass('glyphicon-ok')?hostInput.next().removeClass('glyphicon-ok'):false
+		 	 hostInput.next().hasClass('glyphicon-remove')?hostInput.next().removeClass('glyphicon-remove'):false
+			 portInput.parent().hasClass('has-success')?portInput.parent().removeClass('has-success'):false
+			 portInput.parent().hasClass('has-error')?portInput.parent().removeClass('has-error'):false
+			 portInput.next().hasClass('glyphicon-ok')?portInput.next().removeClass('glyphicon-ok'):false
+		 	 portInput.next().hasClass('glyphicon-remove')?portInput.next().removeClass('glyphicon-remove'):false
+			$("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('');
+			$("#proxy_setting_dlg table tr:eq(1)").remove();
+		});
+		
+		
+		hostInput.keyup(function(data){
+			 var host=$(this).val()
+			 if(!/^[\w\.]{1,255}$/i .test(host)){
+					$("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('<div class="bg-danger" >ip或者域名不合法</div>');
+					hostInput.parent().removeClass('has-success');
+					hostInput.parent().addClass('has-error');
+					hostInput.next().removeClass('glyphicon-ok');
+					hostInput.next().addClass('glyphicon-remove');
+			}else{
+					hostInput.parent().removeClass('has-error');
+					hostInput.next().removeClass('glyphicon-remove');
+					hostInput.parent().addClass('has-success');
+					hostInput.next().addClass('glyphicon-ok');
+					$("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('');
+			}	    
+		});
+		portInput.keyup(function(data){
+			 var port=$(this).val()
+			 if(!/^[0-9]{1,5}$/i .test(port)){
+					$("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('<div class="bg-danger" >端口不合法</div>');
+					portInput.parent().removeClass('has-success');
+					portInput.parent().addClass('has-error');
+					portInput.next().removeClass('glyphicon-ok');
+					portInput.next().addClass('glyphicon-remove');
+			}else{
+					portInput.parent().removeClass('has-error');
+					portInput.next().removeClass('glyphicon-remove');
+					portInput.parent().addClass('has-success');
+					portInput.next().addClass('glyphicon-ok');
+					$("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('');
+			}	    
+		})
+}
+
+function InitProxyRowEvent(){
+	//删除域名
+	$("#proxy_setting_dlg table tr td a.remove-client").click(function(){
+		var domain=$("#proxy_setting_dlg span.default-domain").text();
+		var host=$(this).parent().parent().children("td").eq(0).text();
+		var port=$(this).parent().parent().children("td").eq(1).text();
+		 $.get('/delproxyclient',{host:host,port:port,domain:domain},function(data){
+//			  $.get("/proxyinfos/{0}".format(domain),function(data){
+//					var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
+//					$("#proxy_setting_dlg div.proxy-domain-client").html(res);
+//					$("#proxy_setting_dlg  button span.default-domain").text(domain);
+//				});
+		});  
+		
+	});
+	//编辑域名
+	$("#proxy_setting_dlg table tr td a.edit-client").click(function(){
+		
+		 alert(2);
+	});
+}
+
 
 //初始化菜单事件
 var initMenuEvent=function(){
@@ -224,9 +318,20 @@ var initMenuEvent=function(){
 				var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
 				$("#proxy_setting_dlg div.proxy-domain-client").html(res);
 				$("#proxy_setting_dlg  button span.default-domain").text(defaultDomainSelect);
+					InitProxyRowEvent();
 			});
-			
 		});
+		//add proxy
+		$("#btnAddProxy").click(function(){
+			//$("#proxy_setting_dlg table tr:eq(2)").css("display","table-row");
+				var html=templateEngine("Proxy_Client_EditRow",{});
+				if($("#proxy_setting_dlg table tr:eq(1)").attr('flag')!="proxy-edit"){
+					$("#proxy_setting_dlg table tr:eq(0)").after(html);
+					InitProxyTableEvent();
+				}
+		});
+	    InitProxyRowEvent();
+		//初始化事件
 		$("#proxy_setting_dlg").modal("show");
 	});
 	
@@ -239,7 +344,6 @@ var initMenuEvent=function(){
 			$("#domain_setting_dlg").modal("show");
   		});
 		
-	 	
 	});
 }
 

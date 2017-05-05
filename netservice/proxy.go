@@ -182,27 +182,35 @@ func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) b
 
 //增加反向代理服务器 ,并且增加配置文件中信息
 //-1 重复添加 0 失败 1成功
-func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) (bool, int) {
+func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) int {
 	for _, v := range this.Cfg.ReserveProxy {
 		if v.Domain == domain {
 			for _, client := range v.Clients {
 				if client.Host == hostip && client.Port == port {
-					return false, -1
+					return -1
 				}
 			}
 			//域名存在无重复配置添加client
 			v.Clients = append(v.Clients, &HostInfo{port, hostip})
-			if this.SaveToFile() {
-				return true, 1
+			//热更新
+			if !this.DomainHostList.Has(domain) {
+				this.DomainHostList.Set(domain, []*HostInfo{&HostInfo{port, hostip}})
 			} else {
-				return false, 0
+				clientList, _ := this.DomainHostList.Get(domain)
+				clientInfoList, _ := clientList.([]*HostInfo)
+				this.DomainHostList.Set(domain, append(clientInfoList, &HostInfo{port, hostip}))
+			}
+			if this.SaveToFile() {
+				return 1
+			} else {
+				return 0
 			}
 		}
 	}
 	//域名不存在添加域名=>clients
 	this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy, &LbNode{domain, []*HostInfo{&HostInfo{port, hostip}}})
 	this.SaveToFile()
-	return true, 1
+	return 1
 }
 
 //hostlist by domain

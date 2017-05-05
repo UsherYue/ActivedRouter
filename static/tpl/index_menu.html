@@ -42,14 +42,36 @@
 
 <script id="Proxy_Client_List" type="text/html">
 <table class="table table-hover" style="margin-top:10px;"> 
-	<th>Server IP</th><th>Port</th><th>Statu</th><th>Operate</th>
+	<tr ><th>Server IP</th><th>Port</th><th>Status</th><th>Operate</th><tr/>
 	{{each defaultHosts}}
 		<tr><td>{{$value.host}}</td><td>{{$value.port}}</td><td>Online</td><td>
-		<a href="#">remove</a>
-		&nbsp;/&nbsp;<a href="#">Edit</a>
+		<a href="#" class="remove-client">remove</a>
+		&nbsp;/&nbsp;<a href="#" class="edit-client">Edit</a>
 		</td></tr>
 	{{/each}}
 </table>
+</script>
+
+<script id="Proxy_Client_EditRow" type="text/html">
+	<tr flag="proxy-edit">
+		<td>
+			<div class="form-group has-success has-feedback" style="width:200px">
+			  <input type="text" class="form-control" id="inputHost" aria-describedby="inputSuccess2Status">
+			  <span class="glyphicon  form-control-feedback" aria-hidden="true"></span>
+			</div>
+		</td>
+		<td>
+			<div class="form-group has-success has-feedback" style="width:100px">
+			  <input type="text" class="form-control" id="inputHost" aria-describedby="inputSuccess2Status">
+			  <span class="glyphicon  form-control-feedback" aria-hidden="true"></span>
+			</div>
+		</td>
+		<td>
+			<button type="button" class="btn btn-success  btn-sm" > <span class="glyphicon glyphicon-ok" ></span></button>&nbsp;
+			<button type="button" class="btn btn-success  btn-sm" ><span class="glyphicon glyphicon-remove "></span></button>
+		</td>
+		<td></td>
+	 <tr>
 </script>
 
 <script type="text/html" id="tpl_proxysetting">
@@ -84,7 +106,7 @@
 					{{/each}}
 					</ul>
 				</div>
-				<button type="button" class="btn btn-success  pull-right" style="margin-left:5px;margin-top:-12px;height:30px;">AddProxy</button>
+				<button type="button" class="btn btn-success  pull-right" style="margin-left:5px;margin-top:-12px;height:30px;" id="btnAddProxy">New Proxy Client</button>
 				<div class="clearfix  pre-scrollable proxy-domain-client" style="clear:both" >
 					{{include 'Proxy_Client_List'}}
 				</div>
