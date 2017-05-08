@@ -197,10 +197,10 @@ var initHttpLineChart=function(){
 }
 
 //op=0 删除  op=1编辑修改
-function InitProxyInsertRowEvent(op){
+function InitProxyInsertRowEvent(op,data){
 	    var hostInput=$("#proxy_setting_dlg table tr.insert-row input:eq(0)");
 		var portInput=$("#proxy_setting_dlg table tr.insert-row input:eq(1)");
-		//提交
+		//确认添加
 		if(!op){
 			$("#proxy_setting_dlg table tr.insert-row button:eq(0)").click(function(){
 			   var host=hostInput.val();
@@ -220,6 +220,7 @@ function InitProxyInsertRowEvent(op){
 				}	 
 			});
 		}else{
+			//确认修改
 			$("#proxy_setting_dlg table tr.insert-row button:eq(0)").click(function(){
 			   var host=hostInput.val();
 			   var port=portInput.val();
@@ -227,7 +228,18 @@ function InitProxyInsertRowEvent(op){
 				  $("#proxy_setting_dlg table tr.insert-row td:eq(3)").html('<div class="bg-danger" >参数不合法</div>');
 			   }else{
 					var domain=$("#default-domain").text();
-					alert("修改成功!");
+					$.get("/updateproxyclient",{domain:domain,prehost:data.host,preport:data.port,updatehost:host,updateport:port},function(data){
+						 if(data.status==1){
+							selectRow=$("#proxy_setting_dlg table tr.insert-row").prev();
+							selectRow.show();
+							$("#proxy_setting_dlg table tr.insert-row").remove();
+							//更新为修改后的结果
+							selectRow.find("td:eq(0)").text(host);
+							selectRow.find("td:eq(1)").text(port);
+						}else{
+							$("#proxy_setting_dlg table tr.insert-row td:eq(3)").html('<div class="bg-danger" >修改失败!</div>');
+						}
+					});
 				}	 
 			});
 		}
@@ -249,7 +261,6 @@ function InitProxyInsertRowEvent(op){
 			$("#proxy_setting_dlg table tr.insert-row").remove();
 			
 		});
-		
 		//输入框控制		
 		hostInput.keyup(function(data){
 			 var host=$(this).val()
@@ -298,7 +309,7 @@ function InitProxyRowEvent(){
 					$("#proxy_setting_dlg div.proxy-domain-client").html(res);
 					$("#default-domain").text(domain);
 					//重新初始化ProxyRowEvent
-					InitProxyInsertRowEvent(0);
+					InitProxyRowEvent();
 				});
 		});  
 	});
@@ -314,10 +325,13 @@ function InitProxyRowEvent(){
 		var insertObj=selectRow.next();
 		var hostInput=insertObj.find("input:eq(0)");
 		var portInput=insertObj.find("input:eq(1)");
-		hostInput.val(selectRow.find("td:eq(0)").text());
-		portInput.val(selectRow.find("td:eq(1)").text());
-		//重新初始化ProxyRowEvent
-		InitProxyInsertRowEvent(1);
+		var defaultDomain=$("#default-domain").text();
+		var preHost=selectRow.find("td:eq(0)").text();
+		var prePort=selectRow.find("td:eq(1)").text();
+		hostInput.val(preHost);
+		portInput.val(prePort);
+		//初始化编辑框事件
+		InitProxyInsertRowEvent(1,{host:preHost,port:prePort});
 	});
 }
 
@@ -454,7 +468,6 @@ var loadIndexContent=function(){
 		//非反向代理模式下隐藏折线图
 		$("#http-proxy-statistics").css("display","none");
 	}
-	initMenuEvent();
 };
 
 //加载footer
@@ -495,6 +508,7 @@ var indexModule=function($,template,Chart,Tools){
 		$('#indexcontent').parent().siblings().removeClass('active');
 		$('#indexcontent').parent().removeClass('active').addClass('active');
 	});
+	initMenuEvent();
 }
 
 //定义模块

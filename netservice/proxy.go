@@ -179,12 +179,41 @@ func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) b
 					} else {
 						return false
 					}
-
 				}
 			}
 		}
 	}
 	return false
+}
+
+//更新反向代理client信息
+func (this *ReseveProxyHandler) UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort string) bool {
+	for _, v := range this.Cfg.ReserveProxy {
+		if v.Domain == domain {
+			for _, client := range v.Clients {
+				if client.Host == preHost && client.Port == prePort {
+					client.Host = updateHost
+					client.Port = updatePort
+					//热更反向代理client信息
+					if this.DomainHostList.Has(domain) {
+						clientInfoList := this.GetDomainHostList(domain)
+						for _, item := range clientInfoList {
+							if item.Host == preHost && item.Port == prePort {
+								item.Host = updateHost
+								item.Port = updatePort
+							}
+						}
+					}
+					if this.SaveToFile() {
+						return true
+					} else {
+						return false
+					}
+				}
+			}
+		}
+	}
+	return true
 }
 
 //增加反向代理服务器 ,并且增加配置文件中信息

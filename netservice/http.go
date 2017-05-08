@@ -123,8 +123,23 @@ func (self *Http) DeleteProxyClient(w http.ResponseWriter, r *http.Request, prms
 	}
 }
 
+//http://127.0.0.1:8080/updateproxyclient?domain=www.xxx.com&prehost=121&preport=21&updatehost=xxxxxxx&updateport=1223
 func (self *Http) UpdateProxyClient(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
-	w.Write([]byte("hello,world"))
+	r.ParseForm()
+	domain := r.Form.Get("domain")
+	updateHost := r.Form.Get("updatehost")
+	updatePort := r.Form.Get("updateport")
+	preHost := r.Form.Get("prehost")
+	prePort := r.Form.Get("preport")
+	if domain == "" || updateHost == "" || updatePort == "" || preHost == "" || prePort == "" {
+		self.WriteJsonString(w, `{"status":0}`)
+		return
+	}
+	if ret := ProxyHandler.UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort); !ret {
+		self.WriteJsonString(w, `{"status":0}`)
+	} else {
+		self.WriteJsonString(w, `{"status":1}`)
+	}
 }
 
 //创建http服务
