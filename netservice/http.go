@@ -1,4 +1,3 @@
-//对于客户端 服务器以及http服务的网络封装
 package netservice
 
 import (
@@ -124,6 +123,10 @@ func (self *Http) DeleteProxyClient(w http.ResponseWriter, r *http.Request, prms
 	}
 }
 
+func (self *Http) UpdateProxyClient(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	w.Write([]byte("hello,world"))
+}
+
 //创建http服务
 func NewHttp(host, port string) *Http {
 	return &Http{Host: host, Port: port}
@@ -133,6 +136,7 @@ func NewHttp(host, port string) *Http {
 func (self *Http) Run() {
 	log.Printf("开始启动http服务,%s:%s........\n", self.Host, self.Port)
 	router := httprouter.New()
+	//统计信息
 	router.GET("/clientinfos", self.ClientInfos)
 	router.GET("/statistics", self.Statistics)
 	router.GET("/routerinfo", self.RouterInfo)
@@ -144,7 +148,9 @@ func (self *Http) Run() {
 	router.GET("/deldomain/:domain", self.DelDomain)
 	router.GET("/addproxyclient", self.AddProxyClient)
 	router.GET("/delproxyclient", self.DeleteProxyClient)
+	router.GET("/updateproxyclient", self.UpdateProxyClient)
 	router.GET("/domaininfos", self.DomainInfos)
+	//静态文件路由
 	router.GET("/", self.Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	router.ServeFiles("/website/*filepath", http.Dir("website"))

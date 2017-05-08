@@ -1,3 +1,5 @@
+//提供http、tcp、反向代理等网络服务
+//balabalabala......
 package netservice
 
 import (

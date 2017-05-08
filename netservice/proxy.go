@@ -1,6 +1,3 @@
-/**
-* reserve proxy
- */
 package netservice
 
 import (
