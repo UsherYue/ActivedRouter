@@ -207,13 +207,13 @@ function InitProxyTableEvent(){
                if(!/^[\w\.]{1,255}$/i .test(host)||!/^[0-9]{1,5}$/i .test(port)){
 				  $("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('<div class="bg-danger" >参数不合法</div>');
 			   }else{
-				   //添加反向代理client
-					var domain=$("#proxy_setting_dlg span.default-domain").text();
+				   //添加反向代理client 此处出现域名重复现象 www.abc.comwww.abc.com
+					var domain=$("#default-domain").text();
 					 $.get('/addproxyclient',{host:host,port:port,domain:domain},function(data){
 						  $.get("/proxyinfos/{0}".format(domain),function(data){
 								var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
 								$("#proxy_setting_dlg div.proxy-domain-client").html(res);
-								$("#proxy_setting_dlg  button span.default-domain").text(domain);
+								$("#default-domain").text(domain);
 							});
 					});
 				}	 
@@ -233,7 +233,6 @@ function InitProxyTableEvent(){
 			$("#proxy_setting_dlg table tr:eq(1) td:eq(3)").html('');
 			$("#proxy_setting_dlg table tr:eq(1)").remove();
 		});
-		
 		
 		hostInput.keyup(function(data){
 			 var host=$(this).val()
@@ -271,23 +270,27 @@ function InitProxyTableEvent(){
 
 function InitProxyRowEvent(){
 	//删除域名
+	 //此处出现域名重复现象 www.abc.comwww.abc.com
 	$("#proxy_setting_dlg table tr td a.remove-client").click(function(){
-		var domain=$("#proxy_setting_dlg span.default-domain").text();
+		var domain=$("#default-domain").text();
 		var host=$(this).parent().parent().children("td").eq(0).text();
 		var port=$(this).parent().parent().children("td").eq(1).text();
 		 $.get('/delproxyclient',{host:host,port:port,domain:domain},function(data){
-//			  $.get("/proxyinfos/{0}".format(domain),function(data){
-//					var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
-//					$("#proxy_setting_dlg div.proxy-domain-client").html(res);
-//					$("#proxy_setting_dlg  button span.default-domain").text(domain);
-//				});
+			  $.get("/proxyinfos/{0}".format(domain),function(data){
+					var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
+					$("#proxy_setting_dlg div.proxy-domain-client").html(res);
+					$("#default-domain").text(domain);
+					//重新初始化ProxyRowEvent
+					InitProxyRowEvent();
+				});
 		});  
 		
 	});
 	//编辑域名
 	$("#proxy_setting_dlg table tr td a.edit-client").click(function(){
 		
-		 alert(2);
+		//重新初始化ProxyRowEvent
+		InitProxyRowEvent();
 	});
 }
 
@@ -317,7 +320,7 @@ var initMenuEvent=function(){
 			$.get("/proxyinfos/{0}".format(defaultDomainSelect),function(data){
 				var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
 				$("#proxy_setting_dlg div.proxy-domain-client").html(res);
-				$("#proxy_setting_dlg  button span.default-domain").text(defaultDomainSelect);
+				$("#default-domain").text(defaultDomainSelect);
 					InitProxyRowEvent();
 			});
 		});

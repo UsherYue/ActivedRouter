@@ -167,6 +167,16 @@ func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) b
 					//v.Clients = this.DeleteClientSlice(v.Clients[:index], index)
 					ret, _ := tools.DeleteSlice(v.Clients, index)
 					v.Clients = ret.([]*HostInfo)
+					//热更新删除域名信息
+					if this.DomainHostList.Has(domain) {
+						clientInfoList := this.GetDomainHostList(domain)
+						for index, item := range clientInfoList {
+							if item.Host == hostip && item.Port == port {
+								resultSlice, _ := tools.DeleteSlice(clientInfoList, index)
+								this.DomainHostList.Set(domain, resultSlice)
+							}
+						}
+					}
 					if this.SaveToFile() {
 						return true
 					} else {
