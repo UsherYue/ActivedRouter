@@ -98,6 +98,18 @@ func (self *Http) DelDomain(w http.ResponseWriter, r *http.Request, prms httprou
 	}
 }
 
+//更新反向代理信息
+//将一个域名以及其下面的反向代理客户端更新为另一个域名
+func (self *Http) UpdateDomain(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	preDomain := r.Form.Get("predomain")
+	updateDomain := r.Form.Get("updatedomain")
+	if ProxyHandler.UpdateDomain(preDomain, updateDomain) {
+		self.WriteJsonString(w, `{"status":"1"}`)
+	} else {
+		self.WriteJsonString(w, `{"status":"0"}`)
+	}
+}
+
 func (self *Http) AddProxyClient(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	r.ParseForm()
 	domain := r.Form.Get("domain")
@@ -161,6 +173,7 @@ func (self *Http) Run() {
 	router.GET("/proxyinfos/:domain", self.ProxyInfos)
 	router.GET("/adddomain/:domain", self.AddDomain)
 	router.GET("/deldomain/:domain", self.DelDomain)
+	router.GET("/updatedomain", self.UpdateDomain)
 	router.GET("/addproxyclient", self.AddProxyClient)
 	router.GET("/delproxyclient", self.DeleteProxyClient)
 	router.GET("/updateproxyclient", self.UpdateProxyClient)

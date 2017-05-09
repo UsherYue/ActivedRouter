@@ -389,6 +389,18 @@ var initMenuEvent=function(){
 		$.get("/domaininfos",function(data,status){
 			var html=templateEngine("tpl_domainsetting",{domainInfos:data});
 			$(html).appendTo($("body"));
+			 //增加新域名如果域名存在则增加失败
+			$("#domain_setting_dlg div.btn-add-domain").click(function(){
+				  var insertHtml=templateEngine("Proxy_Domain_EditRow",{});
+				  $("#domain_setting_dlg table tr:last").after(insertHtml);
+				  $("#domain_setting_dlg table tr.insert-row button:eq(0)").click(function(){
+						alert(111);
+				  });
+				 $("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
+					   $("#domain_setting_dlg table tr.insert-row").remove();
+				  });
+				  
+			});
 			$("#domain_setting_dlg").modal("show");
   		});	
 	});

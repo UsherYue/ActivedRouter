@@ -249,6 +249,12 @@ func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) int 
 	return 1
 }
 
+//update domain
+func (this *ReseveProxyHandler) UpdateDomain(preDomain, updateDomain string) bool {
+
+	return true
+}
+
 //hostlist by domain
 func (this *ReseveProxyHandler) GetDomainHostList(domain string) []*HostInfo {
 	v, _ := this.DomainHostList.Get(domain)

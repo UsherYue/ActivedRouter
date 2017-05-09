@@ -52,6 +52,34 @@
 </table>
 </script>
 
+<script id="Proxy_Domain_List" type="text/html">
+<table class="table table-hover" style="margin-top:10px;"> 
+	<tr ><th>Server IP</th><th>Operate</th><tr/>
+	{{each domainInfos}}
+		<tr>
+			<td>{{$value}}</td>
+			<td><a href="#" class="remove-client">remove</a>&nbsp;/&nbsp;<a href="#" class="edit-client">Edit</a></td>
+		</tr>
+	{{/each}}
+</table>
+</script>
+
+
+<script id="Proxy_Domain_EditRow" type="text/html">
+	<tr flag="domain-edit" class="insert-row">
+		<td >
+			<div class="form-group has-success has-feedback" >
+			  <input type="text" class="form-control" id="inputDomain" aria-describedby="inputSuccess2Status">
+			  <span class="glyphicon  form-control-feedback" aria-hidden="true"></span>
+			</div>
+		</td>
+		<td>
+			<button type="button" class="btn btn-success  btn-sm" > <span class="glyphicon glyphicon-ok" ></span></button>&nbsp;
+			<button type="button" class="btn btn-success  btn-sm" ><span class="glyphicon glyphicon-remove "></span></button>
+		</td>
+	 <tr>
+</script>
+
 <script id="Proxy_Client_EditRow" type="text/html">
 	<tr flag="proxy-edit" class="insert-row">
 		<td>
@@ -125,8 +153,8 @@
 <!-- 模态框（Modal） -->
 <div class="modal fade" id="domain_setting_dlg" tabindex="-1" role="dialog" 
    aria-labelledby="myModalLabel" aria-hidden="true">
-   <div class="modal-dialog" style="500px">
-      <div class="modal-content"  >
+   <div class="modal-dialog">
+      <div class="modal-content"  style="width:400px" >
          	<div class="modal-header">
             <button type="button" class="close" 
                data-dismiss="modal" aria-hidden="true">
@@ -136,18 +164,9 @@
                  Domain List
             </h4>
          </div>
-         <div class="modal-body" style="padding:0px;">           
-			<table class="table table-hover" style="margin-top:10px;"> 
-				<th>DomainName</th>
-				<th>Operate</th>
-				{{each domainInfos}}
-					<tr><td>{{$value}}</td><td>
-					<a href="#">remove</a>
-					&nbsp;/&nbsp;<a href="#">Edit</a>
-					</td></tr>
-				{{/each}}
-			</table>	
-			<div type="button" class="btn btn-success" style="margin-left:5px;">+Add A Domain</div>	
+         <div class="modal-body pre-scrollable" style="padding:0px;">           
+			{{include 'Proxy_Domain_List'}}
+			<div type="button" class="btn btn-success btn-add-domain" style="margin-left:5px;">+Add A Domain</div>	
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-default" 
