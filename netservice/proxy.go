@@ -251,6 +251,20 @@ func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) int 
 
 //update domain
 func (this *ReseveProxyHandler) UpdateDomain(preDomain, updateDomain string) bool {
+	for _, v := range this.Cfg.ReserveProxy {
+		if v.Domain == preDomain {
+			v.Domain = updateDomain
+			//热更新
+			data, _ := this.DomainHostList.Get(preDomain)
+			this.DomainHostList.Del(preDomain)
+			this.DomainHostList.Set(updateDomain, data)
+			if this.SaveToFile() {
+				return true
+			} else {
+				return false
+			}
+		}
+	}
 
 	return true
 }
