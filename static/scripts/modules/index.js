@@ -315,6 +315,12 @@ function InitProxyRowEvent(){
 	});
 	//编辑域名
 	$("#proxy_setting_dlg table tr td a.edit-client").click(function(){
+		//删除前一个编辑框
+		var insertObj=$("#proxy_setting_dlg table tr.insert-row");
+		if(insertObj.length>0){
+			insertObj.prev().show();
+			insertObj.remove();
+		}
 		var html=templateEngine("Proxy_Client_EditRow",{});
 		//将edit 插入到选定行下一行,并且隐藏本行
 		var selectRow=$(this).parent().parent();
@@ -322,7 +328,7 @@ function InitProxyRowEvent(){
 		//隐藏选择航
 		selectRow.hide();
 		//插入edit row
-		var insertObj=selectRow.next();
+		insertObj=selectRow.next();
 		var hostInput=insertObj.find("input:eq(0)");
 		var portInput=insertObj.find("input:eq(1)");
 		var defaultDomain=$("#default-domain").text();
