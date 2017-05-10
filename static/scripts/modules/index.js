@@ -5,14 +5,7 @@ var routerInfo=null ;
 //cpu
 var cpuUsedPercent=0;
 var cpuFreePercent=0;
-//
 var hostClientsInfo=null;
-
-//字节到gb
-function bytesToGB(bytes){
-	var gb=(bytes/1024/1024/1024).toFixed(2).toString();
-	return gb ;
-}
 
 //加载script模板
 var loadScriptTpl=function(scriptid,data){	
@@ -462,8 +455,7 @@ var initMenuEvent=function(){
 				$("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
 					selectRow.show();
 					$("#domain_setting_dlg table tr.insert-row").remove();
-				});	
-				
+				});			
 			});
 			$("#domain_setting_dlg").modal("show");
 			$("#domain_setting_dlg").on('hide.bs.modal',function(){
@@ -570,9 +562,8 @@ var indexModule=function($,template,Chart,Tools){
 	//关闭模板缓存
 	template.config.cache=false;
 	window.templateEngine=template;
+	//初始化jquery
 	window.$=$;
-	//初始化格式化函数
-	Tools.StringFormatInit();
 	//同步ajax
 	window.$.ajaxSetup({  
    		 async : false ,
@@ -596,6 +587,7 @@ var indexModule=function($,template,Chart,Tools){
 		$('#indexcontent').parent().siblings().removeClass('active');
 		$('#indexcontent').parent().removeClass('active').addClass('active');
 	});
+	//初始化菜单事件
 	initMenuEvent();
 }
 
