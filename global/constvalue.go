@@ -12,12 +12,9 @@ const (
 
 //运行模式相关
 const (
-	ServerMode       = "server" //服务器模式
-	ClientMode       = "client" //客户端模式
-	ProxyMode        = "proxy"
+	ServerMode       = "server"       //服务器模式
+	ClientMode       = "client"       //客户端模式
 	ReserveProxyMode = "reserveproxy" //反向代理模式
-	MixMode          = "mix"          //server+proxy模式
-	HttpRouterMode   = "httprouter"   //http路由模式
 )
 
 //负载方法

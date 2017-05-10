@@ -41,16 +41,6 @@ func StartNetworkService() {
 			go ProxyHandler.StartProxyServer()
 			log.Println("ActivedRouter is Running  In ReserveProxy Mode...")
 		}
-	case global.MixMode:
-		{
-			//启动路由服务
-			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
-			//启动http服务
-			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
-			//启动反向代理
-			go ProxyHandler.StartProxyServer()
-			log.Println("ActivedRouter is Running  In Mix Mode...")
-		}
 	}
 	global.NetworkSwitch <- true
 }
