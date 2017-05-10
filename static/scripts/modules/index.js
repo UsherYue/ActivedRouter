@@ -382,6 +382,9 @@ var initMenuEvent=function(){
 		});
 	    InitProxyRowEvent();
 		$("#proxy_setting_dlg").modal("show");
+		$("#proxy_setting_dlg").on('hide.bs.modal',function(){
+				$(this).remove();
+		});
 	});
 	
 	//域名列表
@@ -463,6 +466,9 @@ var initMenuEvent=function(){
 				
 			});
 			$("#domain_setting_dlg").modal("show");
+			$("#domain_setting_dlg").on('hide.bs.modal',function(){
+				$(this).remove();
+			});
   		});	
 	});
 }
@@ -561,13 +567,16 @@ var loadIndexMenu=function(){
 
 //导出模块
 var indexModule=function($,template,Chart,Tools){
+	//关闭模板缓存
+	template.config.cache=false;
 	window.templateEngine=template;
 	window.$=$;
 	//初始化格式化函数
 	Tools.StringFormatInit();
 	//同步ajax
-	$.ajaxSetup({  
-   		 async : false  
+	window.$.ajaxSetup({  
+   		 async : false ,
+		 cache:false
 	});  
 	//加载menu
 	loadIndexMenu();

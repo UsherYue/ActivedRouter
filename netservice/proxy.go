@@ -89,14 +89,19 @@ func (this *ReseveProxyHandler) DomainInfos() []string {
 
 //增加域名 同步到文件
 func (this *ReseveProxyHandler) AddDomainConfig(domain string) bool {
+	//判断域名是否存在
 	for _, v := range this.Cfg.ReserveProxy {
 		if v.Domain == domain {
-			return true
+			return false
 		}
 	}
 	this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy, &LbNode{Domain: domain})
-	this.SaveToFile()
-	return true
+	if this.SaveToFile() {
+		//热更新
+		this.DomainHostList.Set(domain, []*HostInfo{})
+		return true
+	}
+	return false
 }
 func (this *ReseveProxyHandler) SaveToFile() bool {
 	if bts, err := json.Marshal(this.Cfg); err != nil {
@@ -143,14 +148,15 @@ func (this *ReseveProxyHandler) DeleteClientSlice(slice []*HostInfo, index int) 
 func (this *ReseveProxyHandler) DeleteDomainConig(domain string) bool {
 	for k, v := range this.Cfg.ReserveProxy {
 		if v.Domain == domain {
-			//this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy[:k], this.Cfg.ReserveProxy[k+1:]...)
-			//this.Cfg.ReserveProxy = this.DeletenLbNodeSlice(this.Cfg.ReserveProxy, k)
+			//删除配置
 			ret, _ := tools.DeleteSlice(this.Cfg.ReserveProxy, k)
 			this.Cfg.ReserveProxy = ret.([]*LbNode)
+			//热更新
+			this.DomainHostList.Del(domain)
+			this.SaveToFile()
 		}
 	}
-	this.SaveToFile()
-	return true
+	return false
 }
 
 //删除反向代理服务器 ,并且删除配置文件中信息
@@ -160,8 +166,6 @@ func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) b
 			for index, client := range v.Clients {
 				if client.Host == hostip && client.Port == port {
 					//删除元素
-					//v.Clients = append(v.Clients[:index], v.Clients[index+1:]...)
-					//v.Clients = this.DeleteClientSlice(v.Clients[:index], index)
 					ret, _ := tools.DeleteSlice(v.Clients, index)
 					v.Clients = ret.([]*HostInfo)
 					//热更新删除域名信息
