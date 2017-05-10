@@ -391,26 +391,15 @@ var initMenuEvent=function(){
 			$(html).appendTo($("body"));
 			 //增加新域名如果域名存在则增加失败
 			$("#domain_setting_dlg div.btn-add-domain").click(function(){
-				var insertRow=$("#domain_setting_dlg table tr[flag='domain-edit']");
-				//保证只出现一个插入框
-				if(insertRow.length==0){
-					   var insertHtml=templateEngine("Proxy_Domain_EditRow",{});
-					  //行尾插入
-					  $("#domain_setting_dlg table tr:last").after(insertHtml);
-					  insertRow=$("#domain_setting_dlg table tr[flag='domain-edit']");
-					  insertRow.find("button:eq(0)").click(function(){
-							//添加域名
-							var addDomain=insertRow.find("input").val();
-							$.get("/adddomain/{0}".format(addDomain),function(data){
-								//添加完成 
-								$("#domain_setting_dlg table tr:last").after("<tr><td>{0}</td><td><a href=\"#\" class=\"remove-client\">remove</a>&nbsp;/&nbsp;<a href=\"#\" class=\"edit-client\">Edit</a></td></tr>".format(addDomain));
-								$("#domain_setting_dlg table tr.insert-row").remove();
-							});
-					  });
-					 $("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
-						   $("#domain_setting_dlg table tr.insert-row").remove();
-					  });
-				}  
+				  var insertHtml=templateEngine("Proxy_Domain_EditRow",{});
+				  $("#domain_setting_dlg table tr:last").after(insertHtml);
+				  $("#domain_setting_dlg table tr.insert-row button:eq(0)").click(function(){
+						alert(111);
+				  });
+				 $("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
+					   $("#domain_setting_dlg table tr.insert-row").remove();
+				  });
+				  
 			});
 			$("#domain_setting_dlg").modal("show");
   		});	
