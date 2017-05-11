@@ -3,7 +3,7 @@
 
 Email:   usher.yue@gmail.com		
 
-目前正在开发中........
+正在努力开发中........
 			
 <br>
 ##  <b>简单介绍</b>		
@@ -11,48 +11,36 @@ Email:   usher.yue@gmail.com
 
 	1、可以集群服务器的监控,通过提供的web Dashboard可以时刻监控每一台服务器的负载、内存、网络、
 	磁盘等信息。
-	
-        
+	      
 	2、反向代理服务器功能,例如Nginx的功能,可以针对不同的域名对不同的业务服务器集群进行反向代理。
         
-	3、Server & Client 模式组合下,可以用作服务器监控使用,并且可以设置监控报警,Server端可以选择性
-	开启监控Dashboard,用于直观的web界面监控。
-	
-	4、服务器监控报警,通过配置每一台服务器的监控报警阀值,来触发不同的脚本,从而达到服务器报警功能,
-	后期支持:短信报警、邮件报警等等。
+	3、Server & Client 模式组合下,可以用作服务器监控使用,Server端可以监控Dashboard,用于直观的web界面监控。
         
-	5、实现基于真实负载的反向代理和请求路由。 支持 Random 和 Alived 模式,分别代表随机转发和基于负载转发。
+	4、反向代理支持 Random 和 Alived 模式,默认Random模式,Alived模式需要在客户端运行Client模式的服务进行数据上报。
         
-	6、快速配置反向代理服务,省去配置nginx反向代理的麻烦步骤,一般流量下的负载足以应付。 
+	5、快速配置反向代理服务,省去配置nginx反向代理的麻烦步骤,一般流量下的负载足以应付。 
         
-##  二、快速入门		
-###  2.1、编译安装
-在系统下运行如下脚本,会在当前目录生成ActivedRouter二进制程序,然后我们配置相应的配置文件,并且运行二进制程序即可启动服务。
-
-	linux64下    boot_linux64.sh
-	darwin64下   boot_darwin64.sh
-	linux32下    boot_linux32.sh
-## 三、详细配置教程
+##  二、快速入门  
 </br>
- 3.1、[ActivedRouter实现反向代理服务器](www.xxx.com)
- 		
- 	
- 3.2、[ActivedRouter实现服务器监控功能](www.xxx.com)		
- 		
- 3.3、[ActivedRouter实现基于真机负载的反向代理服务器](www.xxx.com)
+###  2.1、编译安装	
+	项目目录下运行  go build ,即可生成二进制程序。
+
+###  2.1、编译安装	  
+
+ *  [ActivedRouter实现Random模式的反向代理服务](www.xxx.com)  
+ 
+ * [ActivedRouter实现Aclived模式的反向代理服务](www.xxx.com) 		
+ *  [ActivedRouter实现服务器监控功能](www.xxx.com)
 	
-	
- 3.4、[ActivedRouter配合第三方语言实现API路由](www.xxx.com)	
+ *  [ActivedRouter实现带活跃检测的负载均衡服务](www.xxx.com)	
                
-##  四、工作模式和配置文件
+##  三、工作模式和配置文件
 
-### 4.1、http/https反向代理模式(Reserve Proxy),类似nginx的反向代理功能 。
+### 3.1、http反向代理模式(Reserve Proxy),等同nginx的反向代理
 
-`运行命令： ActivedRouter --runmode=reserveproxy`
-
-
-`编译命令： boot_*.sh 选择不通平台的boot文件开始编译安装`
-`运行命令： ActivedRouter --runmode=proxy 运行反向代理服务`
+	运行命令： ActivedRouter --runmode=client	     运行client 模式
+	运行命令： ActivedRouter --runmode=server	     运行server 模式
+	运行命令： ActivedRouter --runmode=reserveproxy 运行反向代理模式(支持reserveproxy&server)		
 `配置文件：`
         
  	{	
@@ -94,16 +82,10 @@ Email:   usher.yue@gmail.com
 		
 		]
 	}
-`启动代理服务器:`
-	分别运行不同平台下的boot文件
-	boot_darwin64.sh
-	boot_linux32.sh
-	boot_linux64.sh
-	编译安装完毕之后 运行 ./ActivedRouter --runmode=reserveproxy 即可 , 可自行编写shell脚本实现系统级启动 和守护进程。
-
-### 4.2、server和client模式可以配合完全服务器监控,提供web仪表盘。
-`客户端运行: ActivedRouter --runmode=server `	
-`client.json`	
+	
+### 3.2、server和client模式可以配合完全服务器监控,提供web仪表盘。
+	客户端运行: ActivedRouter --runmode=client
+`相关配置文件client.json`	
 
 		{
 			"domain":"wwww.xxx.com",  //客户端服务器的域名可空
@@ -112,25 +94,26 @@ Email:   usher.yue@gmail.com
 			"127.0.0.1:8888",
 			"172.16.200.202:9999"
 			]
-	   }
-		
-`服务器运行: ActivedRouter --runmode=client `	
-`server.ini`	
+	   }    
+  
+*** 
+	服务器运行: ActivedRouter --runmode=server  
 
-		#服务器模式下的配置选项
-		#路由服务器监听的地址
-		host=127.0.0.1
-		#服务器监听的端口号
-		port=8888   
-		#服务模式 moniter & router  
-		srvmode=router
-		#http 提供http路由服务的ip,端口。
-		httphost=127.0.0.1
-		httpport=8080
+`相关配置文件server.json`	  
 
+	{
+		"host":"127.0.0.1",
+		"port":"8888",
+		"srvmode":"router",
+		"httphost":"127.0.0.1",
+		"httpport":"8080"
+	}
 
 
-### 4.3、服务器监控模式触发脚本
+
+
+
+### 4.3、服务器监控模式触发脚本(完善中)
 `当监控服务器下,路由服务器开启srvmode=moniter之后才会触发`		
 
 	{   
@@ -199,7 +182,7 @@ Email:   usher.yue@gmail.com
     </tr>
    </tbody>
 </table>    
-##  提供api服务器监控功能可以实时返回各服务器状态  
+##  后期提供api服务器监控功能可以实时返回各服务器状态  
 <table >
    <thead>
      <tr>
