@@ -160,10 +160,10 @@ var initHttpLineChart=function(){
 		            //是否填充
 		            fill: false,
 		            // 设置贝塞尔曲线下的argb颜色
-		            backgroundColor: colorTable[colorIndex][0],
+		            backgroundColor: colorTable[colorIndex%colorTable.length][0],
 		            //设置曲线颜色
-		            borderColor: colorTable[colorIndex][1],
-					pointBackgroundColor: "#fff",
+		            borderColor: colorTable[colorIndex%colorTable.length][1],
+					 pointBackgroundColor: "#fff",
 		            pointBorderWidth: 1,
 		            pointHoverRadius: 5,
 		            pointHoverBackgroundColor: "rgba(255,205,86,1)",
@@ -290,7 +290,7 @@ function InitProxyInsertRowEvent(op,data){
 }
 
 //初始化反向代理列表普通行的事件
-function InitProxyRowEvent(){
+function InitReservProxyClientEvent(){
 	//删除域名
 	$("#proxy_setting_dlg table tr td a.remove-client").click(function(){
 		var domain=$("#default-domain").text();
@@ -336,36 +336,47 @@ function InitProxyRowEvent(){
 
 //初始化菜单事件
 var initMenuEvent=function(){
+	//点击加载活跃主机
+	$("#activehost").click(function(){
+	    loadActiveContent();
+		$('#activehost').parent().siblings().removeClass('active');
+		$('#activehost').parent().removeClass('active').addClass('active');
+	});
+	//点击加载index
+	$("#indexcontent").click(function(){
+		loadIndexContent();
+		$('#indexcontent').parent().siblings().removeClass('active');
+		$('#indexcontent').parent().removeClass('active').addClass('active');
+	});
+	//反向代理配置
 	$("#reserveproxy_setting").click(function(){
-		//获取域名列表和缺省的client list
 		var clientList=[];
 		var domainList=[];
-		var defaultDomainSelect="暂无域名";
+		var defaultDomainSelect="";
+		//域名信息
 		$.get("/domaininfos",function(data,status){
 			domainList=data;
-			if(0<domainList.length){
-				defaultDomainSelect=domainList[0];
+			defaultDomainSelect=data.length?data[0]:"No Domain"
+			if(data.length>0){			
 				$.get("/proxyinfos/{0}".format(defaultDomainSelect),function(data){
 					clientList=data;
 				});
 			}
   		});
 		var html=templateEngine("tpl_proxysetting",{defaultDomain:defaultDomainSelect,domainlist:domainList,defaultHosts:clientList});
-		//动态增加dlg到body
 		$(html).appendTo($("body"));
 		//域名选择切换事件
 		$("#proxy_setting_dlg ul.select-domain-menu li a").click(function(){
 			defaultDomainSelect=$(this).text();
-			$.get("/proxyinfos/{0}".format(defaultDomainSelect),function(data){
-				var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
+			$.get("/proxyinfos/{0}".format(defaultDomainSelect),function(domainClients){
+				var res=templateEngine("Proxy_Client_List",{defaultHosts:domainClients});
 				$("#proxy_setting_dlg div.proxy-domain-client").html(res);
 				$("#default-domain").text(defaultDomainSelect);
-					InitProxyRowEvent();
+					InitReservProxyClientEvent();
 			});
 		});
 		//add proxy
 		$("#btnAddProxy").click(function(){
-			//$("#proxy_setting_dlg table tr:eq(2)").css("display","table-row");
 				var html=templateEngine("Proxy_Client_EditRow",{});
 				if($("#proxy_setting_dlg table tr:eq(1)").attr('flag')!="proxy-edit"){
 					$("#proxy_setting_dlg table tr:eq(0)").after(html);
@@ -373,10 +384,11 @@ var initMenuEvent=function(){
 					InitProxyInsertRowEvent(0);
 				}
 		});
-	    InitProxyRowEvent();
+	    InitReservProxyClientEvent();
+		//Open Diload
 		$("#proxy_setting_dlg").modal("show");
 		$("#proxy_setting_dlg").on('hide.bs.modal',function(){
-				$(this).remove();
+			$(this).remove();
 		});
 	});
 	
@@ -575,18 +587,6 @@ var indexModule=function($,template,Chart,Tools){
 	loadIndexContent();
 	//加载页脚
 	loadIndexFooter();
-	//点击加载活跃主机
-	$("#activehost").click(function(){
-	    loadActiveContent();
-		$('#activehost').parent().siblings().removeClass('active');
-		$('#activehost').parent().removeClass('active').addClass('active');
-	});
-	//点击加载index
-	$("#indexcontent").click(function(){
-		loadIndexContent();
-		$('#indexcontent').parent().siblings().removeClass('active');
-		$('#indexcontent').parent().removeClass('active').addClass('active');
-	});
 	//初始化菜单事件
 	initMenuEvent();
 }

@@ -16,9 +16,6 @@
 			},
 			chartjs:{
 				exports:'Chart'
-			},
-			index:{
-				deps:['tools']
 			}
 	    }  
 	});

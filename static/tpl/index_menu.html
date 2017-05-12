@@ -44,10 +44,11 @@
 <table class="table table-hover" style="margin-top:10px;"> 
 	<tr ><th>Server IP</th><th>Port</th><th>Status</th><th>Operate</th><tr/>
 	{{each defaultHosts}}
-		<tr><td>{{$value.host}}</td><td>{{$value.port}}</td><td>Online</td><td>
-		<a href="#" class="remove-client">remove</a>
-		&nbsp;/&nbsp;<a href="#" class="edit-client">Edit</a>
-		</td></tr>
+		<tr>
+			<td>{{$value.host}}</td>
+			<td>{{$value.port}}</td>
+			<td>Online</td><td><a href="#" class="remove-client">remove</a>&nbsp;/&nbsp;<a href="#" class="edit-client">Edit</a></td>
+		</tr>
 	{{/each}}
 </table>
 </script>

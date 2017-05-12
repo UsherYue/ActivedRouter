@@ -125,12 +125,11 @@ func (p *Process) Gids() ([]int32, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	gids := make([]int32, 0, 3)
 	gids = append(gids, int32(k.KiRgid), int32(k.KiNgroups[0]), int32(k.KiSvuid))
-
 	return gids, nil
 }
+
 func (p *Process) Terminal() (string, error) {
 	k, err := p.getKProc()
 	if err != nil {
