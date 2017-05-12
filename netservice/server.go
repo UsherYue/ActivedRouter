@@ -13,7 +13,6 @@ import (
 )
 
 //服务器检测时间5s一次
-//后期可以配置脚本化
 const (
 	CHECK_INTERCAL          = 1
 	CHECK_ACTIVE_INTERVAL   = 2                 //活跃检测周期
@@ -35,7 +34,7 @@ func NewServer(host, port string) *Server {
 	return &Server{Host: host, Port: port, TaskFlag: make(chan bool, 0)}
 }
 
-//数据接收
+//Data Receive
 func (self *Server) OnDataRecv(c net.Conn) {
 	log.Printf("accept connect from %s\n", c.RemoteAddr().String())
 	defer c.Close()
@@ -128,7 +127,7 @@ func (self *Server) moniterClient() {
 
 //run router server
 func (self *Server) Run() {
-	log.Printf("开始启动路由服务器服务,%s:%s........\n", self.Host, self.Port)
+	log.Printf("Begin Running Router Service,%s:%s........\n", self.Host, self.Port)
 	addr := ""
 	if self.Host == "*" {
 		addr = ":" + self.Port

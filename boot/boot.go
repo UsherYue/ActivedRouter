@@ -5,17 +5,16 @@
 
 package boot
 
-import . "ActivedRouter/netservice"
+import (
+	. "ActivedRouter/netservice"
+)
 
-/**
-* 初始化
- */
 func init() {
 	//parse cmd line
-	parseCmdline()
-	//parse config file
-	parseConfigfile()
-	//	start network
-	StartNetworkService()
-
+	if parseCmdline() {
+		//parse config file
+		parseConfigfile()
+		//	start network
+		StartNetworkService()
+	}
 }

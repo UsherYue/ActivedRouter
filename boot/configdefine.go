@@ -1,13 +1,13 @@
 package boot
 
-//客户端配置
+//client config mapping struct
 type ClientConfigData struct {
 	Domain           string   `json:"domain"`
 	ClusterName      string   `json:"cluster"`
 	RouterServerList []string `json:"router_list"`
 }
 
-//服务器配置
+//server config mapping struct
 type ServerConfigData struct {
 	Host       string `json:"host"`
 	Port       string `json:"port"`

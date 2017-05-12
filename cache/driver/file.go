@@ -1,10 +1,8 @@
 package driver
 
-//Mysql实现的内存驱动
 type FileContainer struct {
 }
 
-//创建数据channer
 func NewFileContainer() *FileContainer {
 	return nil
 }

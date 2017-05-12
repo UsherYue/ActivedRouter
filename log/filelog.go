@@ -7,19 +7,19 @@ import (
 
 type MyLogger struct {
 	//log
-	_loger      *log.Logger
-	_fileHandle *os.File
+	loger      *log.Logger
+	fileHandle *os.File
 }
 
 //正常日志输出
 func (this *MyLogger) LogOut(msg ...interface{}) {
-	this._loger.Println(msg)
+	this.loger.Println(msg)
 
 }
 
 //打印错误
 func (this *MyLogger) LogErr(msg ...interface{}) {
-	this._loger.Fatalln(msg)
+	this.loger.Fatalln(msg)
 }
 
 //创建日志
@@ -31,14 +31,14 @@ func NewLogger(logfile string) *MyLogger {
 	}
 	loger := log.New(file, "\r\n", log.Ldate|log.Ltime|log.Lshortfile)
 	obj := &MyLogger{}
-	obj._fileHandle = file
-	obj._loger = loger
+	obj.fileHandle = file
+	obj.loger = loger
 	return obj
 }
 
 //关闭文件
 func (this *MyLogger) Close() {
-	this._fileHandle.Close()
+	this.fileHandle.Close()
 }
 
 //每天记录一次日志......

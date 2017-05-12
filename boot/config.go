@@ -12,7 +12,7 @@ import (
 	"ActivedRouter/netservice"
 )
 
-//解析配置文件
+//parse config
 func parseConfigfile() {
 	switch RunMode {
 	case ServerMode:
@@ -37,7 +37,7 @@ func parseConfigfile() {
 	}
 }
 
-//加载json文件
+//load client json config file
 func loadClientJsonConfig(config string) {
 	file, err := os.Open(config)
 	defer file.Close()
@@ -50,7 +50,7 @@ func loadClientJsonConfig(config string) {
 		var ClientMap map[string]interface{}
 		err := json.Unmarshal(bts, &ClientMap)
 		if err != nil {
-			log.Fatalln("加载client.json失败")
+			log.Fatalln("load client.json error")
 		}
 		domain, _ := ClientMap["domain"].(string)
 		cluster, _ := ClientMap["cluster"].(string)
@@ -59,7 +59,7 @@ func loadClientJsonConfig(config string) {
 		ConfigMap["cluster"] = cluster
 		Cluster = cluster
 		Domain = domain
-		//服务器列表
+		//server list
 		var serverArr []string
 		for _, v := range serverList {
 			serverArr = append(serverArr, v.(string))
@@ -69,7 +69,7 @@ func loadClientJsonConfig(config string) {
 	}
 }
 
-//加载服务器json
+//loade serverConfig
 func loadServerJsonConfig(config string) {
 	if file, err := os.Open(config); err == nil {
 		if bts, err := ioutil.ReadAll(file); err == nil {
@@ -77,8 +77,6 @@ func loadServerJsonConfig(config string) {
 			if json.Unmarshal(bts, &serverConfig) != nil {
 				goto Exit
 			} else {
-				//解析
-				//log.Println(sercerConfig)
 				ConfigMap["host"] = serverConfig.Host
 				ConfigMap["port"] = serverConfig.Port
 				ConfigMap["srvmode"] = serverConfig.ServerMode
@@ -94,28 +92,4 @@ func loadServerJsonConfig(config string) {
 	}
 Exit:
 	log.Fatalln("server config load error!")
-}
-
-//load dns router
-func loadDnsRouterConfig(routerFile string) {
-	file, err := os.Open(routerFile)
-	defer func() {
-		file.Close()
-	}()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	//reader
-	if bts, err := ioutil.ReadAll(file); err != nil {
-		log.Fatalln(err.Error())
-	} else {
-		var DnsMap []map[string]interface{}
-		err := json.Unmarshal(bts, &DnsMap)
-		if err != nil {
-			log.Fatalln(err.Error())
-		} else {
-			DnsScript = DnsMap
-			log.Println(string(bts))
-		}
-	}
 }

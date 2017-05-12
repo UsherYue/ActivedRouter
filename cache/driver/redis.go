@@ -1,10 +1,8 @@
 package driver
 
-//Mysql实现的内存驱动
 type RedisContainer struct {
 }
 
-//创建数据channer
 func NewRedisContainer() *RedisContainer {
 	return nil
 }

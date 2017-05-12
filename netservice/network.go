@@ -1,5 +1,8 @@
-//提供http、tcp、反向代理等网络服务
-//balabalabala......
+//ActivedRouter
+//Author:usher.yue
+//Amail:usher.yue@gmail.com
+//TencentQQ:4223665
+// Provide http/https, tcp and reverse proxy  services
 package netservice
 
 import (
@@ -14,9 +17,9 @@ func StartNetworkService() {
 	switch global.RunMode {
 	case global.ServerMode:
 		{
-			//启动路由服务
+			//Run Routing Service
 			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
-			//运行http服务
+			//Run Http Service
 			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
 			log.Println("ActivedRouter is Running In Server Mode...")
 		}
@@ -26,18 +29,18 @@ func StartNetworkService() {
 			serverListArr := strings.Split(serverList, "|")
 			for _, server := range serverListArr {
 				hostinfo := strings.Split(server, ":")
-				//运行客户端代理
+				//Run Client Agent
 				go NewClient(hostinfo[0], hostinfo[1]).Run()
 			}
 			log.Println("ActivedRouter is Running  In Client Mode...")
 		}
 	case global.ReserveProxyMode:
 		{
-			//启动路由服务
+			//Run Routing Service
 			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
-			//开启http服务
+			//Run Http Service
 			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
-			//开启反向代理服务
+			//Run ReserveProxy Service
 			go ProxyHandler.StartProxyServer()
 			log.Println("ActivedRouter is Running  In ReserveProxy Mode...")
 		}

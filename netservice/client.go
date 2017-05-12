@@ -1,12 +1,13 @@
 package netservice
 
 import (
-	"ActivedRouter/global"
-	"ActivedRouter/system"
-	"ActivedRouter/tools"
 	"log"
 	"net"
 	"time"
+
+	"ActivedRouter/global"
+	"ActivedRouter/system"
+	"ActivedRouter/tools"
 )
 
 type Client struct {
@@ -22,7 +23,7 @@ const (
 	HEARTBEAT_INTERVAL = 5
 )
 
-//创建http服务
+//create client agent
 func NewClient(host, port string) *Client {
 	return &Client{Host: host, Port: port, TaskFlag: make(chan bool, 0), ConnectFlag: make(chan bool, 0), Closed: false}
 }
@@ -33,7 +34,7 @@ func (self *Client) ConnectToServer(addr string) {
 	defer func() {
 		if res := recover(); res != nil {
 			log.Println("connect to router" + self.Host + ":" + self.Port + " server error!")
-			//链接失败尝试重复
+			//Re-connect when can't connect to router server
 			self.ConnectFlag <- true
 		}
 	}()
@@ -41,22 +42,20 @@ func (self *Client) ConnectToServer(addr string) {
 	self.ConnSocket = conn
 	defer conn.Close()
 
-	//短连接设置
 	//conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	//conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-	log.Println("连接远程路由服务器成功!")
-	//定时获取系统状态进行上报
+	log.Println("The connection to the remote routing server was successful!")
+	//Report the system status
 	t1 := time.NewTimer(time.Second * HEARTBEAT_INTERVAL)
 	for {
 		select {
 		case <-t1.C:
 			{
-				//控制发送数据
-				//ch <- true
+				//Control to send data
 				t1.Reset(time.Second * HEARTBEAT_INTERVAL)
 				info := system.SysInfo(global.RunMode, global.Cluster, global.Domain)
 				_, err := self.ConnSocket.Write([]byte(tools.Base64Encode([]byte(info))))
-				//如果断开连接重复连接 直到连接到路由服务器为止
+				//attempt connecting to router server until the client agent connect success
 				if err != nil && !self.Closed {
 					conn, err := net.DialTimeout("tcp", addr, time.Second*5)
 					if err == nil {
@@ -68,25 +67,24 @@ func (self *Client) ConnectToServer(addr string) {
 	}
 }
 
-//connect to remote router server
+//connect to remote routing server
 func (self *Client) Run() {
-	log.Printf("正在连接远程路由服务器,目标地址%s:%s........\n", self.Host, self.Port)
+	log.Printf("Connecting to remote routing server, destination address %s:%s........\n", self.Host, self.Port)
 	addr := ""
 	if self.Host == "*" {
 		addr = ":" + self.Port
 	} else {
 		addr = self.Host + ":" + self.Port
 	}
-	//此处应该是连接到多个路由服务器
+	//Connect to multiple routing servers
 	go self.ConnectToServer(addr)
-	//多次尝试
 	go func() {
 		for {
-			//2s尝试一次重新链接
+			//2s try to re-link once
 			time.Sleep(time.Second * 2)
 			<-self.ConnectFlag
 			if !self.Closed {
-				log.Println("尝试链接" + addr)
+				log.Println("Attempt Connecting" + addr)
 				go self.ConnectToServer(addr)
 			} else {
 				break
@@ -97,11 +95,11 @@ func (self *Client) Run() {
 	self.TaskFlag <- true
 }
 
-//停止服务器
+//Disconnnect
 func (self *Client) Disconnect() {
 	self.Closed = true
-	//停止服务器之前先关闭所有连接
+	//Stop all connections before stopping the server
 	self.ConnSocket.Close()
-	//发送关闭消息退出关闭任务
+	//Send Close Message Exit Close the task
 	<-self.TaskFlag
 }

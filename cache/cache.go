@@ -2,8 +2,8 @@
 //Author:usher.yue
 //Amail:usher.yue@gmail.com
 //TencentQQ:4223665
-//缓存驱动接口定义
-//可以自定义扩展驱动类型 默认是 memory driver
+//cache driver interface define
+//we can customize the drive type,default driver is memory
 
 package cache
 
@@ -11,7 +11,7 @@ import (
 	"ActivedRouter/cache/driver"
 )
 
-//cache接口声明
+//cache  interface declare
 type Cacher interface {
 	GetStorage() driver.Containerer
 	Set(k string, v interface{})

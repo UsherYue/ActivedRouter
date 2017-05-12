@@ -1,29 +1,27 @@
 package global
 
-//全局数据
-//配置文件相关
+//config file
 const (
-	ServerConfig     = "config/server.ini"
 	ServerJsonConfig = "config/server.json"
 	HookConfig       = "config/hook.json"
 	ClientConfig     = "config/client.json"
 	HttpProxyConfig  = "config/http_proxy.json"
 )
 
-//运行模式相关
+//run mode
 const (
-	ServerMode       = "server"       //服务器模式
-	ClientMode       = "client"       //客户端模式
-	ReserveProxyMode = "reserveproxy" //反向代理模式
+	ServerMode       = "server"       //server mode
+	ClientMode       = "client"       //client mode
+	ReserveProxyMode = "reserveproxy" //reserveproxy mode
 )
 
-//负载方法
+//load balance method
 const (
 	Alived = "alived"
 	Random = "random"
 )
 
-// 服务器权重 1-9  权重越高 那么服务器处理能力越高 在服务的时候优先被使用
+//Server weight,The higher the weight, the easier it is to be scheduled
 const (
 	HOSTWEIGHT_1 = iota + 1
 	HOSTWEIGHT_2
@@ -37,19 +35,12 @@ const (
 )
 
 const (
+	DescTemplate  = "\n\033[35;1mActivedRouter Description:\033[0m\n\033[1mActiveRouter is a load balancing software and provides a web dashboard for management.\nAuthor:usher.yue\nEmail:ushe.yue@gmail.com\033[0m\033[35;1m\n\nUSAGE:\033[0m\n\t\033[1mActiveRouter --runmode= [arguments]\033[0m\n  \033[35;1m\nThe commands are:\033[0m\n"
 	UsageTemplate = `
-		ActiveRouter 是一个简单的基于路由分发和反向代理的负载均衡监控服务,并且提供一个方便管理的仪表盘用于快速配置、挂载、卸载.
-		Author:usher.yue
-		Email:ushe.yue@gmail.com
-		ActivedRouter Desceiption:
-			mode运行模式可以是 Server、Client、Reserveproxy,分别代表路由服务器模式、客户端模式、反向代理服务器模式。
-		The commands are:
-			ActiveRouter --runmode=Server/Client/ReserveProxy
-			Client 启动客户端模式,一般运行在需要监控、代理的服务器上
-			Server 启动服务器模式
-			ReserveProxy 启动反向代理服务,可选择性的开启关闭服务器模式
-		The Help:
-		    ActiveRouter --help or  -h or -help
-		`
-	UsageRunmodeError = `"runmode参数错误,参考 ActiveRouter --runmode=Client/Reserveproxy/Server"`
+	ActiveRouter --runmode=Server  Running In Server Mode 
+	ActiveRouter --runmode=Client  Running In Client Mode
+	ActiveRouter --runmode=ReserveProxy   Running In ReserveProxy Mode
+`
+	TheHelpTemplate   = "\033[35;1mThe Help:\033[0m\nActiveRouter --help or  -h or -help"
+	UsageRunmodeError = "runmode parameters error ,please reference  ActiveRouter --runmode=Client/Reserveproxy/Server"
 )

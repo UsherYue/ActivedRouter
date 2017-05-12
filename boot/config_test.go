@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-//test 家在客户端配置
+//load config test
 func TestConfig(t *testing.T) {
 	file, _ := os.Open("../config/client.json")
 	bts, _ := ioutil.ReadAll(file)

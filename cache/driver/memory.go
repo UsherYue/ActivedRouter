@@ -1,18 +1,18 @@
 package driver
 
-//Map实现的内存驱动
+//Memory Driven Based on Map Type
 type MapContainer struct {
 	data map[string]interface{}
 }
 
-//创建数据channer
+//create new map container
 func NewMapContainer() *MapContainer {
 	return &MapContainer{data: make(map[string]interface{})}
 }
 
 func (this *MapContainer) PushKVPair(k, v interface{}) Containerer {
 	if key, ok := k.(string); !ok {
-		panic("key必须是string类型!")
+		panic("key must be string type!")
 	} else {
 		this.data[key] = v
 	}
@@ -25,7 +25,7 @@ func (this *MapContainer) Exist(k interface{}) bool {
 
 func (this *MapContainer) EraseKVPair(k interface{}) Containerer {
 	if key, ok := k.(string); !ok {
-		panic("key必须是string类型!")
+		panic("key must be string type!")
 	} else {
 		delete(this.data, key)
 	}

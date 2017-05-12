@@ -2,12 +2,11 @@
 //Author:usher.yue
 //Amail:usher.yue@gmail.com
 //TencentQQ:4223665
-//缓存驱动接口定义
-//可以自定义扩展驱动类型 默认是 memory cache
+//cache driver interface define
 
 package driver
 
-//容器接口声明
+//Container interface define
 type Containerer interface {
 	PushKVPair(k, v interface{}) Containerer
 	EraseKVPair(k interface{}) Containerer
@@ -20,9 +19,9 @@ type Containerer interface {
 	GetData() *map[string]interface{}
 }
 
-//基于内存实现的缓存
+//Cache based on memory implementation
 type CacheImpl struct {
-	Driver Containerer //数据缓存驱动
+	Driver Containerer
 }
 
 func (self *CacheImpl) Exist(k interface{}) bool {
