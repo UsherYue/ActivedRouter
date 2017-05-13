@@ -22,15 +22,22 @@ Email:   usher.yue@gmail.com
         
 ##  二、快速入门  
 </br>
-###  2.1、编译安装	
-	项目下运行  go build ,即可生成二进制程序。
-	依赖:
-	go get github.com/go-ole/go-ole  
-	go get github.com/go-ole/go-ole/oleutil  
-	go get github.com/StackExchange/wmi  
-    go get github.com/shirou/w32  
+###  2.1、编译安装  
 
-###  2.1、编译安装	  
+
+	Windows平台依赖:  
+	 
+	go get github.com/go-ole/go-ole  
+	
+	go get github.com/go-ole/go-ole/oleutil  
+	
+	go get github.com/StackExchange/wmi 
+	 	  
+    go get github.com/shirou/w32  
+     
+    go build main.go
+
+###  2.2、实现功能	  
 
  *  [ActivedRouter实现Random模式的反向代理服务](www.xxx.com)  
  
