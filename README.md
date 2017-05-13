@@ -6,10 +6,11 @@ Email:   usher.yue@gmail.com
 正在努力开发中........
 			
 <br>
-##  <b>简单介绍</b> ##  
+##  <b>简单介绍</b>  
+  
 
 
-### 一、通过ActivedRouter可以实现什么功能? ###  
+### 一、通过ActivedRouter可以实现什么功能?  
  	
 	1、可以集群服务器的监控,通过提供的web Dashboard可以时刻监控每一台服务器的负载、内存、网络、
 	磁盘等信息。
