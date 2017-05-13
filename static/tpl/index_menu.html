@@ -17,17 +17,19 @@
                Settings <b class="caret"></b>
             </a>
             <ul class="dropdown-menu multi-level">
-               <li><a  href="#" id="reserveproxy_setting">ReserveProxy Setting</a></li>
 			   <li><a  href="#"  id="domain_setting" >Domain Setting</a></li>
-			   <li class="dropdown-submenu">
-				 <a  href="#"  id="runmode_setting" >Runmode Setting</a>
-			     <ul class="dropdown-menu">  
-                  <li><a href="#">Server</a></li>  
-                  <li><a href="#">ReserveProxy</a></li>  
-             	</ul>  
-			  </li>
-			   <li class="divider"></li>
-			   <li><a href="#">balabala...</a></li>
+               <li><a  href="#" id="http_reserveproxy_setting">Http ReserveProxy Setting</a></li>
+				<li class="divider"></li>
+				<li><a  href="#" id="">-------以下正在开发中-------</a></li>
+			    <li><a  href="#" id="https_reserveproxy_setting">Https ReserveProxy Setting</a></li>
+				<li><a  href="#" id="tcp_reserveproxy_setting">TCP ReserveProxy Setting</a></li>
+			    <li class="dropdown-submenu">
+					<a  href="#"  id="runmode_setting" >Runmode Setting</a>
+				    <ul class="dropdown-menu">  
+	                  <li><a href="#">Server</a></li>  
+	                  <li><a href="#">ReserveProxy</a></li>  
+	             	</ul>  
+			   </li>
             </ul>
          </li>
        </ul>
@@ -55,10 +57,11 @@
 
 <script id="Proxy_Domain_List" type="text/html">
 <table class="table table-hover" style="margin-top:10px;"> 
-	<tr ><th>Server IP</th><th>Operate</th><tr/>
+	<tr ><th>Server IP</th><th>Htts</th><th>Operate</th><tr/>
 	{{each domainInfos}}
 		<tr>
 			<td>{{$value}}</td>
+			<td>false</td>
 			<td><a href="#" class="remove-domain">remove</a>&nbsp;/&nbsp;<a href="#" class="edit-domain">Edit</a></td>
 		</tr>
 	{{/each}}
@@ -75,7 +78,7 @@
 			  <span class="glyphicon  form-control-feedback" aria-hidden="true"></span>
 			</div>
 		</td>
-		<td>
+		<td colspan="2">
 			<button type="button" class="btn btn-success  btn-sm" > <span class="glyphicon glyphicon-ok" ></span></button>&nbsp;
 			<button type="button" class="btn btn-success  btn-sm" ><span class="glyphicon glyphicon-remove "></span></button>
 		</td>
@@ -116,7 +119,7 @@
                   &times;
             </button>
             <h4 class="modal-title">
-                 ReserveProxy Setting
+                 Http ReserveProxy Setting
             </h4>
          </div>
          <div class="modal-body">           

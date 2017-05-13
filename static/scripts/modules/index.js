@@ -450,7 +450,7 @@ var initMenuEvent=function(){
 		$('#indexcontent').parent().removeClass('active').addClass('active');
 	});
 	//反向代理配置
-	$("#reserveproxy_setting").click(function(){
+	$("#http_reserveproxy_setting").click(function(){
 		var clientList=[];
 		var domainList=[];
 		var defaultDomainSelect="";
