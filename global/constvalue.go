@@ -41,6 +41,6 @@ const (
 	ActiveRouter --runmode=Client  Running In Client Mode
 	ActiveRouter --runmode=ReserveProxy   Running In ReserveProxy Mode
 `
-	TheHelpTemplate   = "\033[35;1mThe Help:\033[0m\nActiveRouter --help or  -h or -help"
+	TheHelpTemplate   = "\033[35;1mThe Help:\033[0m\n\033[1mActiveRouter --help or  -h or -help\033[0m"
 	UsageRunmodeError = "runmode parameters error ,please reference  ActiveRouter --runmode=Client/Reserveproxy/Server"
 )

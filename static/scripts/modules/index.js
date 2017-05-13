@@ -132,7 +132,7 @@ var initHttpLineChart=function(){
 	$.get("/statistics",function(data){
 		  var colorIndex=0;
 		  var labelsLen=15;
-		  //lables
+		  //lablesgit
 		  var labels=[];
 		  for(var i=labelsLen;i>0;i--){
 		    if(i==labelsLen){

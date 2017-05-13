@@ -6,7 +6,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/shirou/gopsutil/internal/common"
+	"ActivedRouter/gopsutil/internal/common"
 )
 
 var (

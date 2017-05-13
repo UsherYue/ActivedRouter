@@ -10,7 +10,7 @@ import (
 
 	"github.com/StackExchange/wmi"
 
-	"github.com/shirou/gopsutil/internal/common"
+	"ActivedRouter/gopsutil/internal/common"
 )
 
 type Win32_Processor struct {

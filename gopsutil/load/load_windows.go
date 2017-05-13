@@ -3,7 +3,7 @@
 package load
 
 import (
-	"github.com/shirou/gopsutil/internal/common"
+	"ActivedRouter/gopsutil/internal/common"
 )
 
 func LoadAvg() (*LoadAvgStat, error) {
