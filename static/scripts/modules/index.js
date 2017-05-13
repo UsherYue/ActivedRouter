@@ -30,15 +30,13 @@ var initMemPie=function(){
 	    labels: [
 	        "Mem Used ({0}%)".format(usedPercent),
 	        "Mem Free  ({0}%)".format(freePercent),
-	
 	    ],
 	    datasets: [
 	        {
 	            data: [usedPercent, freePercent],
 	            backgroundColor: [
 	                "#FF6384",
-	                "#36A2EB"
-	           
+	                "#36A2EB"      
 	            ],
 	            hoverBackgroundColor: [
 	                "#FF6384",
@@ -119,8 +117,7 @@ var initDiskPie=function(){
 	});
 }
 
-
-//init http requ   line chart 
+//init http request   line chart 
 var initHttpLineChart=function(){
 	var colorTable=[
 		["rgba(75,192,192,0.4)","rgba(75,192,192,1)"],
@@ -334,6 +331,110 @@ function InitReservProxyClientEvent(){
 	});
 }
 
+function ChangeInputStatus(jqObj,bSuccess){
+	if(!bSuccess){
+		jqObj.parent().removeClass('has-success');
+		jqObj.parent().addClass('has-error');
+		jqObj.next().removeClass('glyphicon-ok');
+		jqObj.next().addClass('glyphicon-remove');
+	}else{
+		jqObj.parent().removeClass('has-error');
+		jqObj.next().removeClass('glyphicon-remove');
+		jqObj.parent().addClass('has-success');
+		jqObj.next().addClass('glyphicon-ok');
+	}
+}
+
+function InitDomainEditEvent(op){
+	//增加新域名如果域名存在则增加失败
+	$("#domain_setting_dlg div.btn-add-domain").click(function(){
+		var insertRow=$("#domain_setting_dlg table tr[flag='domain-edit']");
+		//保证只出现一个插入框
+		if(insertRow.length==0){
+		   var insertHtml=templateEngine("Proxy_Domain_EditRow",{});
+		  //行尾插入
+		   $("#domain_setting_dlg table ").append(insertHtml);
+		   insertRow=$("#domain_setting_dlg table tr[flag='domain-edit']");
+		   insertRow.find("button:eq(0)").click(function(){
+				//添加域名
+				var addDomain=insertRow.find("input").val();
+				if(!/^[\w\.]{1,255}$/i .test(addDomain)){
+					alert('域名不合法!...');				
+				}else{
+					$.get("/adddomain/{0}".format(addDomain),function(data){
+						//添加完成 
+						$("#domain_setting_dlg table tr:last").after("<tr><td>{0}</td><td><a href=\"#\" class=\"remove-client\">remove</a>&nbsp;/&nbsp;<a href=\"#\" class=\"edit-client\">Edit</a></td></tr>".format(addDomain));
+						$("#domain_setting_dlg table tr.insert-row").remove();
+					});	
+				}
+		   });
+			$("#inputDomain").keyup(function(data){
+			    var  domainVal=$(this).val();
+				ChangeInputStatus($(this),/^[\w\.]{1,255}$/i .test(domainVal));
+			});
+
+		 $("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
+			   $("#domain_setting_dlg table tr.insert-row").remove();
+		  });
+		}  
+	});
+	//删除
+	$("#domain_setting_dlg table tr td a.remove-domain").click(function(){
+			//单击确定删除
+		    var bToDo = window.confirm("单击\"确定\"删除。单击\"取消\"停止。");
+			if(bToDo){
+				var selectRow=$(this).parent().parent();
+				var delDomain=$(this).parent().prev().text();
+				//删除域名
+				$.get("/deldomain/{0}".format(delDomain),function(){
+					selectRow.remove();
+				});						
+			}
+	});
+	//编辑
+	$("#domain_setting_dlg table tr td a.edit-domain").click(function(){
+		var insertRow=$("#domain_setting_dlg table tr.insert-row");
+		var selectRow=$(this).parent().parent();
+		var delDomain=$(this).parent().prev().text();
+		//删除上一个编辑框
+		if(insertRow.length>0){
+			insertRow.prev().show();
+			insertRow.remove();	
+			selectRow.after(insertRow);
+		}else{
+			var insertHtml=templateEngine("Proxy_Domain_EditRow",{});
+			selectRow.after(insertHtml);
+		}
+		selectRow.hide();
+		$("#inputDomain").val(delDomain);
+		//update
+		$("#domain_setting_dlg table tr.insert-row button:eq(0)").click(function(){
+			var updateDomain=$("#inputDomain").val();
+			if(!/^[\w\.]{1,255}$/i .test(updateDomain)){
+					alert('域名不合法!...');				
+				}else{
+					//更新域名
+					$.get("/updatedomain",{predomain:delDomain,updatedomain:updateDomain},function(data){
+					selectRow.show();
+					$("#domain_setting_dlg table tr.insert-row").remove();
+					selectRow.find("td:eq(0)").text(updateDomain);			
+				});
+			}
+		});
+		$("#inputDomain").keyup(function(data){
+		    var  domainVal=$(this).val();
+			ChangeInputStatus($(this),/^[\w\.]{1,255}$/i .test(domainVal));
+		});
+		//remove
+		$("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
+			selectRow.show();
+			$("#domain_setting_dlg table tr.insert-row").remove();
+		});			
+	});
+
+	
+}
+
 //初始化菜单事件
 var initMenuEvent=function(){
 	//点击加载活跃主机
@@ -397,78 +498,7 @@ var initMenuEvent=function(){
 		$.get("/domaininfos",function(data,status){
 			var html=templateEngine("tpl_domainsetting",{domainInfos:data});
 			$(html).appendTo($("body"));
-			 //增加新域名如果域名存在则增加失败
-			$("#domain_setting_dlg div.btn-add-domain").click(function(){
-				var insertRow=$("#domain_setting_dlg table tr[flag='domain-edit']");
-				//保证只出现一个插入框
-				if(insertRow.length==0){
-					   var insertHtml=templateEngine("Proxy_Domain_EditRow",{});
-					  //行尾插入
-					   $("#domain_setting_dlg table ").append(insertHtml);
-					   insertRow=$("#domain_setting_dlg table tr[flag='domain-edit']");
-					   insertRow.find("button:eq(0)").click(function(){
-							//添加域名
-							var addDomain=insertRow.find("input").val();
-							if(!/^[\w\.]{1,255}$/i .test(addDomain)){
-								alert('域名不合法!...');				
-							}else{
-								$.get("/adddomain/{0}".format(addDomain),function(data){
-									//添加完成 
-									$("#domain_setting_dlg table tr:last").after("<tr><td>{0}</td><td><a href=\"#\" class=\"remove-client\">remove</a>&nbsp;/&nbsp;<a href=\"#\" class=\"edit-client\">Edit</a></td></tr>".format(addDomain));
-									$("#domain_setting_dlg table tr.insert-row").remove();
-								});	
-							}
-					   });
-					 $("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
-						   $("#domain_setting_dlg table tr.insert-row").remove();
-					  });
-				}  
-			});
-			//删除
-			$("#domain_setting_dlg table tr td a.remove-domain").click(function(){
-					//单击确定删除
-				    var bToDo = window.confirm("单击\"确定\"删除。单击\"取消\"停止。");
-					if(bToDo){
-						var selectRow=$(this).parent().parent();
-						var delDomain=$(this).parent().prev().text();
-						//删除域名
-						$.get("/deldomain/{0}".format(delDomain),function(){
-							selectRow.remove();
-						});						
-					}
-			});
-			//编辑
-			$("#domain_setting_dlg table tr td a.edit-domain").click(function(){
-				var insertRow=$("#domain_setting_dlg table tr.insert-row");
-				var selectRow=$(this).parent().parent();
-				var delDomain=$(this).parent().prev().text();
-				//删除上一个编辑框
-				if(insertRow.length>0){
-					insertRow.prev().show();
-					insertRow.remove();	
-					selectRow.after(insertRow);
-				}else{
-					var insertHtml=templateEngine("Proxy_Domain_EditRow",{});
-					selectRow.after(insertHtml);
-				}
-				selectRow.hide();
-				$("#inputDomain").val(delDomain);
-				//update
-				$("#domain_setting_dlg table tr.insert-row button:eq(0)").click(function(){
-					var updateDomain=$("#inputDomain").val();
-					//更新域名
-					$.get("/updatedomain",{predomain:delDomain,updatedomain:updateDomain},function(data){
-						selectRow.show();
-						$("#domain_setting_dlg table tr.insert-row").remove();
-						selectRow.find("td:eq(0)").text(updateDomain);			
-					});
-				});
-				//remove
-				$("#domain_setting_dlg table tr.insert-row button:eq(1)").click(function(){
-					selectRow.show();
-					$("#domain_setting_dlg table tr.insert-row").remove();
-				});			
-			});
+			InitDomainEditEvent();
 			$("#domain_setting_dlg").modal("show");
 			$("#domain_setting_dlg").on('hide.bs.modal',function(){
 				$(this).remove();

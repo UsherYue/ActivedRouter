@@ -1,3 +1,8 @@
+//ActivedRouter
+//Author:usher.yue
+//Amail:usher.yue@gmail.com
+//TencentQQ:4223665
+
 package tools
 
 import (
