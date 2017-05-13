@@ -13,9 +13,11 @@ import (
 	"github.com/StackExchange/wmi"
 	"github.com/shirou/w32"
 
-	cpu "github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/internal/common"
-	net "github.com/shirou/gopsutil/net"
+	cpu "ActivedRouter/gopsutil/cpu"
+
+	"ActivedRouter/gopsutil/internal/common"
+
+	net "ActivedRouter/gopsutil/net"
 )
 
 const (

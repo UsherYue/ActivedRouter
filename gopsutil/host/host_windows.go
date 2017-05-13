@@ -11,8 +11,9 @@ import (
 
 	"github.com/StackExchange/wmi"
 
-	"github.com/shirou/gopsutil/internal/common"
-	process "github.com/shirou/gopsutil/process"
+	"ActivedRouter/gopsutil/internal/common"
+
+	process "ActivedRouter/gopsutil/process"
 )
 
 var (
