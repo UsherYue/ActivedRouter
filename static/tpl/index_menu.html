@@ -44,7 +44,7 @@
 
 <script id="Proxy_Client_List" type="text/html">
 <table class="table table-hover" style="margin-top:10px;"> 
-	<tr ><th>Server IP</th><th>Port</th><th>Status</th><th>Operate</th><tr/>
+	<tr ><th>Server Host</th><th>Port</th><th>Status</th><th>Operate</th><tr/>
 	{{each defaultHosts}}
 		<tr>
 			<td>{{$value.host}}</td>
@@ -57,7 +57,7 @@
 
 <script id="Proxy_Domain_List" type="text/html">
 <table class="table table-hover" style="margin-top:10px;"> 
-	<tr ><th>Server IP</th><th>Htts</th><th>Operate</th><tr/>
+	<tr ><th>Server Host</th><th>Htts</th><th>Operate</th><tr/>
 	{{each domainInfos}}
 		<tr>
 			<td>{{$value}}</td>

@@ -528,6 +528,7 @@ var loadActiveContent=function(){
 		$("#clientinfos tbody td").dblclick(function(){
 			var ip=$(this).siblings().eq(1).html();
 			var hostInfo=hostClientsInfo[ip];
+			hostInfo.Info.Status=hostInfo.Status;
 			var html=loadScriptTpl('tpl_activehost',hostInfo.Info)
 			$("#dlg_hostinfo").html(html);
 			//初始化内存
