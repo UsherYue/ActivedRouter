@@ -24,11 +24,11 @@ Email:   usher.yue@gmail.com
 </br>
 ###  2.1、编译安装	
 	项目下运行  go build ,即可生成二进制程序。
-	windows下依赖:
-	go get github.com/go-ole/go-ole
-	go get github.com/go-ole/go-ole/oleutil
-	go get github.com/StackExchange/wmi
-	go get github.com/shirou/w32
+	依赖:
+	go get github.com/go-ole/go-ole  
+	go get github.com/go-ole/go-ole/oleutil  
+	go get github.com/StackExchange/wmi  
+    go get github.com/shirou/w32  
 
 ###  2.1、编译安装	  
 
