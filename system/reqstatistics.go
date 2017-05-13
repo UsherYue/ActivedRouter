@@ -43,8 +43,7 @@ func (self *SysHttpStatistics) GetStatisticsList() StatisticsMap {
 
 //更新集群请求统计
 //cluster 集群名称
-//reqCount 请求次数
-//updateType  0 1 分别代表请求更新,只增加请求次数    时间段更新,添加新的时间段统计。
+//updateType  0 分别代表请求更新,只增加请求次数     1 时间段更新,添加新的时间段统计。
 func (self *SysHttpStatistics) UpdateClusterStatistics(cluster string, updateType int) {
 	self.mutexUpdate.Lock()
 	//创建统计对象 当该集群统计列表不存在的时候
@@ -60,14 +59,18 @@ func (self *SysHttpStatistics) UpdateClusterStatistics(cluster string, updateTyp
 		self.mutexUpdate.Unlock()
 		return
 	}
-	//增加一个新的统计对象
+	//定时增加统计对象边界
 	if updateType == 1 {
 		dataTool := tools.DateTool{}
 		timestamp := dataTool.CurrentUnixTimestamp()
-		//直接递增新的节点数据
-		//递增增加列表
 		for k, _ := range self.statistic {
-			//lastIndex := len(self.statistic[k]) - 1
+			//长度为100的线性表
+			tableLen := len(self.statistic[k])
+			//移除线性表投诉
+			if tableLen > 100 {
+				self.statistic[k] = self.statistic[k][1:]
+			}
+			//追加
 			self.statistic[k] = append(self.statistic[k], newHttpProxyStatistics(timestamp, 0))
 		}
 	} else {

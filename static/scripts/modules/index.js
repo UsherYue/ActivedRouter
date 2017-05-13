@@ -130,17 +130,24 @@ var initHttpLineChart=function(){
 	];
 	//加载路由服务器信息
 	$.get("/statistics",function(data){
-		// alert(JSON.stringify(data));
-		var colorIndex=0;
+		  var colorIndex=0;
+		  var labelsLen=15;
 		  //lables
-		  var labels=['-50','-45min','-40min','-35min','-30min','-25min','-20min','-15min','-10min','-5min','当前'];
+		  var labels=[];
+		  for(var i=labelsLen;i>0;i--){
+		    if(i==labelsLen){
+				labels[i]="当前"
+			}else{
+				labels[i]="-"+(labelsLen-i).toString()+"min";
+			}
+		  }
 		 //每条曲线的数据集合
 		  var datasets=[];
 			for(var key in data){
 				//每一个集群
 				var tmpData=[];
 				var tmpLen=data[key].length;
-				var endIndex=tmpLen-1-10;
+				var endIndex=tmpLen-1-labelsLen;
 				var timeSep=0;
 				var tmpReqCount=0;
 				for(var i=endIndex;i<=tmpLen-1;i++ ){
