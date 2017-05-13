@@ -20,9 +20,11 @@ Email:   usher.yue@gmail.com
 	4、反向代理支持 Random 和 Alived 模式,默认Random模式,Alived模式需要在客户端运行Client模式的服务进行数据上报。
         
 	5、快速配置反向代理服务,省去配置nginx反向代理的麻烦步骤,一般流量下的负载足以应付。 
-        
+  
+          
 ##  二、快速入门  ##
-</br>
+</br>  
+
 ###  2.1、编译安装  ###
 
 
