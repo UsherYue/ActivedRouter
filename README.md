@@ -5,10 +5,14 @@ Email:   usher.yue@gmail.com
 
 正在努力开发中........
 			
-<br>
-##  <b>简单介绍</b>		
-### 一、通过ActivedRouter可以实现什么功能？		
+<br>  
 
+##  简单介绍  
+  
+
+
+### 一、通过ActivedRouter可以实现什么功能?  
+ 	
 	1、可以集群服务器的监控,通过提供的web Dashboard可以时刻监控每一台服务器的负载、内存、网络、
 	磁盘等信息。
 	      
@@ -19,10 +23,12 @@ Email:   usher.yue@gmail.com
 	4、反向代理支持 Random 和 Alived 模式,默认Random模式,Alived模式需要在客户端运行Client模式的服务进行数据上报。
         
 	5、快速配置反向代理服务,省去配置nginx反向代理的麻烦步骤,一般流量下的负载足以应付。 
-        
-##  二、快速入门  
-</br>
-###  2.1、编译安装  
+  
+          
+##  二、快速入门  ##
+</br>  
+
+###  2.1、编译安装  ###
 
 
 	Windows平台依赖:  
