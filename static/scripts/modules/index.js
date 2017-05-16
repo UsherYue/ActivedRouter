@@ -211,7 +211,7 @@ function InitProxyInsertRowEvent(op,data){
 								var res=templateEngine("Proxy_Client_List",{defaultHosts:data});
 								$("#proxy_setting_dlg div.proxy-domain-client").html(res);
 								$("#default-domain").text(domain);
-								InitProxyRowEvent();
+								InitReservProxyClientEvent();
 							});
 					});
 				}	 
@@ -306,7 +306,7 @@ function InitReservProxyClientEvent(){
 					$("#proxy_setting_dlg div.proxy-domain-client").html(res);
 					$("#default-domain").text(domain);
 					//重新初始化ProxyRowEvent
-					InitProxyRowEvent();
+					InitReservProxyClientEvent();
 				});
 		});  
 	});
