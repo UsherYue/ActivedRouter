@@ -359,8 +359,6 @@ func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		panic(err)
 	}
 	//不修改 http request header
-	//此处堵塞是否是造成CPU暴增的原因
-	//当windows客户端连接到centos router server的时候出现了CPU瞬间爆满,具体原因可能是网络出问题了。
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, r)
 	//更新转发统计

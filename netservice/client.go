@@ -54,7 +54,7 @@ func (self *Client) ConnectToServer(addr string) {
 				//Control to send data
 				t1.Reset(time.Second * HEARTBEAT_INTERVAL)
 				info := system.SysInfo(global.RunMode, global.Cluster, global.Domain)
-				_, err := self.ConnSocket.Write([]byte(tools.Base64Encode([]byte(info))))
+				_, err := self.ConnSocket.Write(tools.Base64Encode([]byte(info)))
 				//attempt connecting to router server until the client agent connect success
 				if err != nil && !self.Closed {
 					conn, err := net.DialTimeout("tcp", addr, time.Second*5)

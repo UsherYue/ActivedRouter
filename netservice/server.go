@@ -12,16 +12,15 @@ import (
 	"ActivedRouter/tools"
 )
 
-//服务器检测时间5s一次
 const (
 	CHECK_INTERCAL          = 1
-	CHECK_ACTIVE_INTERVAL   = 2                 //活跃检测周期
-	CHECK_ROUTER_INTERVAL   = 5                 //定期检查路由服务器状态
-	DISPATCH_EVENT_INTERVAL = 5                 //事件分发检测
-	BUFFER_SIZE             = 100 * 1024 * 1024 //‘缓存buffer大小
+	CHECK_ACTIVE_INTERVAL   = 2                 // check  active interval
+	CHECK_ROUTER_INTERVAL   = 5                 //Periodically check the routing server status
+	DISPATCH_EVENT_INTERVAL = 5                 //check event dispatch  interval
+	BUFFER_SIZE             = 100 * 1024 * 1024 //Maximum size of cache
 )
 
-//路由服务器相关封装
+//Router server infomational encapsulation
 type Server struct {
 	Host         string
 	Port         string
@@ -36,40 +35,50 @@ func NewServer(host, port string) *Server {
 
 //Data Receive
 func (self *Server) OnDataRecv(c net.Conn) {
+	//return
 	log.Printf("accept connect from %s\n", c.RemoteAddr().String())
 	defer c.Close()
 	buffer := make([]byte, BUFFER_SIZE)
 	for {
-		//获取客服端心跳反馈
-		n, _ := c.Read(buffer)
-		if n > 0 {
-			//反序列化数据并且进行统计分析
-			decodeData, _ := tools.Base64Decode(buffer[:n])
-			data, err := system.DecodeSysinfo(string(decodeData))
-			//解析错误不处理
-			if err != nil {
-				log.Println(err.Error())
-				continue
+		//Get client heartbeat feedback
+		if n, err := c.Read(buffer); err != nil {
+			//The server shuts down the client-to-server connection when
+			//the client actively shuts down the connection
+			if err.Error() == "EOF" {
+				c.Close()
 			}
-			//获取远程ip
-			addrs := strings.Split(c.RemoteAddr().String(), ":")
-			//更新服务器状态
-			//要做到 thread safe
-			//更新服务器列表 如果不存在那么添加到服务器列表
-			data.IP = addrs[0]
-			global.GHostInfoTable.UpdateHostTable(addrs[0], data)
+			//Repair cpu overload bug
+			return
+		} else {
+			if n > 0 {
+				//Deserialize the data and perform statistical analysis
+				///Note.......
+				//There may be sticky packets of bug
+				decodeData, _ := tools.Base64Decode(buffer[:n])
+				data, err := system.DecodeSysinfo(string(decodeData))
+				//Parsing errors but not handling
+				if err != nil {
+					log.Println(err.Error())
+					//Close connection to server when json decode  error  occured
+					c.Close()
+					return
+				}
+				//get remote host ip
+				addrs := strings.Split(c.RemoteAddr().String(), ":")
+				//update host status
+				data.IP = addrs[0]
+				global.GHostInfoTable.UpdateHostTable(addrs[0], data)
+			}
 		}
 	}
 }
 
-//停止服务器
+//Send Service Stop Message We Shoule Close all connections before stopping the server。
 func (self *Server) StopServer() {
-	//停止服务器之前先关闭所有连接
-	//发送关闭消息
 	<-self.TaskFlag
 }
 
-//定时监测路由服务器信息
+//Timing monitoring of routing server information
 func (self *Server) checkRouterInfo() {
 	timerRouterInfo := time.NewTimer(time.Second * CHECK_ROUTER_INTERVAL)
 	for {
@@ -82,7 +91,6 @@ func (self *Server) checkRouterInfo() {
 			}
 		}
 	}
-
 }
 
 //event dispatch
@@ -110,7 +118,7 @@ func (self *Server) dispatcher() {
 	}
 }
 
-//监控client
+//monitoring client
 func (self *Server) moniterClient() {
 	timerCheckActive := time.NewTimer(time.Second * CHECK_ACTIVE_INTERVAL)
 	for {
@@ -118,7 +126,7 @@ func (self *Server) moniterClient() {
 		case <-timerCheckActive.C:
 			{
 				timerCheckActive.Reset(time.Second * CHECK_ACTIVE_INTERVAL)
-				//更新服务器状态
+				//update host status
 				global.GHostInfoTable.UpdateHostStatus()
 			}
 		}
@@ -146,19 +154,18 @@ func (self *Server) Run() {
 		for {
 			conn, err := l.Accept()
 			if err != nil {
-				//提示错误但不退出
 				log.Println(err)
 			}
-			//数据处理
+			//Data Recv
 			go self.OnDataRecv(conn)
 		}
 	}()
-	//监控client
+	//Run Monitor client
 	go self.moniterClient()
-	//定期收集路由服务器信息
+	//Check the server status regularly
 	go self.checkRouterInfo()
-	//moniter 模式下分发事件
+	//dispatch monitor event
 	go self.dispatcher()
-	//等待任务结束
+	//wait for stop message
 	self.TaskFlag <- false
 }
