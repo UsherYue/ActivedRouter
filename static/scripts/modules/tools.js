@@ -1,7 +1,6 @@
 define([],function(){
 	//字节到gb
 	window.bytesToGB=function(bytes){
-		alert(1);
 		var gb=(bytes/1024/1024/1024).toFixed(2).toString();
 		return gb ;
 	}
