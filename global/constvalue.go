@@ -8,6 +8,11 @@ const (
 	HttpProxyConfig  = "config/http_proxy.json"
 )
 
+const (
+	//defaule pprof's http service  address
+	HTTP_PPROF_DEFAULT_ADDR = ":6060"
+)
+
 //run mode
 const (
 	ServerMode       = "server"       //server mode

@@ -46,6 +46,7 @@ func StartNetworkService() {
 			log.Println("ActivedRouter is Running  In ReserveProxy Mode...")
 		}
 	}
+	ListenAndServePProf(global.HTTP_PPROF_DEFAULT_ADDR, nil)
 	global.NetworkSwitch <- true
 }
 
