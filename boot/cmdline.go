@@ -21,7 +21,7 @@ func parseCmdline() bool {
 	} else {
 		if strings.ToLower(*runmode) != ServerMode &&
 			strings.ToLower(*runmode) != ClientMode &&
-			strings.ToLower(*runmode) != ReserveProxyMode {
+			strings.ToLower(*runmode) != ReverseProxyMode {
 			log.Println(UsageRunmodeError)
 			return false
 		} else {

@@ -589,7 +589,7 @@ var loadIndexContent=function(){
 	//初始化磁盘
 	initDiskPie();
 	//init http
-	if(routerInfo.RunMode=="reserveproxy"){
+	if(routerInfo.RunMode=="reverseproxy"){
 			initHttpLineChart();
 	}else{
 		//非反向代理模式下隐藏折线图

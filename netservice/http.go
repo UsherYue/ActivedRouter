@@ -18,7 +18,7 @@ type Http struct {
 }
 
 //ClientInfos
-//所有服务器 活跃和非活跃
+//All servers  info include active and inactive
 func (self *Http) ClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.HostsInfo.GetStorage().GetData()
 	self.WriteJsonInterface(w, data)
@@ -30,13 +30,11 @@ func (self *Http) Statistics(w http.ResponseWriter, r *http.Request, _ httproute
 	self.WriteJsonInterface(w, data)
 }
 
-//输出json
 func (self *Http) WriteJsonString(w http.ResponseWriter, str string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(str))
 }
 
-//输出interface
 func (self *Http) WriteJsonInterface(w http.ResponseWriter, data interface{}) {
 	bts, _ := json.MarshalIndent(data, "", " ")
 	w.Header().Set("Content-Type", "application/json")
@@ -44,14 +42,12 @@ func (self *Http) WriteJsonInterface(w http.ResponseWriter, data interface{}) {
 }
 
 //Active ClientInfos
-//活跃列表
 func (self *Http) ActiveClientInfos(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.ActiveHostList.ActiveHostInfo.GetStorage().GetData()
 	self.WriteJsonInterface(w, data)
 }
 
-//BEST  ClientInfos
-//权重最高的服务器
+//The highest weight of the server
 func (self *Http) BestClients(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := global.GHostInfoTable.ActiveHostWeightList.Front().Value
 	self.WriteJsonInterface(w, data)
@@ -62,7 +58,7 @@ func (self *Http) Index(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 	http.Redirect(w, r, "/static", 302)
 }
 
-//路由服务器的信息
+//router server info
 func (self *Http) RouterInfo(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	info := global.RouterInfo()
 	if info == "" {
@@ -72,7 +68,7 @@ func (self *Http) RouterInfo(w http.ResponseWriter, r *http.Request, _ httproute
 	self.WriteJsonString(w, info)
 }
 
-//反向代理信息
+//Reverse Proxy infp
 func (self *Http) ProxyInfos(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
 	hostInfos := ProxyHandler.GetDomainHostList(prms.ByName("domain"))
 	self.WriteJsonInterface(w, hostInfos)
@@ -98,8 +94,7 @@ func (self *Http) DelDomain(w http.ResponseWriter, r *http.Request, prms httprou
 	}
 }
 
-//更新反向代理信息
-//将一个域名以及其下面的反向代理客户端更新为另一个域名
+//change  proxy domain
 func (self *Http) UpdateDomain(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
 	r.ParseForm()
 	preDomain := r.Form.Get("predomain")
@@ -155,7 +150,7 @@ func (self *Http) UpdateProxyClient(w http.ResponseWriter, r *http.Request, prms
 	}
 }
 
-//创建http服务
+//create http service
 func NewHttp(host, port string) *Http {
 	return &Http{Host: host, Port: port}
 }
@@ -164,13 +159,13 @@ func NewHttp(host, port string) *Http {
 func (self *Http) Run() {
 	log.Printf("开始启动http服务,%s:%s........\n", self.Host, self.Port)
 	router := httprouter.New()
-	//统计信息
+	//statistics
 	router.GET("/clientinfos", self.ClientInfos)
 	router.GET("/statistics", self.Statistics)
 	router.GET("/routerinfo", self.RouterInfo)
 	router.GET("/activeclients", self.ActiveClientInfos)
 	router.GET("/bestclients", self.ActiveClientInfos)
-	//反向代理配置文件读写
+	//Reverse Proxy  config file setting
 	router.GET("/proxyinfos/:domain", self.ProxyInfos)
 	router.GET("/adddomain/:domain", self.AddDomain)
 	router.GET("/deldomain/:domain", self.DelDomain)
@@ -179,7 +174,7 @@ func (self *Http) Run() {
 	router.GET("/delproxyclient", self.DeleteProxyClient)
 	router.GET("/updateproxyclient", self.UpdateProxyClient)
 	router.GET("/domaininfos", self.DomainInfos)
-	//静态文件路由
+	//statc file server
 	router.GET("/", self.Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	router.ServeFiles("/website/*filepath", http.Dir("website"))

@@ -35,7 +35,7 @@ func StartNetworkService() {
 			}
 			log.Println("ActivedRouter is Running  In Client Mode...")
 		}
-	case global.ReserveProxyMode:
+	case global.ReverseProxyMode:
 		{
 			//Run Routing Service
 			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
@@ -43,7 +43,7 @@ func StartNetworkService() {
 			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
 			//Run ReserveProxy Service
 			go ProxyHandler.StartProxyServer()
-			log.Println("ActivedRouter is Running  In ReserveProxy Mode...")
+			log.Println("ActivedRouter is Running  In ReverseProxy Mode...")
 		}
 	}
 	ListenAndServePProf(global.HTTP_PPROF_DEFAULT_ADDR, nil)

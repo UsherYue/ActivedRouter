@@ -17,7 +17,7 @@ const (
 const (
 	ServerMode       = "server"       //server mode
 	ClientMode       = "client"       //client mode
-	ReserveProxyMode = "reserveproxy" //reserveproxy mode
+	ReverseProxyMode = "reverseproxy" //reverseproxy mode
 )
 
 //load balance method
@@ -44,8 +44,8 @@ const (
 	UsageTemplate = `
 	ActiveRouter --runmode=Server  Running In Server Mode 
 	ActiveRouter --runmode=Client  Running In Client Mode
-	ActiveRouter --runmode=ReserveProxy   Running In ReserveProxy Mode
+	ActiveRouter --runmode=ReverseProxy   Running In ReserveProxy Mode
 `
 	TheHelpTemplate   = "\033[35;1mThe Help:\033[0m\n\033[1mActiveRouter --help or  -h or -help\033[0m"
-	UsageRunmodeError = "runmode parameters error ,please reference  ActiveRouter --runmode=Client/Reserveproxy/Server"
+	UsageRunmodeError = "runmode parameters error ,please reference  ActiveRouter --runmode=Client/ReverseProxy/Server"
 )

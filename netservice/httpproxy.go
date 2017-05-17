@@ -43,7 +43,7 @@ const (
 
 //hander
 var (
-	ProxyHandler = &ReseveProxyHandler{Cfg: &ReserveProxyConfigData{}}
+	ProxyHandler = &ReverseProxyHandler{Cfg: &ReverseProxyConfigData{}}
 )
 
 type HostInfo struct {
@@ -51,14 +51,14 @@ type HostInfo struct {
 	Host string `json:"host"`
 }
 
-//负载均衡节点
+//Load Balance Node
 type LbNode struct {
 	Domain  string      `json:"domain"`
 	Clients []*HostInfo `json:"clients"`
 }
 
-//反向代理配置
-type ReserveProxyConfigData struct {
+//ReverseProxy Config
+type ReverseProxyConfigData struct {
 	ProxyMethod    string    `json:"proxy_method"`
 	HttpProxyAddr  string    `json:"http_proxy_addr"`
 	HttpSwitch     string    `json:"http_switch"`
@@ -66,19 +66,19 @@ type ReserveProxyConfigData struct {
 	HttpsCrt       string    `json:"https_crt"`
 	HttpsKey       string    `json:"https_key"`
 	HttpsProxyAddr string    `json:"https_proxy_addr"`
-	ReserveProxy   []*LbNode `json:"reserve_proxy"`
+	ReverseProxy   []*LbNode `json:"reserve_proxy"`
 }
 
-//reserver
-type ReseveProxyHandler struct {
+//reverse
+type ReverseProxyHandler struct {
 	DomainHostList   cache.Cacher
-	Cfg              *ReserveProxyConfigData
+	Cfg              *ReverseProxyConfigData
 	ProxyCongfigFile string
 	ProxyMethod      string
 }
 
 //domain list
-func (this *ReseveProxyHandler) DomainInfos() []string {
+func (this *ReverseProxyHandler) DomainInfos() []string {
 	data := *this.DomainHostList.GetStorage().GetData()
 	keysArr := make([]string, 0)
 	for k, _ := range data {
@@ -87,23 +87,24 @@ func (this *ReseveProxyHandler) DomainInfos() []string {
 	return keysArr
 }
 
-//增加域名 同步到文件
-func (this *ReseveProxyHandler) AddDomainConfig(domain string) bool {
-	//判断域名是否存在
-	for _, v := range this.Cfg.ReserveProxy {
+//Add the domain name to the configuration
+func (this *ReverseProxyHandler) AddDomainConfig(domain string) bool {
+	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			return false
 		}
 	}
-	this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy, &LbNode{Domain: domain})
+	this.Cfg.ReverseProxy = append(this.Cfg.ReverseProxy, &LbNode{Domain: domain})
 	if this.SaveToFile() {
-		//热更新
+		//Hot update
 		this.DomainHostList.Set(domain, []*HostInfo{})
 		return true
 	}
 	return false
 }
-func (this *ReseveProxyHandler) SaveToFile() bool {
+
+//save to file
+func (this *ReverseProxyHandler) SaveToFile() bool {
 	if bts, err := json.Marshal(this.Cfg); err != nil {
 		return false
 	} else {
@@ -119,19 +120,7 @@ func (this *ReseveProxyHandler) SaveToFile() bool {
 	return true
 }
 
-func (this *ReseveProxyHandler) DeletenLbNodeSlice(slice []*LbNode, index int) []*LbNode {
-	length := len(slice)
-	if slice == nil || length == 0 || length < index {
-		return nil
-	}
-	if length-1 == index {
-		return slice[:index]
-	} else if length > index {
-		return append(slice[:index], slice[index+1:]...)
-	}
-	return nil
-}
-func (this *ReseveProxyHandler) DeleteClientSlice(slice []*HostInfo, index int) []*HostInfo {
+func (this *ReverseProxyHandler) DeletenLbNodeSlice(slice []*LbNode, index int) []*LbNode {
 	length := len(slice)
 	if slice == nil || length == 0 || length < index {
 		return nil
@@ -144,14 +133,27 @@ func (this *ReseveProxyHandler) DeleteClientSlice(slice []*HostInfo, index int) 
 	return nil
 }
 
-//删除域名 同步到文件
-func (this *ReseveProxyHandler) DeleteDomainConig(domain string) bool {
-	for k, v := range this.Cfg.ReserveProxy {
+func (this *ReverseProxyHandler) DeleteClientSlice(slice []*HostInfo, index int) []*HostInfo {
+	length := len(slice)
+	if slice == nil || length == 0 || length < index {
+		return nil
+	}
+	if length-1 == index {
+		return slice[:index]
+	} else if length > index {
+		return append(slice[:index], slice[index+1:]...)
+	}
+	return nil
+}
+
+//Delete the domain name and sync to the configuration file
+func (this *ReverseProxyHandler) DeleteDomainConig(domain string) bool {
+	for k, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
-			//删除配置
-			ret, _ := tools.DeleteSlice(this.Cfg.ReserveProxy, k)
-			this.Cfg.ReserveProxy = ret.([]*LbNode)
-			//热更新
+			//delete item
+			ret, _ := tools.DeleteSlice(this.Cfg.ReverseProxy, k)
+			this.Cfg.ReverseProxy = ret.([]*LbNode)
+			//hot update
 			this.DomainHostList.Del(domain)
 			this.SaveToFile()
 		}
@@ -159,16 +161,16 @@ func (this *ReseveProxyHandler) DeleteDomainConig(domain string) bool {
 	return false
 }
 
-//删除反向代理服务器 ,并且删除配置文件中信息
-func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) bool {
-	for _, v := range this.Cfg.ReserveProxy {
+//delete reverse proxydomain
+func (this *ReverseProxyHandler) DeleteProxyClient(domain, hostip, port string) bool {
+	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			for index, client := range v.Clients {
 				if client.Host == hostip && client.Port == port {
-					//删除元素
+					//delete item
 					ret, _ := tools.DeleteSlice(v.Clients, index)
 					v.Clients = ret.([]*HostInfo)
-					//热更新删除域名信息
+					//hot update
 					if this.DomainHostList.Has(domain) {
 						clientInfoList := this.GetDomainHostList(domain)
 						for index, item := range clientInfoList {
@@ -190,15 +192,15 @@ func (this *ReseveProxyHandler) DeleteProxyClient(domain, hostip, port string) b
 	return false
 }
 
-//更新反向代理client信息
-func (this *ReseveProxyHandler) UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort string) bool {
-	for _, v := range this.Cfg.ReserveProxy {
+//Update Reverse Proxy Client Info
+func (this *ReverseProxyHandler) UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort string) bool {
+	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			for _, client := range v.Clients {
 				if client.Host == preHost && client.Port == prePort {
 					client.Host = updateHost
 					client.Port = updatePort
-					//热更反向代理client信息
+					//hot update
 					if this.DomainHostList.Has(domain) {
 						clientInfoList := this.GetDomainHostList(domain)
 						for _, item := range clientInfoList {
@@ -220,19 +222,22 @@ func (this *ReseveProxyHandler) UpdateProxyClient(domain, preHost, prePort, upda
 	return true
 }
 
-//增加反向代理服务器 ,并且增加配置文件中信息
-//-1 重复添加 0 失败 1成功
-func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) int {
-	for _, v := range this.Cfg.ReserveProxy {
+//Add the reverse proxy client to the specified domain name
+//Return Value
+// -1  Repeat
+//  0  Failure
+//  1  Success
+func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port string) int {
+	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			for _, client := range v.Clients {
 				if client.Host == hostip && client.Port == port {
 					return -1
 				}
 			}
-			//域名存在无重复配置添加client
+			//Add the domain name repeatedly!
 			v.Clients = append(v.Clients, &HostInfo{port, hostip})
-			//热更新
+			//hot update
 			if !this.DomainHostList.Has(domain) {
 				this.DomainHostList.Set(domain, []*HostInfo{&HostInfo{port, hostip}})
 			} else {
@@ -247,18 +252,17 @@ func (this *ReseveProxyHandler) AddProxyClient(domain, hostip, port string) int 
 			}
 		}
 	}
-	//域名不存在添加域名=>clients
-	this.Cfg.ReserveProxy = append(this.Cfg.ReserveProxy, &LbNode{domain, []*HostInfo{&HostInfo{port, hostip}}})
+	this.Cfg.ReverseProxy = append(this.Cfg.ReverseProxy, &LbNode{domain, []*HostInfo{&HostInfo{port, hostip}}})
 	this.SaveToFile()
 	return 1
 }
 
 //update domain
-func (this *ReseveProxyHandler) UpdateDomain(preDomain, updateDomain string) bool {
-	for _, v := range this.Cfg.ReserveProxy {
+func (this *ReverseProxyHandler) UpdateDomain(preDomain, updateDomain string) bool {
+	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == preDomain {
 			v.Domain = updateDomain
-			//热更新
+			//hot update
 			data, _ := this.DomainHostList.Get(preDomain)
 			this.DomainHostList.Del(preDomain)
 			this.DomainHostList.Set(updateDomain, data)
@@ -273,14 +277,14 @@ func (this *ReseveProxyHandler) UpdateDomain(preDomain, updateDomain string) boo
 }
 
 //hostlist by domain
-func (this *ReseveProxyHandler) GetDomainHostList(domain string) []*HostInfo {
+func (this *ReverseProxyHandler) GetDomainHostList(domain string) []*HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	return vArr
 }
 
 //random method
-func (this *ReseveProxyHandler) GetRandomHost(domain string) *HostInfo {
+func (this *ReverseProxyHandler) GetRandomHost(domain string) *HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	proxyCount := len(vArr)
@@ -289,17 +293,15 @@ func (this *ReseveProxyHandler) GetRandomHost(domain string) *HostInfo {
 }
 
 //alived method
-//根据域名 或者ip获取集群最活跃的主机
-func (this *ReseveProxyHandler) GetAlivedHost(domain string) *HostInfo {
+//According to the domain name or ip to obtain the most active cluster host
+func (this *ReverseProxyHandler) GetAlivedHost(domain string) *HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	hostinfo := this.BestHostInfo(vArr)
 	return hostinfo
 }
 
-//获取最优服务器根据服务器权限
-//根据域名对指定集群进行路由
-func (this *ReseveProxyHandler) BestHostInfo(hosts []*HostInfo) *HostInfo {
+func (this *ReverseProxyHandler) BestHostInfo(hosts []*HostInfo) *HostInfo {
 	hostSortedList := global.GHostInfoTable.ActiveHostWeightList
 	for el := hostSortedList.Front(); el != nil; el = el.Next() {
 		bestHost := el.Value.(system.HostInfo)
@@ -316,17 +318,16 @@ func (this *ReseveProxyHandler) BestHostInfo(hosts []*HostInfo) *HostInfo {
 	return nil
 }
 
-//根据负载方法进行主机筛选
 //proxy_method  random 和alived
-func (this *ReseveProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo {
+func (this *ReverseProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo {
 	requestHost := host
-	//处理非80端口
+	//Handle non-80 ports
 	if strings.IndexAny(host, ":") != -1 {
 		strs := strings.Split(host, ":")
 		requestHost = strs[0]
 	}
-	//random proxy模式即可
-	//alived 需要开启mix模式
+	//random
+	//alived
 	switch proxyMethod {
 	case global.Random:
 		{
@@ -341,39 +342,38 @@ func (this *ReseveProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo 
 }
 
 //serve http
-func (this *ReseveProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	//获取服务器
+func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	//Get the business server
 	hostinfo := this.GetHostInfo(r.Host, this.ProxyMethod)
-	//如果获取不到挂载主机那么使用random
 	if hostinfo == nil {
-		//hostinfo = this.GetHostInfo(r.Host, global.Random)
+		//If you can't get the active host then use the random method。
+		hostinfo = this.GetHostInfo(r.Host, global.Random)
 		if hostinfo == nil {
-			w.Write([]byte(r.Host + "没有发现相关集群活跃服务器........."))
+			w.Write([]byte(r.Host + "Can't find active server........."))
 			return
 		}
 	}
-	//重定向http请求
+	//Redirect http request
 	redirect := fmt.Sprintf("http://%s:%s", hostinfo.Host, hostinfo.Port)
 	remote, err := url.Parse(redirect)
 	if err != nil {
 		panic(err)
 	}
-	//不修改 http request header
+	// Not modifyed the http request header
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, r)
-	//更新转发统计
+	//Update reverse proxy statistics
 	global.GProxyHttpStatistics.UpdateClusterStatistics(r.Host, 0)
 }
 
 //load proxy
-func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
+func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 	this.ProxyCongfigFile = proxyConfigFile
 	file, err := os.Open(proxyConfigFile)
 	defer file.Close()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	//reader
 	if bts, err := ioutil.ReadAll(file); err != nil {
 		log.Fatalln(err.Error())
 	} else {
@@ -382,9 +382,9 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		HttpsSwitch = this.Cfg.HttpsSwitch
 		//http https  off
 		if HttpSwitch == SwitchOff && HttpsSwitch == SwitchOff {
-			log.Fatalln("请开启http或者https代理开关.....")
+			log.Fatalln("Please open http or https reverse proxy switch.....")
 		}
-		//获取http开关下的配置
+		//Get the http switch
 		if HttpSwitch == SwitchOn {
 			HttpAddr = this.Cfg.HttpProxyAddr
 			if HttpAddr == "" {
@@ -393,7 +393,7 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 			log.Println("Http Switch:" + HttpSwitch)
 			log.Println("Http  Addr:" + HttpAddr)
 		}
-		//获取https开关下的配置
+		//Get the https switch
 		if HttpsSwitch == SwitchOn {
 			HttpsAddr = this.Cfg.HttpsProxyAddr
 			if HttpsAddr == "" {
@@ -412,9 +412,9 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		} else {
 			this.ProxyMethod = this.Cfg.ProxyMethod
 		}
-		//获取到不同域名
+		//Create a memory cache to store the list of domain names
 		this.DomainHostList = cache.Newcache("memory")
-		clients := this.Cfg.ReserveProxy
+		clients := this.Cfg.ReverseProxy
 		if len(clients) == 0 {
 			log.Fatalln("Config file miss proxy host......")
 		}
@@ -429,8 +429,8 @@ func (this *ReseveProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 	}
 }
 
-//开始进入定时统计
-func (this *ReseveProxyHandler) BeginHttpStatistics() {
+//Run the http statistics service
+func (this *ReverseProxyHandler) BeginHttpStatistics() {
 	timerStatistics := time.NewTimer(time.Second * HTTP_STATISTICS_INTERVAL)
 	for {
 		select {
@@ -438,19 +438,18 @@ func (this *ReseveProxyHandler) BeginHttpStatistics() {
 			{
 				//reset timer
 				timerStatistics.Reset(time.Second * HTTP_STATISTICS_INTERVAL)
-				//递增统计曲线
+				//Incremental statistical curve(曲线)
 				global.GProxyHttpStatistics.UpdateClusterStatistics("", 1)
 			}
 		}
 	}
 }
 
-//启动proxy
-func (this *ReseveProxyHandler) StartProxyServer() {
+//Run Reverse Proxy
+func (this *ReverseProxyHandler) StartProxyServer() {
 	//http switch
 	if HttpSwitch == SwitchOn {
 		go func() {
-			//被代理的服务器host和port
 			err := http.ListenAndServe(HttpAddr, ProxyHandler)
 			if err != nil {
 				log.Fatalln("ListenAndServe HTTP: ", err)
@@ -462,7 +461,6 @@ func (this *ReseveProxyHandler) StartProxyServer() {
 	//https switch
 	if HttpsSwitch == SwitchOn {
 		go func() {
-			//被代理的服务器host和port
 			err := http.ListenAndServeTLS(HttpsAddr, HttpsCrt, HttpsKey, ProxyHandler)
 			if err != nil {
 				log.Fatalln("ListenAndServe HTTP SSL: ", err)
@@ -471,7 +469,8 @@ func (this *ReseveProxyHandler) StartProxyServer() {
 			}
 		}()
 	}
-	//开启http反向代理统计
-	//可选择是否开启 因为此选项会影响http请求速度 关闭可优化速度
+	//Open http reverse proxy statistics
+	//You can choose whether to open, because this option will affect the http request speed,
+	// you can turn off.
 	go this.BeginHttpStatistics()
 }

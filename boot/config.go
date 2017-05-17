@@ -27,7 +27,7 @@ func parseConfigfile() {
 			//client mode
 			loadClientJsonConfig(ClientConfig)
 		}
-	case ReserveProxyMode:
+	case ReverseProxyMode:
 		{
 			//server config
 			loadServerJsonConfig(ServerJsonConfig)
