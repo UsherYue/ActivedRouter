@@ -2,10 +2,11 @@ package tools
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 )
 
-//删除切片
+//selete slice
 func DeleteSlice(slice interface{}, index int) (interface{}, error) {
 	sliceValue := reflect.ValueOf(slice)
 	length := sliceValue.Len()
@@ -18,4 +19,18 @@ func DeleteSlice(slice interface{}, index int) (interface{}, error) {
 		return reflect.AppendSlice(sliceValue.Slice(0, index), sliceValue.Slice(index+1, length)).Interface(), nil
 	}
 	return nil, errors.New("error")
+}
+
+//Convert byte array to hex string .
+func BytesToHexString(data []byte) []string {
+	ret := []string{}
+	for _, byteData := range data {
+		ret = append(ret, fmt.Sprintf("%X", byteData))
+	}
+	return ret
+}
+
+//Convert string  to hex string
+func StringToHexString(str string) []string {
+	return BytesToHexString([]byte(str))
 }

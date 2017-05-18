@@ -1,1 +1,1 @@
-{"proxy_method":"random","http_proxy_addr":"127.0.0.1:80","http_switch":"on","https_switch":"off","https_crt":"a.crt","https_key":"a.key","https_proxy_addr":"127.0.0.1:443","reserve_proxy":[{"domain":"www.abc.com","clients":[{"port":"8080","host":"172.16.43.97"}]}]}
+{"proxy_method":"random","http_proxy_addr":"127.0.0.1:80","http_switch":"on","https_switch":"off","https_crt":"a.crt","https_key":"a.key","https_proxy_addr":"127.0.0.1:443","reserve_proxy":[{"domain":"www.abc.com","clients":[{"port":"8080","host":"127.0.0.1"}]}]}

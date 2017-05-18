@@ -120,32 +120,6 @@ func (this *ReverseProxyHandler) SaveToFile() bool {
 	return true
 }
 
-func (this *ReverseProxyHandler) DeletenLbNodeSlice(slice []*LbNode, index int) []*LbNode {
-	length := len(slice)
-	if slice == nil || length == 0 || length < index {
-		return nil
-	}
-	if length-1 == index {
-		return slice[:index]
-	} else if length > index {
-		return append(slice[:index], slice[index+1:]...)
-	}
-	return nil
-}
-
-func (this *ReverseProxyHandler) DeleteClientSlice(slice []*HostInfo, index int) []*HostInfo {
-	length := len(slice)
-	if slice == nil || length == 0 || length < index {
-		return nil
-	}
-	if length-1 == index {
-		return slice[:index]
-	} else if length > index {
-		return append(slice[:index], slice[index+1:]...)
-	}
-	return nil
-}
-
 //Delete the domain name and sync to the configuration file
 func (this *ReverseProxyHandler) DeleteDomainConig(domain string) bool {
 	for k, v := range this.Cfg.ReverseProxy {

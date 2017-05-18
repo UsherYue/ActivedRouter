@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"ActivedRouter/global"
+	. "ActivedRouter/netservice/packet"
 	"ActivedRouter/system"
-	"ActivedRouter/tools"
 )
 
 type Client struct {
@@ -41,7 +41,6 @@ func (self *Client) ConnectToServer(addr string) {
 	conn, _ := net.DialTimeout("tcp", addr, time.Second*5)
 	self.ConnSocket = conn
 	defer conn.Close()
-
 	//conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 	//conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 	log.Println("The connection to the remote routing server was successful!")
@@ -54,7 +53,10 @@ func (self *Client) ConnectToServer(addr string) {
 				//Control to send data
 				t1.Reset(time.Second * HEARTBEAT_INTERVAL)
 				info := system.SysInfo(global.RunMode, global.Cluster, global.Domain)
-				_, err := self.ConnSocket.Write(tools.Base64Encode([]byte(info)))
+				//Encapsulate packets
+				dataPackage := NewDefaultPacket([]byte(info)).Packet()
+				//fmt.Println(tools.BytesToHexString(dataPackage))
+				_, err := self.ConnSocket.Write(dataPackage)
 				//attempt connecting to router server until the client agent connect success
 				if err != nil && !self.Closed {
 					conn, err := net.DialTimeout("tcp", addr, time.Second*5)

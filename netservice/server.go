@@ -8,8 +8,8 @@ import (
 
 	"ActivedRouter/global"
 	"ActivedRouter/hook"
+	. "ActivedRouter/netservice/packet"
 	"ActivedRouter/system"
-	"ActivedRouter/tools"
 )
 
 const (
@@ -39,6 +39,30 @@ func (self *Server) OnDataRecv(c net.Conn) {
 	log.Printf("accept connect from %s\n", c.RemoteAddr().String())
 	defer c.Close()
 	buffer := make([]byte, BUFFER_SIZE)
+	//Declare a pipe for receiving unpacked data
+	readerChannel := make(chan []byte, 1024)
+	//Store truncated data
+	remainBuffer := make([]byte, 0)
+	//read unpackage data from buffered channel
+	go func(reader chan []byte) {
+		for {
+			packageData := <-reader
+			//decodeData, _ := tools.Base64Decode(packageData)
+			data, err := system.DecodeSysinfo(string(packageData))
+			//Parsing errors but not handling
+			if err != nil {
+				log.Println(err.Error())
+				//Close connection to server when json decode  error  occured
+				c.Close()
+				return
+			}
+			//get remote host ip
+			addrs := strings.Split(c.RemoteAddr().String(), ":")
+			//update host status
+			data.IP = addrs[0]
+			global.GHostInfoTable.UpdateHostTable(addrs[0], data)
+		}
+	}(readerChannel)
 	for {
 		//Get client heartbeat feedback
 		if n, err := c.Read(buffer); err != nil {
@@ -53,21 +77,8 @@ func (self *Server) OnDataRecv(c net.Conn) {
 			if n > 0 {
 				//Deserialize the data and perform statistical analysis
 				///Note.......
-				//There may be sticky packets of bug
-				decodeData, _ := tools.Base64Decode(buffer[:n])
-				data, err := system.DecodeSysinfo(string(decodeData))
-				//Parsing errors but not handling
-				if err != nil {
-					log.Println(err.Error())
-					//Close connection to server when json decode  error  occured
-					c.Close()
-					return
-				}
-				//get remote host ip
-				addrs := strings.Split(c.RemoteAddr().String(), ":")
-				//update host status
-				data.IP = addrs[0]
-				global.GHostInfoTable.UpdateHostTable(addrs[0], data)
+				//fix sticky bugs...
+				remainBuffer = NewDefaultPacket(append(remainBuffer, buffer[:n]...)).UnPacket(readerChannel)
 			}
 		}
 	}
