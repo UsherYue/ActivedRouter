@@ -6,6 +6,7 @@ const (
 	HookConfig       = "config/hook.json"
 	ClientConfig     = "config/client.json"
 	HttpProxyConfig  = "config/http_proxy.json"
+	HttpsProxyConfig = "config/https_proxy.json"
 )
 
 const (
@@ -18,6 +19,7 @@ const (
 	ServerMode       = "server"       //server mode
 	ClientMode       = "client"       //client mode
 	ReverseProxyMode = "reverseproxy" //reverseproxy mode
+	InitMode         = "init"         //初始化
 )
 
 //load balance method

@@ -1,14 +1,50 @@
 package netservice
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net"
+	"os"
+	"strings"
 	"time"
 
 	"ActivedRouter/global"
 	. "ActivedRouter/netservice/packet"
 	"ActivedRouter/system"
 )
+
+//load client json config file
+func LoadClientJsonConfig(config string) {
+	file, err := os.Open(config)
+	defer file.Close()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	if bts, err := ioutil.ReadAll(file); err != nil {
+		log.Fatalln(err.Error())
+	} else {
+		var ClientMap map[string]interface{}
+		err := json.Unmarshal(bts, &ClientMap)
+		if err != nil {
+			log.Fatalln("load client.json error")
+		}
+		domain, _ := ClientMap["domain"].(string)
+		cluster, _ := ClientMap["cluster"].(string)
+		serverList := ClientMap["router_list"].([]interface{})
+		global.ConfigMap["domain"] = domain
+		global.ConfigMap["cluster"] = cluster
+		global.Cluster = cluster
+		global.Domain = domain
+		//server list
+		var serverArr []string
+		for _, v := range serverList {
+			serverArr = append(serverArr, v.(string))
+		}
+		global.ConfigMap["serverlist"] = strings.Join(serverArr, "|")
+		log.Println(global.ConfigMap)
+	}
+}
 
 type Client struct {
 	Host        string

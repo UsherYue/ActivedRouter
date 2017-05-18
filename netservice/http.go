@@ -157,7 +157,7 @@ func NewHttp(host, port string) *Http {
 
 //run router server
 func (self *Http) Run() {
-	log.Printf("开始启动http服务,%s:%s........\n", self.Host, self.Port)
+	log.Printf("Begin  Running http api service,%s:%s........\n", self.Host, self.Port)
 	router := httprouter.New()
 	//statistics
 	router.GET("/clientinfos", self.ClientInfos)

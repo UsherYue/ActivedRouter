@@ -1,8 +1,12 @@
 package netservice
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net"
+	"os"
+
 	"strings"
 	"time"
 
@@ -19,6 +23,40 @@ const (
 	DISPATCH_EVENT_INTERVAL = 5                 //check event dispatch  interval
 	BUFFER_SIZE             = 100 * 1024 * 1024 //Maximum size of cache
 )
+
+//server config mapping struct
+type ServerConfigData struct {
+	Host       string `json:"host"`
+	Port       string `json:"port"`
+	ServerMode string `json:"srvmode"`
+	HttpHost   string `json:"httphost"`
+	HttpPort   string `json:"httpport"`
+}
+
+//loade serverConfig
+func LoadServerJsonConfig(config string) {
+	if file, err := os.Open(config); err == nil {
+		if bts, err := ioutil.ReadAll(file); err == nil {
+			var serverConfig ServerConfigData
+			if json.Unmarshal(bts, &serverConfig) != nil {
+				goto Exit
+			} else {
+				global.ConfigMap["host"] = serverConfig.Host
+				global.ConfigMap["port"] = serverConfig.Port
+				global.ConfigMap["srvmode"] = serverConfig.ServerMode
+				global.ConfigMap["httpport"] = serverConfig.HttpPort
+				global.ConfigMap["httphost"] = serverConfig.HttpHost
+				return
+			}
+		} else {
+			goto Exit
+		}
+	} else {
+		goto Exit
+	}
+Exit:
+	log.Fatalln("server config load error!")
+}
 
 //Router server infomational encapsulation
 type Server struct {
