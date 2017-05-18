@@ -6,15 +6,17 @@
 package boot
 
 import (
-	. "ActivedRouter/netservice"
+	"ActivedRouter/boot/cmdline"
+	"ActivedRouter/boot/config"
+	"ActivedRouter/netservice"
 )
 
 func init() {
 	//parse cmd line
-	if parseCmdline() {
+	if cmdline.ParseCmdline() {
 		//parse config file
-		parseConfigfile()
+		config.ParseConfigfile()
 		//	start network
-		StartNetworkService()
+		netservice.StartNetworkService()
 	}
 }
