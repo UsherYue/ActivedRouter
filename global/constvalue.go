@@ -7,11 +7,17 @@ const (
 	ClientConfig     = "config/client.json"
 	HttpProxyConfig  = "config/http_proxy.json"
 	HttpsProxyConfig = "config/https_proxy.json"
+	CertificateData  = "config/crtdata"
 )
 
 const (
 	//defaule pprof's http service  address
 	HTTP_PPROF_DEFAULT_ADDR = ":6060"
+)
+
+const (
+	DefaultCertificate = "server.crt"
+	DefaultKey         = "server.key"
 )
 
 //run mode

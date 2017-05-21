@@ -25,6 +25,8 @@ func ParseConfigfile() {
 		{
 			//server config
 			netservice.LoadServerJsonConfig(ServerJsonConfig)
+			//certificate config
+			netservice.ProxyHandler.LoadCertificateConfig(CertificateData)
 			//proxy config
 			netservice.ProxyHandler.LoadProxyConfig(HttpProxyConfig)
 		}

@@ -1,6 +1,8 @@
 package netservice
 
 import (
+	//"crypto/tls"
+	//"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +12,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -25,8 +28,6 @@ var (
 	HttpsAddr   string
 	HttpSwitch  string //on off
 	HttpsSwitch string //on off
-	HttpsCrt    string //https certificate
-	HttpsKey    string //https key
 )
 
 //default
@@ -60,22 +61,25 @@ type LbNode struct {
 
 //ReverseProxy Config
 type ReverseProxyConfigData struct {
-	ProxyMethod    string    `json:"proxy_method"`
-	HttpProxyAddr  string    `json:"http_proxy_addr"`
-	HttpSwitch     string    `json:"http_switch"`
+	ProxyMethod   string `json:"proxy_method"`
+	HttpProxyAddr string `json:"http_proxy_addr"`
+	//global http switch
+	HttpSwitch string `json:"http_switch"`
+	//global https switch
 	HttpsSwitch    string    `json:"https_switch"`
-	HttpsCrt       string    `json:"https_crt"`
-	HttpsKey       string    `json:"https_key"`
 	HttpsProxyAddr string    `json:"https_proxy_addr"`
 	ReverseProxy   []*LbNode `json:"reserve_proxy"`
 }
 
 //reverse
 type ReverseProxyHandler struct {
-	DomainHostList   cache.Cacher
-	Cfg              *ReverseProxyConfigData
-	ProxyCongfigFile string
-	ProxyMethod      string
+	DomainHostList cache.Cacher
+	Cfg            *ReverseProxyConfigData
+	httpsServer    *HttpsServer
+	//certificate config
+	CertificateConfigData []*CertificateConfig
+	ProxyCongfigFile      string
+	ProxyMethod           string
 }
 
 //domain list
@@ -227,7 +231,7 @@ func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port string) int
 			}
 		}
 	}
-	this.Cfg.ReverseProxy = append(this.Cfg.ReverseProxy, &LbNode{domain, "off", []*HostInfo{&HostInfo{port, hostip}}})
+	this.Cfg.ReverseProxy = append(this.Cfg.ReverseProxy, &LbNode{Domain: domain, HttpsSwitch: "off", Clients: []*HostInfo{&HostInfo{port, hostip}}})
 	this.SaveToFile()
 	return 1
 }
@@ -316,8 +320,23 @@ func (this *ReverseProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo
 	return nil
 }
 
+//Check the legitimacy of https access
+func (this *ReverseProxyHandler) checkValidHttpsReq(host string) bool {
+	if _, ok := this.httpsServer.TLSConfig.NameToCertificate[host]; ok {
+		return true
+	}
+	return false
+}
+
 //serve http
 func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.TLS != nil {
+		if !this.checkValidHttpsReq(r.Host) {
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(r.Host + "&nbsp;&nbsp;can't be accessed via https,please configure a digital certificate........."))
+			return
+		}
+	}
 	//Get the business server
 	hostinfo := this.GetHostInfo(r.Host, this.ProxyMethod)
 	if hostinfo == nil {
@@ -339,6 +358,26 @@ func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	proxy.ServeHTTP(w, r)
 	//Update reverse proxy statistics
 	global.GProxyHttpStatistics.UpdateClusterStatistics(r.Host, 0)
+}
+
+//Load Certificate Config
+func (this *ReverseProxyHandler) LoadCertificateConfig(certificateConfigFile string) {
+	stat, err := os.Stat(global.CertificateData)
+	if os.IsNotExist(err) || !stat.IsDir() {
+		return
+	}
+	if fileInfos, err := ioutil.ReadDir(global.CertificateData); err != nil {
+		return
+	} else {
+		for _, fileInfo := range fileInfos {
+			if fileInfo.IsDir() {
+				domain := fileInfo.Name()
+				certFile := path.Join(global.CertificateData, domain, global.DefaultCertificate)
+				keyFile := path.Join(global.CertificateData, domain, global.DefaultKey)
+				this.CertificateConfigData = append(this.CertificateConfigData, &CertificateConfig{Domain: domain, CertFile: certFile, KeyFile: keyFile})
+			}
+		}
+	}
 }
 
 //load proxy
@@ -376,12 +415,10 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 			} else {
 				HttpsAddr = this.Cfg.HttpsProxyAddr
 			}
-			HttpsCrt = this.Cfg.HttpsCrt
-			HttpsKey = this.Cfg.HttpsKey
+			//			HttpsCrt = this.Cfg.HttpsCrt
+			//			HttpsKey = this.Cfg.HttpsKey
 			log.Println("Https Switch:" + HttpsSwitch)
 			log.Println("Https Addr:" + HttpsAddr)
-			log.Println("Https  Crt:" + HttpsCrt)
-			log.Println("Https  Key:" + HttpsKey)
 		}
 		//proxy method
 		if this.Cfg.ProxyMethod == "" {
@@ -435,8 +472,16 @@ func (this *ReverseProxyHandler) StartProxyServer() {
 	//https switch
 	if HttpsSwitch == SwitchOn {
 		go func() {
-			httpsServer := NewHttpsServer()
-			err := httpsServer.RunHttpsService(HttpsAddr, "", "", ProxyHandler)
+			this.httpsServer = NewHttpsServer()
+			this.httpsServer.AddDomainCertificateConfig(this.CertificateConfigData)
+			//https access control
+			//			this.httpsServer.GetCertificate = func(clientInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			//				x509Cert, err := tls.LoadX509KeyPair("config/ca/server.crt", "config/ca/server.key")
+			//				x509.ParseCertificate(x509Cert.Certificate[0])
+			//				clientInfo.Conn.Close()
+			//				return nil, err
+			//			}
+			err := this.httpsServer.RunHttpsService(HttpsAddr, "", "", ProxyHandler)
 			if err != nil {
 				log.Fatalln("RunHttpServer:", err)
 			} else {
