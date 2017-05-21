@@ -18,11 +18,9 @@
             </a>
             <ul class="dropdown-menu multi-level">
 			   <li><a  href="#"  id="domain_setting" >Domain Setting</a></li>
-               <li><a  href="#" id="http_reserveproxy_setting">Http ReserveProxy Setting</a></li>
+               <li><a  href="#" id="http_reverseproxy_setting">Http ReverseProxy Setting</a></li>
 				<li class="divider"></li>
-				<li><a  href="#" id="">-------以下正在开发中-------</a></li>
-			    <li><a  href="#" id="https_reserveproxy_setting">Https ReserveProxy Setting</a></li>
-				<li><a  href="#" id="tcp_reserveproxy_setting">TCP ReserveProxy Setting</a></li>
+				<li><a  href="#" id="tcp_reserveproxy_setting">TCP ReverseProxy Setting</a></li>
 			    <li class="dropdown-submenu">
 					<a  href="#"  id="runmode_setting" >Runmode Setting</a>
 				    <ul class="dropdown-menu">  
@@ -57,7 +55,7 @@
 
 <script id="Proxy_Domain_List" type="text/html">
 <table class="table table-hover" style="margin-top:10px;"> 
-	<tr ><th>Server Host</th><th>Htts</th><th>Operate</th><tr/>
+	<tr ><th>Server Host</th><th>Https</th><th>Operate</th><tr/>
 	{{each domainInfos}}
 		<tr>
 			<td>{{$value}}</td>

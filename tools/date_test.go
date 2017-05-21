@@ -43,3 +43,12 @@ func TestGetWeekInterval(t *testing.T) {
 	str := datatTool.Format(782166400, "2006-01-02 15:04:05")
 	fmt.Println(str)
 }
+
+func TestA(t *testing.T) {
+	fmt.Println((map[string]int{} == nil))
+	fmt.Println(map[string]int{})
+	//fmt.Println((len(map[string]int{}) == 0))
+	var m map[string]int = nil
+	fmt.Println(m == nil)
+	fmt.Println(m)
+}

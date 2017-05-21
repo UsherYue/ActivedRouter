@@ -53,8 +53,9 @@ type HostInfo struct {
 
 //Load Balance Node
 type LbNode struct {
-	Domain  string      `json:"domain"`
-	Clients []*HostInfo `json:"clients"`
+	Domain      string      `json:"domain"`
+	HttpsSwitch string      `json:"https_switch"`
+	Clients     []*HostInfo `json:"clients"`
 }
 
 //ReverseProxy Config
@@ -226,7 +227,7 @@ func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port string) int
 			}
 		}
 	}
-	this.Cfg.ReverseProxy = append(this.Cfg.ReverseProxy, &LbNode{domain, []*HostInfo{&HostInfo{port, hostip}}})
+	this.Cfg.ReverseProxy = append(this.Cfg.ReverseProxy, &LbNode{domain, "off", []*HostInfo{&HostInfo{port, hostip}}})
 	this.SaveToFile()
 	return 1
 }
@@ -360,18 +361,20 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		}
 		//Get the http switch
 		if HttpSwitch == SwitchOn {
-			HttpAddr = this.Cfg.HttpProxyAddr
-			if HttpAddr == "" {
+			if this.Cfg.HttpProxyAddr == "" {
 				HttpAddr = DefaultHttpAddr
+			} else {
+				HttpAddr = this.Cfg.HttpProxyAddr
 			}
 			log.Println("Http Switch:" + HttpSwitch)
 			log.Println("Http  Addr:" + HttpAddr)
 		}
 		//Get the https switch
 		if HttpsSwitch == SwitchOn {
-			HttpsAddr = this.Cfg.HttpsProxyAddr
-			if HttpsAddr == "" {
+			if this.Cfg.HttpsProxyAddr == "" {
 				HttpsAddr = DefaultHttsAddr
+			} else {
+				HttpsAddr = this.Cfg.HttpsProxyAddr
 			}
 			HttpsCrt = this.Cfg.HttpsCrt
 			HttpsKey = this.Cfg.HttpsKey
@@ -380,7 +383,7 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 			log.Println("Https  Crt:" + HttpsCrt)
 			log.Println("Https  Key:" + HttpsKey)
 		}
-
+		//proxy method
 		if this.Cfg.ProxyMethod == "" {
 			this.ProxyMethod = global.Random
 		} else {
@@ -389,9 +392,6 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		//Create a memory cache to store the list of domain names
 		this.DomainHostList = cache.Newcache("memory")
 		clients := this.Cfg.ReverseProxy
-		if len(clients) == 0 {
-			log.Fatalln("Config file miss proxy host......")
-		}
 		for _, client := range clients {
 			subDomain := client.Domain
 			var subClientList []*HostInfo
@@ -435,9 +435,10 @@ func (this *ReverseProxyHandler) StartProxyServer() {
 	//https switch
 	if HttpsSwitch == SwitchOn {
 		go func() {
-			err := http.ListenAndServeTLS(HttpsAddr, HttpsCrt, HttpsKey, ProxyHandler)
+			httpsServer := NewHttpsServer()
+			err := httpsServer.RunHttpsService(HttpsAddr, "", "", ProxyHandler)
 			if err != nil {
-				log.Fatalln("ListenAndServe HTTP SSL: ", err)
+				log.Fatalln("RunHttpServer:", err)
 			} else {
 				log.Println("Listen Http SSL:", HttpsAddr)
 			}
