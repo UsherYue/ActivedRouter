@@ -45,10 +45,14 @@ func TestGetWeekInterval(t *testing.T) {
 }
 
 func TestA(t *testing.T) {
-	fmt.Println((map[string]int{} == nil))
-	fmt.Println(map[string]int{})
-	//fmt.Println((len(map[string]int{}) == 0))
-	var m map[string]int = nil
-	fmt.Println(m == nil)
-	fmt.Println(m)
+	//	fmt.Println((map[string]int{} == nil))
+	//	fmt.Println(map[string]int{})
+	//	//fmt.Println((len(map[string]int{}) == 0))
+	//	var m map[string]int = nil
+	//	fmt.Println(m == nil)
+	//	fmt.Println(m)
+	var mpTest map[int]int = make(map[int]int)
+	//var mpTest map[int]int
+	mpTest[1] = 222
+	fmt.Println(mpTest[1])
 }

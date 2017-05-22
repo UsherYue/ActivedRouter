@@ -1,8 +1,6 @@
 package netservice
 
 import (
-	//"crypto/tls"
-	//"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -56,6 +54,7 @@ type HostInfo struct {
 type LbNode struct {
 	Domain      string      `json:"domain"`
 	HttpsSwitch string      `json:"https_switch"`
+	HttpSwitch  string      `json:"http_switch"`
 	Clients     []*HostInfo `json:"clients"`
 }
 
@@ -64,14 +63,15 @@ type ReverseProxyConfigData struct {
 	ProxyMethod   string `json:"proxy_method"`
 	HttpProxyAddr string `json:"http_proxy_addr"`
 	//global http switch
-	HttpSwitch string `json:"http_switch"`
+	GlobalHttpSwitch string `json:"http_switch"`
 	//global https switch
-	HttpsSwitch    string    `json:"https_switch"`
-	HttpsProxyAddr string    `json:"https_proxy_addr"`
-	ReverseProxy   []*LbNode `json:"reserve_proxy"`
+	GlobalHttpsSwitch string                       `json:"https_switch"`
+	HttpsProxyAddr    string                       `json:"https_proxy_addr"`
+	ReverseProxy      []*LbNode                    `json:"reserve_proxy"`
+	DomainProxySwitch map[string]map[string]string `json:"-"`
 }
 
-//reverse
+//reverse proxy handler
 type ReverseProxyHandler struct {
 	DomainHostList cache.Cacher
 	Cfg            *ReverseProxyConfigData
@@ -110,7 +110,7 @@ func (this *ReverseProxyHandler) AddDomainConfig(domain string) bool {
 
 //save to file
 func (this *ReverseProxyHandler) SaveToFile() bool {
-	if bts, err := json.Marshal(this.Cfg); err != nil {
+	if bts, err := json.MarshalIndent(this.Cfg, "", " "); err != nil {
 		return false
 	} else {
 		if file, err := os.OpenFile(this.ProxyCongfigFile, os.O_RDWR|os.O_TRUNC, os.ModePerm); err != nil {
@@ -172,9 +172,11 @@ func (this *ReverseProxyHandler) DeleteProxyClient(domain, hostip, port string) 
 }
 
 //Update Reverse Proxy Client Info
-func (this *ReverseProxyHandler) UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort string) bool {
+func (this *ReverseProxyHandler) UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort, httpsSwitch, httpSwitch string) bool {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
+			v.HttpsSwitch = httpsSwitch
+			v.HttpSwitch = HttpSwitch
 			for _, client := range v.Clients {
 				if client.Host == preHost && client.Port == prePort {
 					client.Host = updateHost
@@ -206,9 +208,12 @@ func (this *ReverseProxyHandler) UpdateProxyClient(domain, preHost, prePort, upd
 // -1  Repeat
 //  0  Failure
 //  1  Success
-func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port string) int {
+func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port, httsSwitch, httpSwitch string) int {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
+			//proxy switch
+			v.HttpsSwitch = httsSwitch
+			v.HttpSwitch = httpSwitch
 			for _, client := range v.Clients {
 				if client.Host == hostip && client.Port == port {
 					return -1
@@ -237,9 +242,12 @@ func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port string) int
 }
 
 //update domain
-func (this *ReverseProxyHandler) UpdateDomain(preDomain, updateDomain string) bool {
+func (this *ReverseProxyHandler) UpdateDomain(preDomain, updateDomain, httpsSwitch, httpSwitch string) bool {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == preDomain {
+			//proxy switch
+			v.HttpsSwitch = httpsSwitch
+			v.HttpSwitch = httpSwitch
 			v.Domain = updateDomain
 			//hot update
 			data, _ := this.DomainHostList.Get(preDomain)
@@ -255,6 +263,28 @@ func (this *ReverseProxyHandler) UpdateDomain(preDomain, updateDomain string) bo
 	return true
 }
 
+func (this *ReverseProxyHandler) ChangeSwitchStatus(domain, protocol, switchStatus string) {
+	for _, v := range this.Cfg.ReverseProxy {
+		if v.Domain == domain {
+			switch protocol {
+			case "http":
+				{
+					v.HttpSwitch = switchStatus
+				}
+			case "https":
+				{
+					v.HttpsSwitch = switchStatus
+				}
+			default:
+				{
+					return
+				}
+			}
+			this.SaveToFile()
+		}
+	}
+}
+
 //hostlist by domain
 func (this *ReverseProxyHandler) GetDomainHostList(domain string) []*HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
@@ -267,6 +297,10 @@ func (this *ReverseProxyHandler) GetRandomHost(domain string) *HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	proxyCount := len(vArr)
+	//fix bug :integer divide by zero
+	if proxyCount == 0 {
+		return nil
+	}
 	index := rand.Uint32() % uint32(proxyCount)
 	return vArr[index]
 }
@@ -320,23 +354,37 @@ func (this *ReverseProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo
 	return nil
 }
 
-//Check the legitimacy of https access
-func (this *ReverseProxyHandler) checkValidHttpsReq(host string) bool {
-	if _, ok := this.httpsServer.TLSConfig.NameToCertificate[host]; ok {
-		return true
-	}
-	return false
-}
-
 //serve http
+//If the request protocol is https, check whether the reverse proxy is allowed to pass
 func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.TLS != nil {
-		if !this.checkValidHttpsReq(r.Host) {
+		if !this.httpsServer.CheckValidHttpsReq(r.Host) {
 			w.Header().Set("Content-Type", "text/html")
 			w.Write([]byte(r.Host + "&nbsp;&nbsp;can't be accessed via https,please configure a digital certificate........."))
 			return
 		}
+		if proxySwitch, ok := this.Cfg.DomainProxySwitch[r.Host]; ok {
+			if httpsSwitch, ok := proxySwitch["https"]; ok {
+				if httpsSwitch == SwitchOn {
+					goto STARTPROXY
+				}
+			}
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open https proxy switch........."))
+		}
+	} else {
+		if proxySwitch, ok := this.Cfg.DomainProxySwitch[r.Host]; ok {
+			if httpsSwitch, ok := proxySwitch["http"]; ok {
+				if httpsSwitch == SwitchOn {
+					goto STARTPROXY
+				}
+			}
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open http proxy switch........."))
+		}
 	}
+
+STARTPROXY:
 	//Get the business server
 	hostinfo := this.GetHostInfo(r.Host, this.ProxyMethod)
 	if hostinfo == nil {
@@ -357,7 +405,7 @@ func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	proxy := httputil.NewSingleHostReverseProxy(remote)
 	proxy.ServeHTTP(w, r)
 	//Update reverse proxy statistics
-	global.GProxyHttpStatistics.UpdateClusterStatistics(r.Host, 0)
+	go global.GProxyHttpStatistics.UpdateClusterStatistics(r.Host, 0)
 }
 
 //Load Certificate Config
@@ -380,7 +428,7 @@ func (this *ReverseProxyHandler) LoadCertificateConfig(certificateConfigFile str
 	}
 }
 
-//load proxy
+//Load proxy config
 func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 	this.ProxyCongfigFile = proxyConfigFile
 	file, err := os.Open(proxyConfigFile)
@@ -391,9 +439,12 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 	if bts, err := ioutil.ReadAll(file); err != nil {
 		log.Fatalln(err.Error())
 	} else {
-		json.Unmarshal(bts, &this.Cfg)
-		HttpSwitch = this.Cfg.HttpSwitch
-		HttpsSwitch = this.Cfg.HttpsSwitch
+		if err := json.Unmarshal(bts, &this.Cfg); err != nil {
+			log.Fatalln("Parse proxy config file .....")
+		}
+		this.Cfg.DomainProxySwitch = make(map[string]map[string]string)
+		HttpSwitch = this.Cfg.GlobalHttpSwitch
+		HttpsSwitch = this.Cfg.GlobalHttpsSwitch
 		//http https  off
 		if HttpSwitch == SwitchOff && HttpsSwitch == SwitchOff {
 			log.Fatalln("Please open http or https reverse proxy switch.....")
@@ -420,7 +471,7 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 			log.Println("Https Switch:" + HttpsSwitch)
 			log.Println("Https Addr:" + HttpsAddr)
 		}
-		//proxy method
+		//Proxy method
 		if this.Cfg.ProxyMethod == "" {
 			this.ProxyMethod = global.Random
 		} else {
@@ -431,6 +482,8 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		clients := this.Cfg.ReverseProxy
 		for _, client := range clients {
 			subDomain := client.Domain
+			//Domain proxy switch
+			this.Cfg.DomainProxySwitch[subDomain] = map[string]string{"http": client.HttpSwitch, "https": client.HttpsSwitch}
 			var subClientList []*HostInfo
 			for _, hostInfo := range client.Clients {
 				subClientList = append(subClientList, hostInfo)
@@ -474,13 +527,6 @@ func (this *ReverseProxyHandler) StartProxyServer() {
 		go func() {
 			this.httpsServer = NewHttpsServer()
 			this.httpsServer.AddDomainCertificateConfig(this.CertificateConfigData)
-			//https access control
-			//			this.httpsServer.GetCertificate = func(clientInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
-			//				x509Cert, err := tls.LoadX509KeyPair("config/ca/server.crt", "config/ca/server.key")
-			//				x509.ParseCertificate(x509Cert.Certificate[0])
-			//				clientInfo.Conn.Close()
-			//				return nil, err
-			//			}
 			err := this.httpsServer.RunHttpsService(HttpsAddr, "", "", ProxyHandler)
 			if err != nil {
 				log.Fatalln("RunHttpServer:", err)

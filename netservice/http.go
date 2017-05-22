@@ -99,7 +99,7 @@ func (self *Http) UpdateDomain(w http.ResponseWriter, r *http.Request, prms http
 	r.ParseForm()
 	preDomain := r.Form.Get("predomain")
 	updateDomain := r.Form.Get("updatedomain")
-	if ProxyHandler.UpdateDomain(preDomain, updateDomain) {
+	if ProxyHandler.UpdateDomain(preDomain, updateDomain, "on", "on") {
 		self.WriteJsonString(w, `{"status":"1"}`)
 	} else {
 		self.WriteJsonString(w, `{"status":"0"}`)
@@ -111,7 +111,7 @@ func (self *Http) AddProxyClient(w http.ResponseWriter, r *http.Request, _ httpr
 	domain := r.Form.Get("domain")
 	host := r.Form.Get("host")
 	port := r.Form.Get("port")
-	if ret := ProxyHandler.AddProxyClient(domain, host, port); ret == -1 {
+	if ret := ProxyHandler.AddProxyClient(domain, host, port, "on", "on"); ret == -1 {
 		self.WriteJsonString(w, `{"status":0,"data":{"code":-1}}`)
 	} else if ret == 0 {
 		self.WriteJsonString(w, `{"status":0,"data":{"code":0}}`)
@@ -143,7 +143,7 @@ func (self *Http) UpdateProxyClient(w http.ResponseWriter, r *http.Request, prms
 		self.WriteJsonString(w, `{"status":0}`)
 		return
 	}
-	if ret := ProxyHandler.UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort); !ret {
+	if ret := ProxyHandler.UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort, "on", "on"); !ret {
 		self.WriteJsonString(w, `{"status":0}`)
 	} else {
 		self.WriteJsonString(w, `{"status":1}`)
