@@ -26,9 +26,9 @@ func ParseConfigfile() {
 			//server config
 			netservice.LoadServerJsonConfig(ServerJsonConfig)
 			//certificate config
-			netservice.DefaultReverseProxy.LoadCertificateConfig(CertificateData)
+			netservice.DefaultHttpReverseProxy.LoadCertificateConfig(CertificateData)
 			//proxy config
-			netservice.DefaultReverseProxy.LoadProxyConfig(HttpProxyConfig)
+			netservice.DefaultHttpReverseProxy.LoadProxyConfig(HttpProxyConfig)
 		}
 	case InitMode:
 		{

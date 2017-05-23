@@ -40,7 +40,7 @@ func StartNetworkService() {
 			//Run Http Service
 			go NewHttp(ServerConfigData.HttpHost, ServerConfigData.HttpPort).Run()
 			//Run ReserveProxy Service
-			go DefaultReverseProxy.StartProxyServer()
+			go DefaultHttpReverseProxy.StartProxyServer()
 			log.Println("ActivedRouter is Running  In ReverseProxy Mode...")
 		}
 	}

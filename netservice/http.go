@@ -70,24 +70,24 @@ func (self *Http) RouterInfo(w http.ResponseWriter, r *http.Request, _ httproute
 
 //Reverse Proxy infp
 func (self *Http) ProxyInfos(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
-	hostInfos := DefaultReverseProxy.GetDomainHostList(prms.ByName("domain"))
+	hostInfos := DefaultHttpReverseProxy.GetDomainHostList(prms.ByName("domain"))
 	self.WriteJsonInterface(w, hostInfos)
 }
 
 func (self *Http) DomainInfos(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
-	keysArray := DefaultReverseProxy.DomainInfos()
+	keysArray := DefaultHttpReverseProxy.DomainInfos()
 	self.WriteJsonInterface(w, keysArray)
 }
 
 func (self *Http) AddDomain(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
-	if DefaultReverseProxy.AddDomainConfig(prms.ByName("domain")) {
+	if DefaultHttpReverseProxy.AddDomainConfig(prms.ByName("domain")) {
 		self.WriteJsonString(w, `{"status":"1"}`)
 	} else {
 		self.WriteJsonString(w, `{"status":"0"}`)
 	}
 }
 func (self *Http) DelDomain(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
-	if DefaultReverseProxy.DeleteDomainConig(prms.ByName("domain")) {
+	if DefaultHttpReverseProxy.DeleteDomainConig(prms.ByName("domain")) {
 		self.WriteJsonString(w, `{"status":"1"}`)
 	} else {
 		self.WriteJsonString(w, `{"status":"0"}`)
@@ -99,7 +99,7 @@ func (self *Http) UpdateDomain(w http.ResponseWriter, r *http.Request, prms http
 	r.ParseForm()
 	preDomain := r.Form.Get("predomain")
 	updateDomain := r.Form.Get("updatedomain")
-	if DefaultReverseProxy.UpdateDomain(preDomain, updateDomain, "on", "on") {
+	if DefaultHttpReverseProxy.UpdateDomain(preDomain, updateDomain, "on", "on") {
 		self.WriteJsonString(w, `{"status":"1"}`)
 	} else {
 		self.WriteJsonString(w, `{"status":"0"}`)
@@ -111,7 +111,7 @@ func (self *Http) AddProxyClient(w http.ResponseWriter, r *http.Request, _ httpr
 	domain := r.Form.Get("domain")
 	host := r.Form.Get("host")
 	port := r.Form.Get("port")
-	if ret := DefaultReverseProxy.AddProxyClient(domain, host, port, "on", "on"); ret == -1 {
+	if ret := DefaultHttpReverseProxy.AddProxyClient(domain, host, port, "on", "on"); ret == -1 {
 		self.WriteJsonString(w, `{"status":0,"data":{"code":-1}}`)
 	} else if ret == 0 {
 		self.WriteJsonString(w, `{"status":0,"data":{"code":0}}`)
@@ -124,7 +124,7 @@ func (self *Http) DeleteProxyClient(w http.ResponseWriter, r *http.Request, prms
 	domain := r.Form.Get("domain")
 	host := r.Form.Get("host")
 	port := r.Form.Get("port")
-	if ret := DefaultReverseProxy.DeleteProxyClient(domain, host, port); !ret {
+	if ret := DefaultHttpReverseProxy.DeleteProxyClient(domain, host, port); !ret {
 		self.WriteJsonString(w, `{"status":0}`)
 	} else {
 		self.WriteJsonString(w, `{"status":1}`)
@@ -143,10 +143,36 @@ func (self *Http) UpdateProxyClient(w http.ResponseWriter, r *http.Request, prms
 		self.WriteJsonString(w, `{"status":0}`)
 		return
 	}
-	if ret := DefaultReverseProxy.UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort, "on", "on"); !ret {
+	if ret := DefaultHttpReverseProxy.UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort, "on", "on"); !ret {
 		self.WriteJsonString(w, `{"status":0}`)
 	} else {
 		self.WriteJsonString(w, `{"status":1}`)
+	}
+}
+
+//http://www.abc.com/proxyctl?protocol=http&switch=on
+func (self *Http) ProxyControl(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	r.ParseForm()
+	proxyProtocol := r.Form.Get("protocol")
+	proxySwitch := r.Form.Get("switch")
+	var bSuccess = false
+	if proxyProtocol == "https" {
+		if proxySwitch == global.SwitchOn {
+			bSuccess = DefaultHttpReverseProxy.StartAllHttpsService()
+		} else if proxySwitch == global.SwitchOff {
+			bSuccess = DefaultHttpReverseProxy.StopAllHttpsService()
+		}
+	} else if proxyProtocol == "http" {
+		if proxySwitch == global.SwitchOn {
+			bSuccess = DefaultHttpReverseProxy.StartAllHttpService()
+		} else if proxySwitch == global.SwitchOff {
+			bSuccess = DefaultHttpReverseProxy.StoptAllHttpService()
+		}
+	}
+	if bSuccess {
+		self.WriteJsonString(w, `{"status":1}`)
+	} else {
+		self.WriteJsonString(w, `{"status":}`)
 	}
 }
 
@@ -174,6 +200,8 @@ func (self *Http) Run() {
 	router.GET("/delproxyclient", self.DeleteProxyClient)
 	router.GET("/updateproxyclient", self.UpdateProxyClient)
 	router.GET("/domaininfos", self.DomainInfos)
+	//reverse proxy switch
+	router.GET("/proxyctl", self.ProxyControl)
 	//statc file server
 	router.GET("/", self.Index)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
