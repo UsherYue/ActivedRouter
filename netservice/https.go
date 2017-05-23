@@ -22,12 +22,6 @@ type CertificateConfig struct {
 type HttpsServer struct {
 	http.Server
 	//If GetCertificate is set, the leaf certificate is returned by calling this function.
-	//	func(clientInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
-	//		fmt.Println(clientInfo.ServerName)
-	//		x509Cert, err := tls.LoadX509KeyPair("config/ca/server.crt", "config/ca/server.key")
-	//		result, _ := x509.ParseCertificate(x509Cert.Certificate[0])
-	//		return nil, err
-	//	}
 	GetCertificate func(*tls.ClientHelloInfo) (*tls.Certificate, error)
 }
 

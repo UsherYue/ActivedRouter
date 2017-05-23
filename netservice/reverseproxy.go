@@ -275,7 +275,7 @@ func (this *ReverseProxy) GetDomainHostList(domain string) []*HostInfo {
 }
 
 //random method
-func (this *ReverseProxy) GetRandomHost(domain string) *HostInfo {
+func (this *ReverseProxy) getRandomHost(domain string) *HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	proxyCount := len(vArr)
@@ -289,22 +289,18 @@ func (this *ReverseProxy) GetRandomHost(domain string) *HostInfo {
 
 //alived method
 //According to the domain name or ip to obtain the most active cluster host
-func (this *ReverseProxy) GetAlivedHost(domain string) *HostInfo {
+func (this *ReverseProxy) getAlivedHost(domain string) *HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
-	hostinfo := this.BestHostInfo(vArr)
+	hostinfo := this.bestHostInfo(vArr)
 	return hostinfo
 }
 
-func (this *ReverseProxy) BestHostInfo(hosts []*HostInfo) *HostInfo {
+func (this *ReverseProxy) bestHostInfo(hosts []*HostInfo) *HostInfo {
 	hostSortedList := global.GHostInfoTable.ActiveHostWeightList
 	for el := hostSortedList.Front(); el != nil; el = el.Next() {
 		bestHost := el.Value.(system.HostInfo)
 		for _, host := range hosts {
-			//			log.Println(host.Host)
-			//			log.Println(host.Port)
-			//			log.Println(bestHost.Info.IP)
-			//			log.Println(bestHost.Info.Domain)
 			if bestHost.Info.IP == host.Host || bestHost.Info.Domain == host.Host {
 				return host
 			}
@@ -313,8 +309,8 @@ func (this *ReverseProxy) BestHostInfo(hosts []*HostInfo) *HostInfo {
 	return nil
 }
 
-//proxy_method  random 和alived
-func (this *ReverseProxy) GetHostInfo(host, proxyMethod string) *HostInfo {
+//proxy_method  random  and alived
+func (this *ReverseProxy) getHostInfo(host, proxyMethod string) *HostInfo {
 	requestHost := host
 	//Handle non-80 ports
 	if strings.IndexAny(host, ":") != -1 {
@@ -326,11 +322,11 @@ func (this *ReverseProxy) GetHostInfo(host, proxyMethod string) *HostInfo {
 	switch proxyMethod {
 	case global.Random:
 		{
-			return this.GetRandomHost(requestHost)
+			return this.getRandomHost(requestHost)
 		}
 	case global.Alived:
 		{
-			return this.GetAlivedHost(requestHost)
+			return this.getAlivedHost(requestHost)
 		}
 	}
 	return nil
@@ -384,10 +380,10 @@ func (self *ReverseProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//Get the business server
-	hostinfo := self.GetHostInfo(r.Host, self.ProxyMethod)
+	hostinfo := self.getHostInfo(r.Host, self.ProxyMethod)
 	if hostinfo == nil {
 		//If you can't get the active host then use the random method。
-		hostinfo = self.GetHostInfo(r.Host, global.Random)
+		hostinfo = self.getHostInfo(r.Host, global.Random)
 		if hostinfo == nil {
 			w.Write([]byte(r.Host + "Can't find active server........."))
 			return
@@ -531,7 +527,6 @@ func (this *ReverseProxy) StoptAllHttpService() bool {
 }
 
 //Run Reverse Proxy
-//ADD
 func (self *ReverseProxy) StartProxyServer() {
 	//Http service switch
 	if self.Cfg.GlobalHttpSwitch == global.SwitchOn {
