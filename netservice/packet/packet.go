@@ -1,3 +1,9 @@
+//ActivedRouter
+//Author:usher.yue
+//Amail:usher.yue@gmail.com
+//TencentQQ:4223665
+// Provide http/https, tcp and reverse proxy  services
+
 package packet
 
 import (

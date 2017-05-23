@@ -7,8 +7,8 @@
  "reserve_proxy": [
   {
    "domain": "www.abc.com",
-   "https_switch": "off",
-   "http_switch": "off",
+   "https_switch": "on",
+   "http_switch": "on",
    "clients": [
     {
      "port": "8080",

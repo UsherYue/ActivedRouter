@@ -28,18 +28,6 @@ var (
 	HttpsSwitch string //on off
 )
 
-//default
-var (
-	DefaultHttpAddr = "127.0.0.1:80"
-	DefaultHttsAddr = "127.0.0.1:443"
-	SwitchOn        = "on"
-	SwitchOff       = "off"
-)
-
-const (
-	HTTP_STATISTICS_INTERVAL = 60 //http statistics interval 5min
-)
-
 //hander
 var (
 	ProxyHandler = &ReverseProxyHandler{Cfg: &ReverseProxyConfigData{}}
@@ -354,37 +342,52 @@ func (this *ReverseProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo
 	return nil
 }
 
-//serve http
+//Http and https access filters
 //If the request protocol is https, check whether the reverse proxy is allowed to pass
-func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (this *ReverseProxyHandler) accessFilter(w http.ResponseWriter, r *http.Request) bool {
+	//global https http switch
 	if r.TLS != nil {
-		if !this.httpsServer.CheckValidHttpsReq(r.Host) {
+		if !this.httpsServer.checkValidHttpsReq(r.Host) {
 			w.Header().Set("Content-Type", "text/html")
 			w.Write([]byte(r.Host + "&nbsp;&nbsp;can't be accessed via https,please configure a digital certificate........."))
-			return
 		}
-		if proxySwitch, ok := this.Cfg.DomainProxySwitch[r.Host]; ok {
-			if httpsSwitch, ok := proxySwitch["https"]; ok {
-				if httpsSwitch == SwitchOn {
-					goto STARTPROXY
-				}
-			}
+		if this.Cfg.GlobalHttpsSwitch == global.SwitchOff {
 			w.Header().Set("Content-Type", "text/html")
-			w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open https proxy switch........."))
+			w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open global https proxy switch........."))
+		} else if this.Cfg.GlobalHttpsSwitch == global.SwitchOn {
+			if proxySwitch, ok := this.Cfg.DomainProxySwitch[r.Host]; ok {
+				if httpsSwitch, ok := proxySwitch["https"]; ok {
+					if httpsSwitch == global.SwitchOn {
+						return true
+					}
+				}
+				w.Header().Set("Content-Type", "text/html")
+				w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open https proxy switch........."))
+			}
 		}
 	} else {
-		if proxySwitch, ok := this.Cfg.DomainProxySwitch[r.Host]; ok {
-			if httpsSwitch, ok := proxySwitch["http"]; ok {
-				if httpsSwitch == SwitchOn {
-					goto STARTPROXY
-				}
-			}
+		if this.Cfg.GlobalHttpSwitch == global.SwitchOff {
 			w.Header().Set("Content-Type", "text/html")
-			w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open http proxy switch........."))
+			w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open global http proxy switch........."))
+		} else {
+			if proxySwitch, ok := this.Cfg.DomainProxySwitch[r.Host]; ok {
+				if httpsSwitch, ok := proxySwitch["http"]; ok {
+					if httpsSwitch == global.SwitchOn {
+						return true
+					}
+				}
+				w.Header().Set("Content-Type", "text/html")
+				w.Write([]byte(r.Host + "&nbsp;&nbsp;Please open http proxy switch........."))
+			}
 		}
 	}
+	return false
+}
 
-STARTPROXY:
+func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !this.accessFilter(w, r) {
+		return
+	}
 	//Get the business server
 	hostinfo := this.GetHostInfo(r.Host, this.ProxyMethod)
 	if hostinfo == nil {
@@ -446,13 +449,13 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 		HttpSwitch = this.Cfg.GlobalHttpSwitch
 		HttpsSwitch = this.Cfg.GlobalHttpsSwitch
 		//http https  off
-		if HttpSwitch == SwitchOff && HttpsSwitch == SwitchOff {
+		if HttpSwitch == global.SwitchOff && HttpsSwitch == global.SwitchOff {
 			log.Fatalln("Please open http or https reverse proxy switch.....")
 		}
 		//Get the http switch
-		if HttpSwitch == SwitchOn {
+		if HttpSwitch == global.SwitchOn {
 			if this.Cfg.HttpProxyAddr == "" {
-				HttpAddr = DefaultHttpAddr
+				HttpAddr = global.DefaultHttpAddr
 			} else {
 				HttpAddr = this.Cfg.HttpProxyAddr
 			}
@@ -460,14 +463,12 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 			log.Println("Http  Addr:" + HttpAddr)
 		}
 		//Get the https switch
-		if HttpsSwitch == SwitchOn {
+		if HttpsSwitch == global.SwitchOn {
 			if this.Cfg.HttpsProxyAddr == "" {
-				HttpsAddr = DefaultHttsAddr
+				HttpsAddr = global.DefaultHttsAddr
 			} else {
 				HttpsAddr = this.Cfg.HttpsProxyAddr
 			}
-			//			HttpsCrt = this.Cfg.HttpsCrt
-			//			HttpsKey = this.Cfg.HttpsKey
 			log.Println("Https Switch:" + HttpsSwitch)
 			log.Println("Https Addr:" + HttpsAddr)
 		}
@@ -495,13 +496,13 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 
 //Run the http statistics service
 func (this *ReverseProxyHandler) BeginHttpStatistics() {
-	timerStatistics := time.NewTimer(time.Second * HTTP_STATISTICS_INTERVAL)
+	timerStatistics := time.NewTimer(time.Second * global.Http_Statistics_Interval)
 	for {
 		select {
 		case <-timerStatistics.C:
 			{
 				//reset timer
-				timerStatistics.Reset(time.Second * HTTP_STATISTICS_INTERVAL)
+				timerStatistics.Reset(time.Second * global.Http_Statistics_Interval)
 				//Incremental statistical curve(曲线)
 				global.GProxyHttpStatistics.UpdateClusterStatistics("", 1)
 			}
@@ -509,10 +510,40 @@ func (this *ReverseProxyHandler) BeginHttpStatistics() {
 	}
 }
 
+//stop https service
+func (this *ReverseProxyHandler) StopHttpsService() error {
+	return nil
+}
+
+//stop http service
+func (this *ReverseProxyHandler) StopHttpService() error {
+	return nil
+}
+
+//start https service
+func (this *ReverseProxyHandler) StartHttpsService() error {
+	return nil
+}
+
+//start http service
+func (this *ReverseProxyHandler) StartHttpService() error {
+	return nil
+}
+
+//stop  all proxy service
+func (this *ReverseProxyHandler) StopAllProxyService() error {
+	return nil
+}
+
+//start  all proxy service
+func (this *ReverseProxyHandler) StartAllProxyService() error {
+	return nil
+}
+
 //Run Reverse Proxy
 func (this *ReverseProxyHandler) StartProxyServer() {
-	//http switch
-	if HttpSwitch == SwitchOn {
+	//Http service switch
+	if HttpSwitch == global.SwitchOn {
 		go func() {
 			err := http.ListenAndServe(HttpAddr, ProxyHandler)
 			if err != nil {
@@ -522,8 +553,8 @@ func (this *ReverseProxyHandler) StartProxyServer() {
 			}
 		}()
 	}
-	//https switch
-	if HttpsSwitch == SwitchOn {
+	//Https  service switch
+	if HttpsSwitch == global.SwitchOn {
 		go func() {
 			this.httpsServer = NewHttpsServer()
 			this.httpsServer.AddDomainCertificateConfig(this.CertificateConfigData)

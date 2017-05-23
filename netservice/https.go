@@ -76,7 +76,7 @@ func (self *HttpsServer) AddDomainCertificateConfig(config []*CertificateConfig)
 }
 
 //Check the legitimacy of https access
-func (self *HttpsServer) CheckValidHttpsReq(host string) bool {
+func (self *HttpsServer) checkValidHttpsReq(host string) bool {
 	if _, ok := self.TLSConfig.NameToCertificate[host]; ok {
 		return true
 	}

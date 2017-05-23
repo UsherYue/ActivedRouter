@@ -46,7 +46,7 @@ func StartNetworkService() {
 			log.Println("ActivedRouter is Running  In ReverseProxy Mode...")
 		}
 	}
-	ListenAndServePProf(global.HTTP_PPROF_DEFAULT_ADDR, nil)
+	ListenAndServePProf(global.HTTP_PPROF_Default_Addr, nil)
 	global.NetworkSwitch <- true
 }
 

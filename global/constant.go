@@ -11,10 +11,15 @@ const (
 )
 
 const (
+	//http statistics interval 5min
+	Http_Statistics_Interval = 60
 	//defaule pprof's http service  address
-	HTTP_PPROF_DEFAULT_ADDR = ":6060"
+	HTTP_PPROF_Default_Addr = ":6060"
+	DefaultHttpAddr         = "127.0.0.1:80"
+	DefaultHttsAddr         = "127.0.0.1:443"
 )
 
+//certificate
 const (
 	DefaultCertificate = "server.crt"
 	DefaultKey         = "server.key"
@@ -32,6 +37,11 @@ const (
 const (
 	Alived = "alived"
 	Random = "random"
+)
+
+const (
+	SwitchOn  = "on"
+	SwitchOff = "off"
 )
 
 //Server weight,The higher the weight, the easier it is to be scheduled
