@@ -20,7 +20,12 @@
    "domain": "www.abcd.com",
    "https_switch": "on",
    "http_switch": "on",
-   "clients": []
+   "clients": [
+    {
+     "port": "8080",
+     "host": "127.0.0.1"
+    }
+   ]
   },
   {
    "domain": "www.abcde.com",
