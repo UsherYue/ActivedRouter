@@ -16,16 +16,11 @@ import (
 	"ActivedRouter/system"
 )
 
-const (
-	CHECK_INTERCAL          = 1
-	CHECK_ACTIVE_INTERVAL   = 2                 // check  active interval
-	CHECK_ROUTER_INTERVAL   = 5                 //Periodically check the routing server status
-	DISPATCH_EVENT_INTERVAL = 5                 //check event dispatch  interval
-	BUFFER_SIZE             = 100 * 1024 * 1024 //Maximum size of cache
-)
+//server config
+var ServerConfigData ServerConfig
 
 //server config mapping struct
-type ServerConfigData struct {
+type ServerConfig struct {
 	Host       string `json:"host"`
 	Port       string `json:"port"`
 	ServerMode string `json:"srvmode"`
@@ -37,15 +32,8 @@ type ServerConfigData struct {
 func LoadServerJsonConfig(config string) {
 	if file, err := os.Open(config); err == nil {
 		if bts, err := ioutil.ReadAll(file); err == nil {
-			var serverConfig ServerConfigData
-			if json.Unmarshal(bts, &serverConfig) != nil {
-				goto Exit
-			} else {
-				global.ConfigMap["host"] = serverConfig.Host
-				global.ConfigMap["port"] = serverConfig.Port
-				global.ConfigMap["srvmode"] = serverConfig.ServerMode
-				global.ConfigMap["httpport"] = serverConfig.HttpPort
-				global.ConfigMap["httphost"] = serverConfig.HttpHost
+			if json.Unmarshal(bts, &ServerConfigData) == nil {
+				global.SrvMode = ServerConfigData.ServerMode
 				return
 			}
 		} else {
@@ -67,8 +55,8 @@ type Server struct {
 }
 
 //create server
-func NewServer(host, port string) *Server {
-	return &Server{Host: host, Port: port, TaskFlag: make(chan bool, 0)}
+func NewServer() *Server {
+	return &Server{TaskFlag: make(chan bool, 0)}
 }
 
 //Data Receive
@@ -76,7 +64,7 @@ func (self *Server) OnDataRecv(c net.Conn) {
 	//return
 	log.Printf("accept connect from %s\n", c.RemoteAddr().String())
 	defer c.Close()
-	buffer := make([]byte, BUFFER_SIZE)
+	buffer := make([]byte, global.SERVER_BUFFER_SIZE)
 	//Declare a pipe for receiving unpacked data
 	readerChannel := make(chan []byte, 1024)
 	//Store truncated data
@@ -129,14 +117,14 @@ func (self *Server) StopServer() {
 
 //Timing monitoring of routing server information
 func (self *Server) checkRouterInfo() {
-	timerRouterInfo := time.NewTimer(time.Second * CHECK_ROUTER_INTERVAL)
+	timerRouterInfo := time.NewTimer(time.Second * global.SERVER_CHECK_ROUTER_INTERVAL)
 	for {
 		select {
 		case <-timerRouterInfo.C:
 			{
-				routerInfo := system.SysInfo(global.RunMode, "ActivedRouterInfo", "")
-				global.SetRouterInfo(routerInfo)
-				timerRouterInfo.Reset(time.Second * CHECK_ROUTER_INTERVAL)
+				routerInfo := system.SysInfo(global.RunMode, "ActivedRouterInfo")
+				global.SetRouterSysInfo(routerInfo)
+				timerRouterInfo.Reset(time.Second * global.SERVER_CHECK_ROUTER_INTERVAL)
 			}
 		}
 	}
@@ -145,7 +133,7 @@ func (self *Server) checkRouterInfo() {
 //event dispatch
 func (self *Server) dispatcher() {
 	closureFunc := func() {
-		timerDispathcEvent := time.NewTimer(time.Second * DISPATCH_EVENT_INTERVAL)
+		timerDispathcEvent := time.NewTimer(time.Second * global.SERVER_DISPATCH_EVENT_INTERVAL)
 		for {
 			select {
 			case <-timerDispathcEvent.C:
@@ -153,12 +141,12 @@ func (self *Server) dispatcher() {
 					log.Println("-------event begin------------")
 					hook.DispatchEvent()
 					log.Println("-------event end------------")
-					timerDispathcEvent.Reset(time.Second * DISPATCH_EVENT_INTERVAL)
+					timerDispathcEvent.Reset(time.Second * global.SERVER_DISPATCH_EVENT_INTERVAL)
 				}
 			}
 		}
 	}
-	srvmode, _ := global.ConfigMap["srvmode"]
+	srvmode := global.SrvMode
 	switch srvmode {
 	case "moniter":
 		{
@@ -169,12 +157,12 @@ func (self *Server) dispatcher() {
 
 //monitoring client
 func (self *Server) moniterClient() {
-	timerCheckActive := time.NewTimer(time.Second * CHECK_ACTIVE_INTERVAL)
+	timerCheckActive := time.NewTimer(time.Second * global.SERVER_CHECK_ACTIVE_INTERVAL)
 	for {
 		select {
 		case <-timerCheckActive.C:
 			{
-				timerCheckActive.Reset(time.Second * CHECK_ACTIVE_INTERVAL)
+				timerCheckActive.Reset(time.Second * global.SERVER_CHECK_ACTIVE_INTERVAL)
 				//update host status
 				global.GHostInfoTable.UpdateHostStatus()
 			}
@@ -183,7 +171,9 @@ func (self *Server) moniterClient() {
 }
 
 //run router server
-func (self *Server) Run() {
+func (self *Server) Run(host, port string) {
+	self.Host = host
+	self.Port = port
 	log.Printf("Begin Running Router Service,%s:%s........\n", self.Host, self.Port)
 	addr := ""
 	if self.Host == "*" {

@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"strings"
 	"time"
 
 	"ActivedRouter/global"
@@ -14,37 +13,13 @@ import (
 	"ActivedRouter/system"
 )
 
-//load client json config file
-func LoadClientJsonConfig(config string) {
-	file, err := os.Open(config)
-	defer file.Close()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	if bts, err := ioutil.ReadAll(file); err != nil {
-		log.Fatalln(err.Error())
-	} else {
-		var ClientMap map[string]interface{}
-		err := json.Unmarshal(bts, &ClientMap)
-		if err != nil {
-			log.Fatalln("load client.json error")
-		}
-		domain, _ := ClientMap["domain"].(string)
-		cluster, _ := ClientMap["cluster"].(string)
-		serverList := ClientMap["router_list"].([]interface{})
-		global.ConfigMap["domain"] = domain
-		global.ConfigMap["cluster"] = cluster
-		global.Cluster = cluster
-		global.Domain = domain
-		//server list
-		var serverArr []string
-		for _, v := range serverList {
-			serverArr = append(serverArr, v.(string))
-		}
-		global.ConfigMap["serverlist"] = strings.Join(serverArr, "|")
-		log.Println(global.ConfigMap)
-	}
+//client config
+type ClientConfig struct {
+	ClusterName string   `json:"cluster"`
+	RouterList  []string `json:"router_list"`
 }
+
+var ClientConfigData ClientConfig
 
 type Client struct {
 	Host        string
@@ -55,13 +30,33 @@ type Client struct {
 	ConnSocket  net.Conn
 }
 
-const (
-	HEARTBEAT_INTERVAL = 5
-)
-
 //create client agent
 func NewClient(host, port string) *Client {
 	return &Client{Host: host, Port: port, TaskFlag: make(chan bool, 0), ConnectFlag: make(chan bool, 0), Closed: false}
+}
+
+/*
+{
+	"cluster":"测集群",
+	"router_list":[
+		"127.0.0.1:8888",
+		"172.16.200.202:8888"
+	]
+}
+load client json config file*/
+func LoadClientConfig(configFilePath string) {
+	file, err := os.Open(configFilePath)
+	defer file.Close()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	if bts, err := ioutil.ReadAll(file); err != nil {
+		log.Fatalln(err.Error())
+	} else {
+		if err := json.Unmarshal(bts, &ClientConfigData); err != nil {
+			log.Fatalln("load client.json error")
+		}
+	}
 }
 
 //connect to server
@@ -81,14 +76,14 @@ func (self *Client) ConnectToServer(addr string) {
 	//conn.SetReadDeadline(time.Now().Add(5 * time.Second))
 	log.Println("The connection to the remote routing server was successful!")
 	//Report the system status
-	t1 := time.NewTimer(time.Second * HEARTBEAT_INTERVAL)
+	t1 := time.NewTimer(time.Second * global.CLIENT_HEARTBEAT_INTERVAL)
 	for {
 		select {
 		case <-t1.C:
 			{
 				//Control to send data
-				t1.Reset(time.Second * HEARTBEAT_INTERVAL)
-				info := system.SysInfo(global.RunMode, global.Cluster, global.Domain)
+				t1.Reset(time.Second * global.CLIENT_HEARTBEAT_INTERVAL)
+				info := system.SysInfo(global.RunMode, ClientConfigData.ClusterName)
 				//Encapsulate packets
 				dataPackage := NewDefaultPacket([]byte(info)).Packet()
 				//fmt.Println(tools.BytesToHexString(dataPackage))
@@ -105,10 +100,10 @@ func (self *Client) ConnectToServer(addr string) {
 	}
 }
 
-//connect to remote routing server
+//Connect to remote routing server
 func (self *Client) Run() {
 	log.Printf("Connecting to remote routing server, destination address %s:%s........\n", self.Host, self.Port)
-	addr := ""
+	var addr string
 	if self.Host == "*" {
 		addr = ":" + self.Port
 	} else {

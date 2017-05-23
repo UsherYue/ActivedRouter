@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"runtime"
 	"time"
-	//	"runtime"
-	"strings"
 
 	"ActivedRouter/gopsutil/cpu"
 	"ActivedRouter/gopsutil/disk"
@@ -53,7 +51,7 @@ type SystemInfo struct {
 }
 
 //获取系统信息 返回json
-func SysInfo(runMode, cluster, domain string) string {
+func SysInfo(runMode, cluster string) string {
 	//内存
 	virtualMem, _ := mem.VirtualMemory()
 	//交换内存
@@ -74,8 +72,7 @@ func SysInfo(runMode, cluster, domain string) string {
 	info.HOST, _ = host.HostInfo()
 	//cluster
 	info.Cluster = cluster
-	//domain
-	info.Domain = domain
+
 	//最近5s的状态
 	cpuPercent, _ := cpu.CPUPercent(1*time.Second, true)
 	info.CpuPercent = cpuPercent
@@ -124,7 +121,7 @@ func SysInfo(runMode, cluster, domain string) string {
 	}
 	//testNc()
 	bts, _ := json.MarshalIndent(info, "", " ")
-	return strings.TrimSpace(strings.Trim(strings.Trim(string(bts), "\n"), "\t"))
+	return string(bts)
 }
 
 func testNc() {

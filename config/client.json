@@ -1,6 +1,5 @@
 {
-	"domain":"proxy.12xue.com",
-	"cluster":"UIA集群",
+	"cluster":"测集群",
 	"router_list":[
 		"127.0.0.1:8888",
 		"172.16.200.202:8888"

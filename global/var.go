@@ -13,12 +13,7 @@ import (
 	"ActivedRouter/system"
 )
 
-//cache driver
-//memory
-//mysql
-//file
-//redis
-//mongodb
+//GLOBAL CACHE
 var GlobalCache cache.Cacher = cache.Newcache("memory")
 
 //Control network service start and stop
@@ -27,19 +22,14 @@ var NetworkSwitch = make(chan bool, 0)
 //Store server related status
 var GHostInfoTable = system.NewHostInfoTable()
 
-var GRouterInfo string = ""
-
-//Config  Mapping
-var ConfigMap map[string]string = map[string]string{}
+//Router System Info
+var RouterSysInfo string = ""
 
 //Run Mode
 var RunMode = ""
 
-//Client cluster name
-var Cluster = ""
-
-// Client Domain Name Use in Client Mode .
-var Domain = ""
+//SRVMODE
+var SrvMode = "monitor"
 
 //Global http reverse proxy statistics
 var GProxyHttpStatistics = system.NewSysHttpStatistics()
@@ -47,15 +37,15 @@ var GProxyHttpStatistics = system.NewSysHttpStatistics()
 //Read-Write Mutex
 var rwMutexRouterInfo = &sync.RWMutex{}
 
-func SetRouterInfo(info string) {
+func SetRouterSysInfo(info string) {
 	rwMutexRouterInfo.Lock()
-	GRouterInfo = info
+	RouterSysInfo = info
 	rwMutexRouterInfo.Unlock()
 }
 
 func RouterInfo() string {
 	rwMutexRouterInfo.RLock()
-	info := GRouterInfo
+	info := RouterSysInfo
 	rwMutexRouterInfo.RUnlock()
 	return info
 }

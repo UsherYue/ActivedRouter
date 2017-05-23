@@ -19,16 +19,14 @@ func StartNetworkService() {
 	case global.ServerMode:
 		{
 			//Run Routing Service
-			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
+			go NewServer().Run(ServerConfigData.Host, ServerConfigData.Port)
 			//Run Http Service
-			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
+			go NewHttp(ServerConfigData.HttpHost, ServerConfigData.HttpPort).Run()
 			log.Println("ActivedRouter is Running In Server Mode...")
 		}
 	case global.ClientMode:
 		{
-			serverList := global.ConfigMap["serverlist"]
-			serverListArr := strings.Split(serverList, "|")
-			for _, server := range serverListArr {
+			for _, server := range ClientConfigData.RouterList {
 				hostinfo := strings.Split(server, ":")
 				//Run Client Agent
 				go NewClient(hostinfo[0], hostinfo[1]).Run()
@@ -38,9 +36,9 @@ func StartNetworkService() {
 	case global.ReverseProxyMode:
 		{
 			//Run Routing Service
-			go NewServer(global.ConfigMap["host"], global.ConfigMap["port"]).Run()
+			go NewServer().Run(ServerConfigData.Host, ServerConfigData.Port)
 			//Run Http Service
-			go NewHttp(global.ConfigMap["httphost"], global.ConfigMap["httpport"]).Run()
+			go NewHttp(ServerConfigData.HttpHost, ServerConfigData.HttpPort).Run()
 			//Run ReserveProxy Service
 			go DefaultReverseProxy.StartProxyServer()
 			log.Println("ActivedRouter is Running  In ReverseProxy Mode...")

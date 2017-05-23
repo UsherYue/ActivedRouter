@@ -19,7 +19,7 @@ func ParseConfigfile() {
 	case ClientMode:
 		{
 			//client mode
-			netservice.LoadClientJsonConfig(ClientConfig)
+			netservice.LoadClientConfig(ClientConfig)
 		}
 	case ReverseProxyMode:
 		{

@@ -19,6 +19,18 @@ const (
 	DefaultHttsAddr         = "127.0.0.1:443"
 )
 
+const (
+	CLIENT_HEARTBEAT_INTERVAL = 5
+)
+
+const (
+	SERVER_CHECK_INTERCAL          = 1
+	SERVER_CHECK_ACTIVE_INTERVAL   = 2                 // check  active interval
+	SERVER_CHECK_ROUTER_INTERVAL   = 5                 //Periodically check the routing server status
+	SERVER_DISPATCH_EVENT_INTERVAL = 5                 //check event dispatch  interval
+	SERVER_BUFFER_SIZE             = 100 * 1024 * 1024 //Maximum size of cache
+)
+
 //certificate
 const (
 	DefaultCertificate = "server.crt"
