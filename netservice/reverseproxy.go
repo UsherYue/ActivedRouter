@@ -30,7 +30,7 @@ var (
 
 //hander
 var (
-	ProxyHandler = &ReverseProxyHandler{Cfg: &ReverseProxyConfigData{}}
+	DefaultReverseProxy = &ReverseProxy{Cfg: &ReverseProxyConfigData{}}
 )
 
 type HostInfo struct {
@@ -60,7 +60,7 @@ type ReverseProxyConfigData struct {
 }
 
 //reverse proxy handler
-type ReverseProxyHandler struct {
+type ReverseProxy struct {
 	DomainHostList cache.Cacher
 	Cfg            *ReverseProxyConfigData
 	httpsServer    *HttpsServer
@@ -71,7 +71,7 @@ type ReverseProxyHandler struct {
 }
 
 //domain list
-func (this *ReverseProxyHandler) DomainInfos() []string {
+func (this *ReverseProxy) DomainInfos() []string {
 	data := *this.DomainHostList.GetStorage().GetData()
 	keysArr := make([]string, 0)
 	for k, _ := range data {
@@ -81,7 +81,7 @@ func (this *ReverseProxyHandler) DomainInfos() []string {
 }
 
 //Add the domain name to the configuration
-func (this *ReverseProxyHandler) AddDomainConfig(domain string) bool {
+func (this *ReverseProxy) AddDomainConfig(domain string) bool {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			return false
@@ -97,7 +97,7 @@ func (this *ReverseProxyHandler) AddDomainConfig(domain string) bool {
 }
 
 //save to file
-func (this *ReverseProxyHandler) SaveToFile() bool {
+func (this *ReverseProxy) SaveToFile() bool {
 	if bts, err := json.MarshalIndent(this.Cfg, "", " "); err != nil {
 		return false
 	} else {
@@ -114,7 +114,7 @@ func (this *ReverseProxyHandler) SaveToFile() bool {
 }
 
 //Delete the domain name and sync to the configuration file
-func (this *ReverseProxyHandler) DeleteDomainConig(domain string) bool {
+func (this *ReverseProxy) DeleteDomainConig(domain string) bool {
 	for k, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			//delete item
@@ -129,7 +129,7 @@ func (this *ReverseProxyHandler) DeleteDomainConig(domain string) bool {
 }
 
 //delete reverse proxydomain
-func (this *ReverseProxyHandler) DeleteProxyClient(domain, hostip, port string) bool {
+func (this *ReverseProxy) DeleteProxyClient(domain, hostip, port string) bool {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			for index, client := range v.Clients {
@@ -160,7 +160,7 @@ func (this *ReverseProxyHandler) DeleteProxyClient(domain, hostip, port string) 
 }
 
 //Update Reverse Proxy Client Info
-func (this *ReverseProxyHandler) UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort, httpsSwitch, httpSwitch string) bool {
+func (this *ReverseProxy) UpdateProxyClient(domain, preHost, prePort, updateHost, updatePort, httpsSwitch, httpSwitch string) bool {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			v.HttpsSwitch = httpsSwitch
@@ -196,7 +196,7 @@ func (this *ReverseProxyHandler) UpdateProxyClient(domain, preHost, prePort, upd
 // -1  Repeat
 //  0  Failure
 //  1  Success
-func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port, httsSwitch, httpSwitch string) int {
+func (this *ReverseProxy) AddProxyClient(domain, hostip, port, httsSwitch, httpSwitch string) int {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			//proxy switch
@@ -230,7 +230,7 @@ func (this *ReverseProxyHandler) AddProxyClient(domain, hostip, port, httsSwitch
 }
 
 //update domain
-func (this *ReverseProxyHandler) UpdateDomain(preDomain, updateDomain, httpsSwitch, httpSwitch string) bool {
+func (this *ReverseProxy) UpdateDomain(preDomain, updateDomain, httpsSwitch, httpSwitch string) bool {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == preDomain {
 			//proxy switch
@@ -251,7 +251,7 @@ func (this *ReverseProxyHandler) UpdateDomain(preDomain, updateDomain, httpsSwit
 	return true
 }
 
-func (this *ReverseProxyHandler) ChangeSwitchStatus(domain, protocol, switchStatus string) {
+func (this *ReverseProxy) ChangeSwitchStatus(domain, protocol, switchStatus string) {
 	for _, v := range this.Cfg.ReverseProxy {
 		if v.Domain == domain {
 			switch protocol {
@@ -274,14 +274,14 @@ func (this *ReverseProxyHandler) ChangeSwitchStatus(domain, protocol, switchStat
 }
 
 //hostlist by domain
-func (this *ReverseProxyHandler) GetDomainHostList(domain string) []*HostInfo {
+func (this *ReverseProxy) GetDomainHostList(domain string) []*HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	return vArr
 }
 
 //random method
-func (this *ReverseProxyHandler) GetRandomHost(domain string) *HostInfo {
+func (this *ReverseProxy) GetRandomHost(domain string) *HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	proxyCount := len(vArr)
@@ -295,14 +295,14 @@ func (this *ReverseProxyHandler) GetRandomHost(domain string) *HostInfo {
 
 //alived method
 //According to the domain name or ip to obtain the most active cluster host
-func (this *ReverseProxyHandler) GetAlivedHost(domain string) *HostInfo {
+func (this *ReverseProxy) GetAlivedHost(domain string) *HostInfo {
 	v, _ := this.DomainHostList.Get(domain)
 	vArr, _ := v.([]*HostInfo)
 	hostinfo := this.BestHostInfo(vArr)
 	return hostinfo
 }
 
-func (this *ReverseProxyHandler) BestHostInfo(hosts []*HostInfo) *HostInfo {
+func (this *ReverseProxy) BestHostInfo(hosts []*HostInfo) *HostInfo {
 	hostSortedList := global.GHostInfoTable.ActiveHostWeightList
 	for el := hostSortedList.Front(); el != nil; el = el.Next() {
 		bestHost := el.Value.(system.HostInfo)
@@ -320,7 +320,7 @@ func (this *ReverseProxyHandler) BestHostInfo(hosts []*HostInfo) *HostInfo {
 }
 
 //proxy_method  random 和alived
-func (this *ReverseProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo {
+func (this *ReverseProxy) GetHostInfo(host, proxyMethod string) *HostInfo {
 	requestHost := host
 	//Handle non-80 ports
 	if strings.IndexAny(host, ":") != -1 {
@@ -344,7 +344,7 @@ func (this *ReverseProxyHandler) GetHostInfo(host, proxyMethod string) *HostInfo
 
 //Http and https access filters
 //If the request protocol is https, check whether the reverse proxy is allowed to pass
-func (this *ReverseProxyHandler) accessFilter(w http.ResponseWriter, r *http.Request) bool {
+func (this *ReverseProxy) accessFilter(w http.ResponseWriter, r *http.Request) bool {
 	//global https http switch
 	if r.TLS != nil {
 		if !this.httpsServer.checkValidHttpsReq(r.Host) {
@@ -384,15 +384,16 @@ func (this *ReverseProxyHandler) accessFilter(w http.ResponseWriter, r *http.Req
 	return false
 }
 
-func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !this.accessFilter(w, r) {
+//Http and Https reverse proxy handeler
+func (self *ReverseProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !self.accessFilter(w, r) {
 		return
 	}
 	//Get the business server
-	hostinfo := this.GetHostInfo(r.Host, this.ProxyMethod)
+	hostinfo := self.GetHostInfo(r.Host, self.ProxyMethod)
 	if hostinfo == nil {
 		//If you can't get the active host then use the random method。
-		hostinfo = this.GetHostInfo(r.Host, global.Random)
+		hostinfo = self.GetHostInfo(r.Host, global.Random)
 		if hostinfo == nil {
 			w.Write([]byte(r.Host + "Can't find active server........."))
 			return
@@ -412,7 +413,7 @@ func (this *ReverseProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 }
 
 //Load Certificate Config
-func (this *ReverseProxyHandler) LoadCertificateConfig(certificateConfigFile string) {
+func (this *ReverseProxy) LoadCertificateConfig(certificateConfigFile string) {
 	stat, err := os.Stat(global.CertificateData)
 	if os.IsNotExist(err) || !stat.IsDir() {
 		return
@@ -432,7 +433,7 @@ func (this *ReverseProxyHandler) LoadCertificateConfig(certificateConfigFile str
 }
 
 //Load proxy config
-func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
+func (this *ReverseProxy) LoadProxyConfig(proxyConfigFile string) {
 	this.ProxyCongfigFile = proxyConfigFile
 	file, err := os.Open(proxyConfigFile)
 	defer file.Close()
@@ -495,7 +496,7 @@ func (this *ReverseProxyHandler) LoadProxyConfig(proxyConfigFile string) {
 }
 
 //Run the http statistics service
-func (this *ReverseProxyHandler) BeginHttpStatistics() {
+func (this *ReverseProxy) BeginHttpStatistics() {
 	timerStatistics := time.NewTimer(time.Second * global.Http_Statistics_Interval)
 	for {
 		select {
@@ -511,42 +512,42 @@ func (this *ReverseProxyHandler) BeginHttpStatistics() {
 }
 
 //stop https service
-func (this *ReverseProxyHandler) StopHttpsService() error {
+func (this *ReverseProxy) StopHttpsService() error {
 	return nil
 }
 
 //stop http service
-func (this *ReverseProxyHandler) StopHttpService() error {
+func (this *ReverseProxy) StopHttpService() error {
 	return nil
 }
 
 //start https service
-func (this *ReverseProxyHandler) StartHttpsService() error {
+func (this *ReverseProxy) StartHttpsService() error {
 	return nil
 }
 
 //start http service
-func (this *ReverseProxyHandler) StartHttpService() error {
+func (this *ReverseProxy) StartHttpService() error {
 	return nil
 }
 
 //stop  all proxy service
-func (this *ReverseProxyHandler) StopAllProxyService() error {
+func (this *ReverseProxy) StopAllProxyService() error {
 	return nil
 }
 
 //start  all proxy service
-func (this *ReverseProxyHandler) StartAllProxyService() error {
+func (this *ReverseProxy) StartAllProxyService() error {
 	return nil
 }
 
 //Run Reverse Proxy
 //ADD
-func (this *ReverseProxyHandler) StartProxyServer() {
+func (self *ReverseProxy) StartProxyServer() {
 	//Http service switch
 	if HttpSwitch == global.SwitchOn {
 		go func() {
-			err := http.ListenAndServe(HttpAddr, ProxyHandler)
+			err := http.ListenAndServe(HttpAddr, DefaultReverseProxy)
 			if err != nil {
 				log.Fatalln("ListenAndServe HTTP: ", err)
 			} else {
@@ -557,9 +558,9 @@ func (this *ReverseProxyHandler) StartProxyServer() {
 	//Https  service switch
 	if HttpsSwitch == global.SwitchOn {
 		go func() {
-			this.httpsServer = NewHttpsServer()
-			this.httpsServer.AddDomainCertificateConfig(this.CertificateConfigData)
-			err := this.httpsServer.RunHttpsService(HttpsAddr, "", "", ProxyHandler)
+			self.httpsServer = NewHttpsServer()
+			self.httpsServer.AddDomainCertificateConfig(self.CertificateConfigData)
+			err := self.httpsServer.RunHttpsService(HttpsAddr, "", "", self)
 			if err != nil {
 				log.Fatalln("RunHttpServer:", err)
 			} else {
@@ -570,5 +571,5 @@ func (this *ReverseProxyHandler) StartProxyServer() {
 	//Open http reverse proxy statistics
 	//You can choose whether to open, because this option will affect the http request speed,
 	// you can turn off.
-	go this.BeginHttpStatistics()
+	go self.BeginHttpStatistics()
 }
