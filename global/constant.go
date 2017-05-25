@@ -7,6 +7,7 @@ const (
 	ClientConfig     = "config/client.json"
 	HttpProxyConfig  = "config/http_proxy.json"
 	HttpsProxyConfig = "config/https_proxy.json"
+	TCPProxyConfig   = "config/tcp_proxy.json"
 	CertificateData  = "config/crtdata"
 )
 
