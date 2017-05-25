@@ -18,9 +18,10 @@
             </a>
             <ul class="dropdown-menu multi-level">
 			   <li><a  href="#"  id="domain_setting" >Domain Setting</a></li>
-               <li><a  href="#" id="http_reverseproxy_setting">Http ReverseProxy Setting</a></li>
+			   <li><a  href="#" id="domain_certificate_setting">Domain Certificate Settings</a></li>
+               <li><a  href="#" id="http_reverseproxy_setting">Http ReverseProxy Settings</a></li>
 				<li class="divider"></li>
-				<li><a  href="#" id="tcp_reserveproxy_setting">TCP ReverseProxy Setting</a></li>
+				<li><a  href="#" id="tcp_reserveproxy_setting">TCP ReverseProxy Settings</a></li>
 			    <li class="dropdown-submenu">
 					<a  href="#"  id="runmode_setting" >Runmode Setting</a>
 				    <ul class="dropdown-menu">  
@@ -169,6 +170,56 @@
          <div class="modal-body pre-scrollable" style="padding:0px;">           
 			{{include 'Proxy_Domain_List'}}
 			<div type="button" class="btn btn-success btn-add-domain" style="margin-left:5px;">+Add A Domain</div>	
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" 
+               data-dismiss="modal">关闭
+            </button>
+         </div>
+
+      </div><!-- /.modal-content -->
+</div><!-- /.modal -->
+</script>
+
+<script type="text/html" id="tpl_certificate_setting">
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="certificate_setting_dlg" tabindex="-1" role="dialog" 
+   aria-labelledby="myModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content"  style="width:600px" >
+         	<div class="modal-header">
+            <button type="button" class="close" 
+               data-dismiss="modal" aria-hidden="true">
+                  &times;
+            </button>
+            <h4 class="modal-title">
+                 Domain Certificate Configuration
+            </h4>
+         </div>
+         <div class="modal-body pre-scrollable" style="padding:0px;">           
+			<table class="table table-hover" style="margin-top:10px;"> 
+				<tr ><th>Server Host</th><th>crt</th><th>key</th><th>Operate</th><tr/>
+				{{each domainInfos}}
+					<tr>
+						<td>{{$value}}</td>
+						<td>
+							<div class="input-file ">
+							    <span class="text"><span class=" glyphicon glyphicon-cloud-upload"></span></span>
+							    <input id="file_crt" class="file" type="file" />
+															未设置
+							</div>
+						</td>
+						<td>
+							<div class="input-file ">
+							    <span class="text"><span class=" glyphicon glyphicon-cloud-upload"></span></span>
+							    <input id="file_crt" class="file" type="file" />
+															未设置
+							</div>
+							</td>
+						<td><a href="#" class="remove-domain">remove</a>
+					</tr>
+				{{/each}}
+			</table>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-default" 

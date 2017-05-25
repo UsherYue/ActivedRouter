@@ -96,3 +96,38 @@ html, body {height: 100%;}
             -moz-border-radius: 6px 0 6px 6px;  
             border-radius: 6px 0 6px 6px;  
         }  
+		
+		
+		
+		
+/******/
+div.input-file {
+    position: relative; /* 保证子元素的定位 */
+    width: 80px;
+    height: 30px;
+/*  background: #eee;
+    border: 1px solid #ccc;*/
+    text-align: center;
+    cursor: pointer;
+}
+
+span.text {
+    display: inline-block;
+    margin-top: 5px;
+    color: #666;
+    font-family: "微软雅黑";
+    font-size: 13px;
+	text-align:center;
+}
+
+input.file {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 120px; /* 宽高和外围元素保持一致 */
+    height: 30px;
+    opacity: 0;
+    -moz-opacity: 0;  /* 兼容老式浏览器 */
+    filter: alpha(opacity=0); /* 兼容ie */
+}

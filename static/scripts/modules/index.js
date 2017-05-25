@@ -512,6 +512,23 @@ var initMenuEvent=function(){
 			});
   		});	
 	});
+	
+	//thrift 证书列表
+	//http://www.cnblogs.com/yuanlong1012/p/5127497.html
+	//http://www.makaidong.com/%E5%8D%9A%E5%AE%A2%E5%9B%AD%E7%9F%A5%E9%81%93/17798.shtml
+	$("#domain_certificate_setting").click(function(){
+		$.get("/domaininfos",function(data,status){
+			var html=templateEngine("tpl_certificate_setting",{domainInfos:data});
+			$(html).appendTo($("body"));
+			InitDomainEditEvent();
+			$("#certificate_setting_dlg").modal("show");
+			$("#certificate_setting_dlg").on('hide.bs.modal',function(){
+				$(this).remove();
+			});
+  		});	
+	});
+	
+	
 }
 
 //加载活跃主机列表
