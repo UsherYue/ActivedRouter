@@ -3,8 +3,11 @@ package netservice
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path"
 
 	"ActivedRouter/global"
 	"ActivedRouter/system"
@@ -179,20 +182,51 @@ func (self *Http) ProxyControl(w http.ResponseWriter, r *http.Request, prms http
 //uploadfile
 func (self *Http) UploadFile(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
 	r.ParseForm()
-	_, header, _ := r.FormFile("file")
-	filetype := r.PostFormValue("filetype")
-	domain := r.PostFormValue("domain")
-	if filetype == "crt" {
-		self.WriteJsonString(w, `{"status":1}`)
-		fmt.Println(filetype)
-		fmt.Println(header.Filename)
-	} else if filetype == "key" {
-		self.WriteJsonString(w, `{"status":1}`)
-		fmt.Println(filetype)
-		fmt.Println(domain)
+	if f, _, err := r.FormFile("file"); err != nil {
+		goto ERROR
 	} else {
-		self.WriteJsonString(w, `{"status":0}`)
+		filetype := r.PostFormValue("filetype")
+		domain := r.PostFormValue("domain")
+		if domain == "" {
+			goto ERROR
+		}
+		if filetype == "crt" {
+			if bts, err := ioutil.ReadAll(f); err != nil {
+				goto ERROR
+			} else {
+				filePath := "config/crtdata/" + domain
+				if _, err := os.Stat(filePath); err != nil {
+					os.MkdirAll(filePath, 0777)
+				}
+				if err := ioutil.WriteFile(path.Join(filePath, global.DefaultCertificate), bts, 0777); err != nil {
+					goto ERROR
+				} else {
+					goto SUCCESS
+				}
+			}
+		} else if filetype == "key" {
+			if bts, err := ioutil.ReadAll(f); err != nil {
+				goto ERROR
+			} else {
+				filePath := "config/crtdata/" + domain
+				if _, err := os.Stat(filePath); err != nil {
+					os.MkdirAll(filePath, 0777)
+				}
+				if err := ioutil.WriteFile(path.Join(filePath, global.DefaultKey), bts, 0777); err != nil {
+					goto ERROR
+				} else {
+					goto SUCCESS
+				}
+			}
+		} else {
+			goto ERROR
+		}
 	}
+SUCCESS:
+	self.WriteJsonString(w, `{"status":1}`)
+	return
+ERROR:
+	self.WriteJsonString(w, `{"status":0}`)
 }
 
 //create http service
