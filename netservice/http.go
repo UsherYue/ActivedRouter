@@ -172,7 +172,26 @@ func (self *Http) ProxyControl(w http.ResponseWriter, r *http.Request, prms http
 	if bSuccess {
 		self.WriteJsonString(w, `{"status":1}`)
 	} else {
-		self.WriteJsonString(w, `{"status":}`)
+		self.WriteJsonString(w, `{"status":0}`)
+	}
+}
+
+//uploadfile
+func (self *Http) UploadFile(w http.ResponseWriter, r *http.Request, prms httprouter.Params) {
+	r.ParseForm()
+	_, header, _ := r.FormFile("file")
+	filetype := r.PostFormValue("filetype")
+	domain := r.PostFormValue("domain")
+	if filetype == "crt" {
+		self.WriteJsonString(w, `{"status":1}`)
+		fmt.Println(filetype)
+		fmt.Println(header.Filename)
+	} else if filetype == "key" {
+		self.WriteJsonString(w, `{"status":1}`)
+		fmt.Println(filetype)
+		fmt.Println(domain)
+	} else {
+		self.WriteJsonString(w, `{"status":0}`)
 	}
 }
 
@@ -204,6 +223,8 @@ func (self *Http) Run() {
 	router.GET("/proxyctl", self.ProxyControl)
 	//statc file server
 	router.GET("/", self.Index)
+	//upload file
+	router.POST("/uploadfile", self.UploadFile)
 	router.ServeFiles("/static/*filepath", http.Dir("static"))
 	router.ServeFiles("/website/*filepath", http.Dir("website"))
 	log.Fatal(http.ListenAndServe(self.Host+":"+self.Port, router))

@@ -526,6 +526,45 @@ var initMenuEvent=function(){
 				$(this).remove();
 			});
   		});	
+		
+		//上传证书 
+		$("#certificate_setting_dlg div.file_crt").click(function(data){
+			var domain=$(this).parent().prev().text();
+			/******异步上传文件******/
+			AsyncUploadFile({
+				url:"/uploadfile",
+				onFinish:function(result,data){
+					  console.log(data);
+				},
+				onProgress:function(progress){
+					  
+				},
+				data:{
+					filetype:"crt",
+					domain:domain
+				}
+			});
+			/******异步上传文件******/
+		});
+		//上传key
+		$("#certificate_setting_dlg div.file_key").click(function(data){
+			var domain=$(this).parent().prev().prev().text();
+			/******异步上传文件******/
+			AsyncUploadFile({
+				url:"/uploadfile",
+				onFinish:function(result,data){
+					  console.log(data);
+				},
+				onProgress:function(progress){
+					  
+				},
+				data:{
+					filetype:"key",
+					domain:domain
+				}
+			});
+			/******异步上传文件******/
+		})
 	});
 	
 	
