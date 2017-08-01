@@ -28,7 +28,7 @@ func Test_Packet(t *testing.T) {
 	readerChan := make(chan []byte, 1024)
 	//unpackage
 	packetTool := NewDefaultPacket(packetData).SetHeader("#####")
-	remainData := packetTool.UnPackage(readerChan)
+	remainData := packetTool.UnPacket(readerChan)
 	//remain data
 	fmt.Println("Remain Data:", tools.BytesToHexString(remainData))
 	go func(reader chan []byte) {

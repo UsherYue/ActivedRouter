@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-//selete slice
+//DeleteSlice selete slice
 func DeleteSlice(slice interface{}, index int) (interface{}, error) {
 	sliceValue := reflect.ValueOf(slice)
 	length := sliceValue.Len()
@@ -21,7 +21,7 @@ func DeleteSlice(slice interface{}, index int) (interface{}, error) {
 	return nil, errors.New("error")
 }
 
-//Convert byte array to hex string .
+//BytesToHexString Convert byte array to hex string .
 func BytesToHexString(data []byte) []string {
 	ret := []string{}
 	for _, byteData := range data {
