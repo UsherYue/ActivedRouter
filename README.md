@@ -1,5 +1,5 @@
 #   ActiveRouter简介    　
-当前版本: Beta 0.1	by usher.yue	
+当前版本: Beta 0.11	by usher.yue	
 
 Email:   usher.yue@gmail.com		
 
